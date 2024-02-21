@@ -1,8 +1,4 @@
-﻿# Directories
-.vs/
-bin/
-obj/
-
-# Files
+﻿# Files
+*.db
 .DS_Store
 Thumbs.db

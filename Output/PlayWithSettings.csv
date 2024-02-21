@@ -1,0 +1,8 @@
+int,1
+float,1.1
+str,Hello
+list,"[1, '2_2', 3]"
+tuple,"('4_4', 5)"
+bool,True
+bytes,b'\xe3\x81\xaf\xe3\x82\x8d\xef\xbd\x9e'
+none,
