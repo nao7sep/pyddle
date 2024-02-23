@@ -1,4 +1,7 @@
-﻿# Get the path to the directory containing the current Python executable.
+﻿# Created 2024-02-21
+# This script updates all outdated packages.
+
+# Get the path to the directory containing the current Python executable.
 
 import sys
 import os
@@ -7,13 +10,16 @@ directoryPath = os.path.dirname(sys.executable)
 
 # Get the path to the pip executable.
 
-pipFilePath = os.path.join(directoryPath, "Scripts", f"pip3{os.name == 'nt' and '.exe' or ''}") # Expect pip3 first.
+def createPipFilePath(directoryPath: str, fileName: str) -> str:
+    return os.path.join(directoryPath, "Scripts", f"{fileName}{os.name == 'nt' and '.exe' or ''}")
 
-if not os.path.exists(pipFilePath):
-    pipFilePath = os.path.join(directoryPath, "Scripts", f"pip{os.name == 'nt' and '.exe' or ''}") # Fall back to pip.
+pipFilePath = createPipFilePath(directoryPath, "pip3") # Expect pip3 first.
+
+if os.path.exists(pipFilePath) == False:
+    pipFilePath = createPipFilePath(directoryPath, "pip") # Fall back to pip.
 
 # Uninstall the tzdata package.
-# It's required to run Output_available_timezones.py and will be reinstalled later.
+# It's required to run OutputAvailableTimezones.py and will be reinstalled later.
 
 import subprocess
 
@@ -23,8 +29,8 @@ subprocess.run([pipFilePath, "uninstall", "tzdata", "-y"])
 
 subprocess.run([pipFilePath, "install", "tzdata==2023.4"])
 
-# Remember whether beautifulsoup4 is originally installed.
-# Oh well, I just liked the name.
+# Remember whether beautifulsoup4 was originally installed.
+# Oh well, I just liked the name of the package.
 
 import importlib.util
 
@@ -56,7 +62,8 @@ if len(outdatedPackages) > 0:
 
     if input("Would you like to update all outdated packages? (y/n) ").lower() == "y":
         for package in outdatedPackages:
-            subprocess.run([pipFilePath, "install", f'{package["name"]}=={package["latest_version"]}']) # Specify the version to avoid installing a newer version than intended.
+            # Specify the version to avoid installing a newer version than intended.
+            subprocess.run([pipFilePath, "install", f'{package["name"]}=={package["latest_version"]}'])
 
 if isBeautifulSoup4OriginallyInstalled == False:
     subprocess.run([pipFilePath, "uninstall", "beautifulsoup4", "-y"])

@@ -1,5 +1,5 @@
 ﻿# Created: 2024-02-21
-# This script demonstrates how to write and read data to and from various file formats expecting usage as settings files.
+# This script demonstrates how to write and read settings in various file formats.
 
 # Initialize variables of frequently used types.
 
@@ -42,14 +42,14 @@ config.add_section("Data")
 for key, value in data.items():
     config["Data"][key] = str(value)
 
-with open("PlayWithSettings.ini", "w") as configfile:
+with open("WriteAndReadSettings.ini", "w") as configfile:
     config.write(configfile)
 
 # Read the data from the INI file.
 
 config.clear()
 
-config.read("PlayWithSettings.ini")
+config.read("WriteAndReadSettings.ini")
 
 print("Data from the INI file:")
 
@@ -68,12 +68,12 @@ print(f"Bytes converted to Base64: {data['bytes']}")
 
 import json
 
-with open("PlayWithSettings.json", "w") as jsonfile:
+with open("WriteAndReadSettings.json", "w") as jsonfile:
     json.dump(data, jsonfile, indent=4)
 
 # Read the data from the JSON file.
 
-with open("PlayWithSettings.json", "r") as jsonfile:
+with open("WriteAndReadSettings.json", "r") as jsonfile:
     dataFromJson = json.load(jsonfile)
 
 # Convert the Base64 strings in the 2 portions of data back to bytes.
@@ -101,12 +101,12 @@ import xml.dom.minidom
 
 prettyXml = xml.dom.minidom.parseString (ET.tostring(root, 'utf-8')).toprettyxml(indent="    ")
 
-with open("PlayWithSettings.xml", "w") as xmlfile:
+with open("WriteAndReadSettings.xml", "w") as xmlfile:
     xmlfile.write(prettyXml)
 
 # Read the data from the XML file.
 
-tree = ET.parse("PlayWithSettings.xml")
+tree = ET.parse("WriteAndReadSettings.xml")
 
 root = tree.getroot()
 
@@ -122,7 +122,7 @@ import csv
 # The newline="" part specifies that line endings should not be altered.
 # Without this, Python would automatically convert line endings depending on the platform, which could corrupt the file.
 
-with open("PlayWithSettings.csv", "w", newline="") as csvfile:
+with open("WriteAndReadSettings.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
 
     for key, value in data.items():
@@ -132,7 +132,7 @@ with open("PlayWithSettings.csv", "w", newline="") as csvfile:
 
 # The value for the none key will be read as an empty string as the CSV format doesnt support None values.
 
-with open("PlayWithSettings.csv", "r", newline="") as csvfile:
+with open("WriteAndReadSettings.csv", "r", newline="") as csvfile:
     reader = csv.reader(csvfile)
     dataFromCsv = list(reader)
 
@@ -145,7 +145,7 @@ for row in dataFromCsv:
 
 import sqlite3
 
-conn = sqlite3.connect("PlayWithSettings.db")
+conn = sqlite3.connect("WriteAndReadSettings.db")
 
 c = conn.cursor()
 
@@ -162,7 +162,7 @@ conn.close()
 
 # Read the data from the SQLite database.
 
-conn = sqlite3.connect("PlayWithSettings.db")
+conn = sqlite3.connect("WriteAndReadSettings.db")
 
 c = conn.cursor()
 
