@@ -27,10 +27,9 @@ data = {
 
 # Create the "output" subdirectory and set the working directory to it.
 
-import os
+from file_system import make_and_move_to_output_subdirectory
 
-os.makedirs("output", exist_ok=True)
-os.chdir("output")
+make_and_move_to_output_subdirectory()
 
 # Write the data into a INI file.
 
@@ -176,3 +175,7 @@ print("Data from the SQLite database:")
 
 for row in data_from_sqlite:
     print(f"    {row[0]}: {row[1]}")
+
+from debugging import display_press_enter_key_to_continue_if_not_debugging
+
+display_press_enter_key_to_continue_if_not_debugging()

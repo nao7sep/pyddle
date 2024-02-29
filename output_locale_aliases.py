@@ -1,10 +1,9 @@
 ﻿# Created: 2024-02-21
 # This script outputs all the locale aliases.
 
-import os
+from file_system import make_and_move_to_output_subdirectory
 
-os.makedirs("output", exist_ok=True)
-os.chdir("output")
+make_and_move_to_output_subdirectory()
 
 import locale
 
@@ -12,3 +11,7 @@ with open("output_locale_aliases.txt", "w", encoding="utf-8-sig") as file: # Wri
     for key, value in sorted(locale.locale_alias.items()):
         file.write(f"{key}: {value}\n") # The line ending will be converted to the default one for the platform.
         print(f"{key}: {value}")
+
+from debugging import display_press_enter_key_to_continue_if_not_debugging
+
+display_press_enter_key_to_continue_if_not_debugging()

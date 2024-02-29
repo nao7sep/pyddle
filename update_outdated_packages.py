@@ -18,31 +18,40 @@ pipFilePath = createPipFilePath(directoryPath, "pip3") # Expect pip3 first.
 if os.path.exists(pipFilePath) == False:
     pipFilePath = createPipFilePath(directoryPath, "pip") # Fall back to pip.
 
+# If the script is being debugged, older versions of the packages are installed to demonstrate the update process.
+
+from debugging import is_debugging
+
 # Uninstall the tzdata package.
 # It's required to run OutputAvailableTimezones.py and will be reinstalled later.
 
 import subprocess
 
-subprocess.run([pipFilePath, "uninstall", "tzdata", "-y"])
+if is_debugging():
+    subprocess.run([pipFilePath, "uninstall", "tzdata", "-y"])
 
 # Install tzdata 2023.4, which is obsolete, for testing purposes.
 
-subprocess.run([pipFilePath, "install", "tzdata==2023.4"])
+if is_debugging():
+    subprocess.run([pipFilePath, "install", "tzdata==2023.4"])
 
 # Remember whether beautifulsoup4 was originally installed.
 # Oh well, I just liked the name of the package.
 
 import importlib.util
 
-isBeautifulSoup4OriginallyInstalled = importlib.util.find_spec("beautifulsoup4") is not None
+if is_debugging():
+    isBeautifulSoup4OriginallyInstalled = importlib.util.find_spec("beautifulsoup4") is not None
 
 # Attempt to uninstall beautifulsoup4.
 
-subprocess.run([pipFilePath, "uninstall", "beautifulsoup4", "-y"])
+if is_debugging():
+    subprocess.run([pipFilePath, "uninstall", "beautifulsoup4", "-y"])
 
 # Install beautifulsoup4 4.12.2, which is obsolete, for testing purposes.
 
-subprocess.run([pipFilePath, "install", "beautifulsoup4==4.12.2"])
+if is_debugging():
+    subprocess.run([pipFilePath, "install", "beautifulsoup4==4.12.2"])
 
 # Get a list of all outdated packages as a JSON string.
 
@@ -65,5 +74,13 @@ if len(outdatedPackages) > 0:
             # Specify the version to avoid installing a newer version than intended.
             subprocess.run([pipFilePath, "install", f'{package["name"]}=={package["latest_version"]}'])
 
-if isBeautifulSoup4OriginallyInstalled == False:
-    subprocess.run([pipFilePath, "uninstall", "beautifulsoup4", "-y"])
+else:
+    print("No outdated packages.")
+
+if is_debugging():
+    if isBeautifulSoup4OriginallyInstalled == False:
+        subprocess.run([pipFilePath, "uninstall", "beautifulsoup4", "-y"])
+
+from debugging import display_press_enter_key_to_continue_if_not_debugging
+
+display_press_enter_key_to_continue_if_not_debugging()

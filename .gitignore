@@ -1,4 +1,7 @@
-﻿# Files
+﻿# Directories
+__pycache__/
+
+# Files
 *.db
 .DS_Store
 Thumbs.db
