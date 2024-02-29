@@ -1,5 +1,5 @@
 <?xml version="1.0" ?>
-<Data>
+<data>
     <int>1</int>
     <float>1.1</float>
     <str>Hello</str>
@@ -8,4 +8,4 @@
     <bool>True</bool>
     <bytes>b'\xe3\x81\xaf\xe3\x82\x8d\xef\xbd\x9e'</bytes>
     <none>None</none>
-</Data>
+</data>
