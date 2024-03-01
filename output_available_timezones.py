@@ -7,7 +7,7 @@ make_and_move_to_output_subdirectory()
 
 import zoneinfo
 
-# If no timezones are available, run: pip install tzdata
+# If no timezones are available, run: pip3/pip install tzdata
 
 with open("output_available_timezones.txt", "w", encoding="utf-8-sig") as file:
     for timezone in sorted(zoneinfo.available_timezones()):

@@ -98,10 +98,10 @@ for key, value in data.items():
 
 import xml.dom.minidom
 
-prettyXml = xml.dom.minidom.parseString (ET.tostring(root, 'utf-8')).toprettyxml(indent="    ")
+pretty_xml = xml.dom.minidom.parseString (ET.tostring(root, 'utf-8')).toprettyxml(indent="    ")
 
 with open("write_and_read_settings.xml", "w") as xmlfile:
-    xmlfile.write(prettyXml)
+    xmlfile.write(pretty_xml)
 
 # Read the data from the XML file.
 

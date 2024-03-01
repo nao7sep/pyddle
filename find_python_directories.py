@@ -12,7 +12,7 @@ def is_python_looking_directory(path):
             return False
     if is_debugging():
         print(f"Possible Python directory: {path}") # There can be variants of Python installations.
-    expected_file_names = ['python.exe', 'python3.exe', 'python', 'python3']
+    expected_file_names = ['python3.exe', 'python.exe', 'python3', 'python']
     for name in expected_file_names:
         if os.path.isfile(os.path.join(path, name)):
             return True
