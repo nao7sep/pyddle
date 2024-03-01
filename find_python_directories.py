@@ -1,5 +1,5 @@
 ﻿# Created: 2024-02-29
-# This script finds all Python-looking directories on all drives/volumes.
+# This script finds all Python-looking directories on all Windows drives / Mac volumes.
 
 from debugging import is_debugging
 
@@ -30,7 +30,10 @@ def get_all_drive_or_volume_paths():
 scanned_directory_count = 0
 
 for drive_or_volume_path in get_all_drive_or_volume_paths():
-    for directory_path, subdirectory_names, _ in os.walk(drive_or_volume_path):
+    # I dont mind using os.walk, which should be relatively slow, because this is a once-in-a-while script.
+    # https://docs.python.org/3/library/os.html#os.walk
+    # There must be faster ways to do this.
+    for directory_path, subdirectory_names, _ in os.walk(drive_or_volume_path, onerror = None): # Explicitly ignore errors.
         scanned_directory_count += 1
         print(f"Scanned {scanned_directory_count} directories.\r", end = "")
         for subdirectory_name in subdirectory_names:
@@ -39,7 +42,7 @@ for drive_or_volume_path in get_all_drive_or_volume_paths():
                 print(f"Python-looking directory: {subdirectory_path}")
 
 # In an non-debugging environment, the scanned directory count will be overwritten by the "Press Enter key" message.
-# In a debugging environment, the console should get to a new prompt, inserting a line break after the last scanned directory count.
+# In a debugging environment, the console should get to a new prompt, with or without overwriting the last scanned directory count.
 
 from debugging import display_press_enter_key_to_continue_if_not_debugging
 
