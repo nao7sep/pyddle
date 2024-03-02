@@ -42,13 +42,20 @@ with open("output_environment_variables.txt", "w", encoding="utf-8-sig") as file
         is_path = key.upper() == "PATH" # Case-insensitively, just in case.
         if is_debugging():
             if any(separator in value for separator in other_separators):
-                print(f"{Fore.YELLOW}Contains another separator: {key} = {value}{Fore.RESET}") # Worth investigating.
-        for separated_value in separated_values:
-            file.write(f"{separated_value}\n")
-            if is_path and os.path.isdir(separated_value) == False:
-                print(f"{Fore.RED}{separated_value}{Fore.RESET}") # Missing directory.
-            else:
-                print(separated_value)
+                print(f"{Fore.YELLOW}Contains another separator.{Fore.RESET}") # Worth investigating.
+        if separated_values:
+            for separated_value in separated_values:
+                file.write(f"{separated_value}\n")
+                if is_path and os.path.isdir(separated_value) == False:
+                    print(f"{Fore.RED}{separated_value}{Fore.RESET}") # Missing directory.
+                    # We could also look for duplicates,
+                    #     but on Windows for example, each user's environment variables are merged with the system's,
+                    #     and we wouldnt always know which ones must be preserved.
+                else:
+                    print(separated_value)
+        else:
+            file.write("(Empty)\n")
+            print(f"{Fore.YELLOW}(Empty){Fore.RESET}") # Not necessary an error.
 
 from debugging import display_press_enter_key_to_continue_if_not_debugging
 
