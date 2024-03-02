@@ -4,4 +4,5 @@ __pycache__/
 # Files
 *.db
 .DS_Store
+output_environment_variables.txt
 Thumbs.db
