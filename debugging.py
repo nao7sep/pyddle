@@ -9,5 +9,5 @@ def is_debugging():
 # For console apps not to close immediately after execution.
 
 def display_press_enter_key_to_continue_if_not_debugging():
-    if is_debugging() == False:
+    if not is_debugging():
         input("Press Enter key to continue: ")

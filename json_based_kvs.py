@@ -34,6 +34,30 @@ def show_merged_kvs_data():
     for key, value in merged_kvs_data.items():
         print(f"    {key}: {value}")
 
+def update_first_kvs_data(key, value):
+    first_kvs_data[key] = value
+
+    if key not in second_kvs_data:
+        merged_kvs_data[key] = value
+
+def update_second_kvs_data(key, value):
+    second_kvs_data[key] = value
+    merged_kvs_data[key] = value
+
+def delete_from_first_kvs_data(key):
+    if key in first_kvs_data:
+        del first_kvs_data[key]
+
+    if key in merged_kvs_data and key not in second_kvs_data:
+        del merged_kvs_data[key]
+
+def delete_from_second_kvs_data(key):
+    if key in second_kvs_data:
+        del second_kvs_data[key]
+
+    if key in merged_kvs_data and key not in first_kvs_data:
+        del merged_kvs_data[key]
+
 import sqlite3
 import datetime
 

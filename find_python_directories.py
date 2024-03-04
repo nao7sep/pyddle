@@ -9,7 +9,7 @@ def is_python_looking_directory(path):
     expected_directory_names = ['include', 'lib'] # These 2 are always expected.
 
     for name in expected_directory_names:
-        if os.path.isdir(os.path.join(path, name)) == False:
+        if not os.path.isdir(os.path.join(path, name)):
             return False
 
     if is_debugging():

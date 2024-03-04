@@ -52,7 +52,7 @@ with open("output_environment_variables.txt", "w", encoding="utf-8-sig") as file
             for separated_value in separated_values:
                 file.write(f"{separated_value}\n")
 
-                if is_path and os.path.isdir(separated_value) == False:
+                if is_path and not os.path.isdir(separated_value):
                     print(f"{Fore.RED}{separated_value}{Fore.RESET}") # Missing directory.
                     # We could also look for duplicates,
                     #     but on Windows for example, each user's environment variables are merged with the system's,

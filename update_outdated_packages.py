@@ -98,7 +98,7 @@ else:
     print("No outdated packages.")
 
 if is_debugging():
-    if is_beautifulsoup4_originally_installed == False:
+    if not is_beautifulsoup4_originally_installed:
         subprocess.run([pip_file_path, "uninstall", "beautifulsoup4", "-y"])
 
 from debugging import display_press_enter_key_to_continue_if_not_debugging
