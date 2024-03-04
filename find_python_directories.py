@@ -1,8 +1,7 @@
 ﻿# Created: 2024-02-29
 # This script finds all Python-looking directories on all Windows drives / Mac volumes.
 
-from debugging import is_debugging
-
+import debugging
 import os
 
 def is_python_looking_directory(path):
@@ -12,7 +11,7 @@ def is_python_looking_directory(path):
         if not os.path.isdir(os.path.join(path, name)):
             return False
 
-    if is_debugging():
+    if debugging.is_debugging():
         print(f"Possible Python directory: {path}") # There can be variants of Python installations.
 
     expected_file_names = ['python3.exe', 'python.exe', 'python3', 'python']
@@ -51,6 +50,4 @@ for drive_or_volume_path in get_all_drive_or_volume_paths():
 # In an non-debugging environment, the scanned directory count will be overwritten by the "Press Enter key" message.
 # In a debugging environment, the console should get to a new prompt, with or without overwriting the last scanned directory count.
 
-from debugging import display_press_enter_key_to_continue_if_not_debugging
-
-display_press_enter_key_to_continue_if_not_debugging()
+debugging.display_press_enter_key_to_continue_if_not_debugging()

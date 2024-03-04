@@ -1,6 +1,16 @@
 ﻿# Created: 2024-02-21
 # This script demonstrates how to write and read settings in various file formats.
 
+import base64
+import configparser
+import csv
+import debugging
+import file_system
+import json
+import sqlite3
+import xml.dom.minidom
+import xml.etree.ElementTree
+
 # Initialize variables of frequently used types.
 
 _int = 1
@@ -27,13 +37,13 @@ data = {
 
 # Create the "output" subdirectory and set the working directory to it.
 
-from file_system import make_and_move_to_output_subdirectory
+file_system.make_and_move_to_output_subdirectory()
 
-make_and_move_to_output_subdirectory()
+# ------------------------------------------------------------------------------
+#     INI file
+# ------------------------------------------------------------------------------
 
 # Write the data into a INI file.
-
-import configparser
 
 config = configparser.ConfigParser()
 config.add_section("data")
@@ -41,8 +51,8 @@ config.add_section("data")
 for key, value in data.items():
     config["data"][key] = str(value)
 
-with open("write_and_read_settings.ini", "w") as configfile:
-    config.write(configfile)
+with open("write_and_read_settings.ini", "w") as config_file:
+    config.write(config_file)
 
 # Read the data from the INI file.
 
@@ -55,9 +65,11 @@ print("Data from the INI file:")
 for key, value in config["data"].items():
     print(f"    {key}: {value}")
 
-# Convert the bytes in the data to a Base64 string for JSON serialization.
+# ------------------------------------------------------------------------------
+#     JSON file
+# ------------------------------------------------------------------------------
 
-import base64
+# Convert the bytes in the data to a Base64 string for JSON serialization.
 
 data["bytes"] = base64.b64encode(data["bytes"]).decode("ascii")
 
@@ -65,15 +77,13 @@ print(f"Bytes converted to Base64: {data['bytes']}")
 
 # Write the data into a JSON file.
 
-import json
-
-with open("write_and_read_settings.json", "w") as jsonfile:
-    json.dump(data, jsonfile, indent=4)
+with open("write_and_read_settings.json", "w") as json_file:
+    json.dump(data, json_file, indent=4)
 
 # Read the data from the JSON file.
 
-with open("write_and_read_settings.json", "r") as jsonfile:
-    data_from_json = json.load(jsonfile)
+with open("write_and_read_settings.json", "r") as json_file:
+    data_from_json = json.load(json_file)
 
 # Convert the Base64 strings in the 2 portions of data back to bytes.
 
@@ -85,27 +95,27 @@ print("Data from the JSON file:")
 for key, value in data_from_json.items():
     print(f"    {key}: {value}")
 
+# ------------------------------------------------------------------------------
+#     XML file
+# ------------------------------------------------------------------------------
+
 # Write the data into a XML file.
 
-import xml.etree.ElementTree as ET
-
-root = ET.Element("data")
+root = xml.etree.ElementTree.Element("data")
 
 for key, value in data.items():
-    ET.SubElement(root, key).text = str(value)
+    xml.etree.ElementTree.SubElement(root, key).text = str(value)
 
 # Convert to pretty XML.
 
-import xml.dom.minidom
+pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'utf-8')).toprettyxml(indent="    ")
 
-pretty_xml = xml.dom.minidom.parseString (ET.tostring(root, 'utf-8')).toprettyxml(indent="    ")
-
-with open("write_and_read_settings.xml", "w") as xmlfile:
-    xmlfile.write(pretty_xml)
+with open("write_and_read_settings.xml", "w") as xml_file:
+    xml_file.write(pretty_xml)
 
 # Read the data from the XML file.
 
-tree = ET.parse("write_and_read_settings.xml")
+tree = xml.etree.ElementTree.parse("write_and_read_settings.xml")
 
 root = tree.getroot()
 
@@ -114,15 +124,17 @@ print("Data from the XML file:")
 for child in root:
     print(f"    {child.tag}: {child.text}")
 
-# Write the data into a CSV file.
+# ------------------------------------------------------------------------------
+#     CSV file
+# ------------------------------------------------------------------------------
 
-import csv
+# Write the data into a CSV file.
 
 # The newline="" part specifies that line endings should not be altered.
 # Without this, Python would automatically convert line endings depending on the platform, which could corrupt the file.
 
-with open("write_and_read_settings.csv", "w", newline="") as csvfile:
-    writer = csv.writer(csvfile)
+with open("write_and_read_settings.csv", "w", newline="") as csv_file:
+    writer = csv.writer(csv_file)
 
     for key, value in data.items():
         writer.writerow([key, value])
@@ -131,8 +143,8 @@ with open("write_and_read_settings.csv", "w", newline="") as csvfile:
 
 # The value for the none key will be read as an empty string as the CSV format doesnt support None values.
 
-with open("write_and_read_settings.csv", "r", newline="") as csvfile:
-    reader = csv.reader(csvfile)
+with open("write_and_read_settings.csv", "r", newline="") as csv_file:
+    reader = csv.reader(csv_file)
     data_from_csv = list(reader)
 
 print("Data from the CSV file:")
@@ -140,9 +152,11 @@ print("Data from the CSV file:")
 for row in data_from_csv:
     print(f"    {row[0]}: {row[1]}")
 
-# Write the data into a SQLite database.
+# ------------------------------------------------------------------------------
+#     SQLite database
+# ------------------------------------------------------------------------------
 
-import sqlite3
+# Write the data into a SQLite database.
 
 conn = sqlite3.connect("write_and_read_settings.db")
 
@@ -180,6 +194,4 @@ print("Data from the SQLite database:")
 for row in data_from_sqlite:
     print(f"    {row[0]}: {row[1]}")
 
-from debugging import display_press_enter_key_to_continue_if_not_debugging
-
-display_press_enter_key_to_continue_if_not_debugging()
+debugging.display_press_enter_key_to_continue_if_not_debugging()

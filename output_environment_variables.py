@@ -1,7 +1,10 @@
 ﻿# Created: 2024-03-02
 # This script outputs all environment variables and their values.
 
-from debugging import is_debugging
+import colorama
+import debugging
+import file_system
+import os
 
 main_separator = ''
 other_separators = []
@@ -12,8 +15,6 @@ other_separators = []
 # Out of the 3, we look for what's not the most commonly used one on each platform,
 #     excluding ':', which frequently appears in paths on Windows.
 
-import os
-
 if os.name == "nt":
     main_separator = ';'
     other_separators = [',']
@@ -23,11 +24,7 @@ else:
 
 is_first_variable = True
 
-from file_system import make_and_move_to_output_subdirectory
-
-make_and_move_to_output_subdirectory()
-
-from colorama import Fore
+file_system.make_and_move_to_output_subdirectory()
 
 with open("output_environment_variables.txt", "w", encoding="utf-8-sig") as file:
     for key, value in sorted(os.environ.items()):
@@ -44,16 +41,16 @@ with open("output_environment_variables.txt", "w", encoding="utf-8-sig") as file
 
         is_path = key.upper() == "PATH" # Case-insensitively, just in case.
 
-        if is_debugging():
+        if debugging.is_debugging():
             if any(separator in value for separator in other_separators):
-                print(f"{Fore.YELLOW}Contains another separator.{Fore.RESET}") # Worth investigating.
+                print(f"{colorama.Fore.YELLOW}Contains another separator.{colorama.Fore.RESET}") # Worth investigating.
 
         if separated_values:
             for separated_value in separated_values:
                 file.write(f"{separated_value}\n")
 
                 if is_path and not os.path.isdir(separated_value):
-                    print(f"{Fore.RED}{separated_value}{Fore.RESET}") # Missing directory.
+                    print(f"{colorama.Fore.RED}{separated_value}{colorama.Fore.RESET}") # Missing directory.
                     # We could also look for duplicates,
                     #     but on Windows for example, each user's environment variables are merged with the system's,
                     #     and we wouldnt always know which ones must be preserved.
@@ -61,8 +58,6 @@ with open("output_environment_variables.txt", "w", encoding="utf-8-sig") as file
                     print(separated_value)
         else:
             file.write("(Empty)\n")
-            print(f"{Fore.YELLOW}(Empty){Fore.RESET}") # Not necessary an error.
+            print(f"{colorama.Fore.YELLOW}(Empty){colorama.Fore.RESET}") # Not necessary an error.
 
-from debugging import display_press_enter_key_to_continue_if_not_debugging
-
-display_press_enter_key_to_continue_if_not_debugging()
+debugging.display_press_enter_key_to_continue_if_not_debugging()

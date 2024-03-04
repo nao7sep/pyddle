@@ -1,18 +1,17 @@
 ﻿# Created: 2024-03-04
 # This scripts offers a simple key-value store (KVS) using JSON files.
 
+import datetime
+import json
 import os
+import sqlite3
 
 # https://docs.python.org/3/reference/datamodel.html#modules
 executing_script_files_directory_path = os.path.dirname(__file__)
 first_kvs_file_path = os.path.join(executing_script_files_directory_path, ".pyddle_kvs.json")
-print(first_kvs_file_path)
 
 # https://docs.python.org/3/library/os.path.html#os.path.expanduser
 second_kvs_file_path = os.path.join(os.path.expanduser("~"), ".pyddle_kvs.json")
-print(second_kvs_file_path)
-
-import json
 
 first_kvs_data = {}
 
@@ -57,9 +56,6 @@ def delete_from_second_kvs_data(key):
 
     if key in merged_kvs_data and key not in first_kvs_data:
         del merged_kvs_data[key]
-
-import sqlite3
-import datetime
 
 def save_kvs_data(path, data):
     json_string = json.dumps(data, indent=4)

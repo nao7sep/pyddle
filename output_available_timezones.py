@@ -1,11 +1,11 @@
 ﻿# Created: 2024-02-21
 # This script outputs all the available timezones.
 
-from file_system import make_and_move_to_output_subdirectory
-
-make_and_move_to_output_subdirectory()
-
+import debugging
+import file_system
 import zoneinfo
+
+file_system.make_and_move_to_output_subdirectory()
 
 # If no timezones are available, run: pip3/pip install tzdata
 
@@ -14,6 +14,4 @@ with open("output_available_timezones.txt", "w", encoding="utf-8-sig") as file:
         file.write(timezone + '\n')
         print(timezone)
 
-from debugging import display_press_enter_key_to_continue_if_not_debugging
-
-display_press_enter_key_to_continue_if_not_debugging()
+debugging.display_press_enter_key_to_continue_if_not_debugging()

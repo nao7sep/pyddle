@@ -1,6 +1,8 @@
 ﻿# Created: 2024-03-04
 # This script plays with SQLite for educational purposes.
 
+import datetime
+import debugging
 import sqlite3
 
 # https://www.sqlite.org/inmemorydb.html
@@ -21,8 +23,6 @@ cursor.execute("CREATE TABLE IF NOT EXISTS table1 ("
                    "localtime_string DATETIME NOT NULL, "
                    "localtime_string_as_utc DATETIME NOT NULL, "
                    "localtime_string_as_localtime DATETIME NOT NULL)")
-
-import datetime
 
 utc_string = datetime.datetime.now(datetime.UTC).isoformat()
 print(f"utc_string: {utc_string}")
@@ -75,6 +75,4 @@ else:
 
 connection.close()
 
-from debugging import display_press_enter_key_to_continue_if_not_debugging
-
-display_press_enter_key_to_continue_if_not_debugging()
+debugging.display_press_enter_key_to_continue_if_not_debugging()
