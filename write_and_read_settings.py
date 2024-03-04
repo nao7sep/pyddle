@@ -150,11 +150,15 @@ c = conn.cursor()
 
 # The table is created if it doesnt exist, and it has a column for how many times each row has been updated, and all the columns are not nullable.
 
-c.execute("CREATE TABLE IF NOT EXISTS data (key TEXT PRIMARY KEY NOT NULL, value TEXT NOT NULL, update_count INTEGER NOT NULL)")
+c.execute("CREATE TABLE IF NOT EXISTS data ("
+              "key TEXT PRIMARY KEY NOT NULL, "
+              "value TEXT NOT NULL, "
+              "update_count INTEGER NOT NULL)")
 
 for key, value in data.items():
     # If a row with the same key doesnt exist, the SELECT statement will return NULL, which will then be coalesced to 1.
-    c.execute("INSERT OR REPLACE INTO data (key, value, update_count) VALUES (?, ?, COALESCE ((SELECT update_count + 1 FROM data WHERE key = ?), 1))", (key, str(value), key))
+    c.execute("INSERT OR REPLACE INTO data (key, value, update_count) "
+                  "VALUES (?, ?, COALESCE ((SELECT update_count + 1 FROM data WHERE key = ?), 1))", (key, str(value), key))
 
 conn.commit()
 conn.close()

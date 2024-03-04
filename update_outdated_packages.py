@@ -22,6 +22,7 @@ def get_pip_file_path():
                 pip_file_path = os.path.join(directory_path, subdirectory_name, pip_file_name)
             else:
                 pip_file_path = os.path.join(directory_path, pip_file_name)
+
             if os.path.isfile(pip_file_path):
                 return pip_file_path
 

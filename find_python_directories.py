@@ -7,15 +7,20 @@ import os
 
 def is_python_looking_directory(path):
     expected_directory_names = ['include', 'lib'] # These 2 are always expected.
+
     for name in expected_directory_names:
         if os.path.isdir(os.path.join(path, name)) == False:
             return False
+
     if is_debugging():
         print(f"Possible Python directory: {path}") # There can be variants of Python installations.
+
     expected_file_names = ['python3.exe', 'python.exe', 'python3', 'python']
+
     for name in expected_file_names:
         if os.path.isfile(os.path.join(path, name)):
             return True
+
     return False
 
 def get_all_drive_or_volume_paths():
@@ -36,8 +41,10 @@ for drive_or_volume_path in get_all_drive_or_volume_paths():
     for directory_path, subdirectory_names, _ in os.walk(drive_or_volume_path, onerror = None): # Explicitly ignore errors.
         scanned_directory_count += 1
         print(f"Scanned {scanned_directory_count} directories.\r", end = "")
+
         for subdirectory_name in subdirectory_names:
             subdirectory_path = os.path.join(directory_path, subdirectory_name)
+
             if is_python_looking_directory(subdirectory_path):
                 print(f"Python-looking directory: {subdirectory_path}")
 

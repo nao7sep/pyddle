@@ -32,20 +32,26 @@ from colorama import Fore
 with open("output_environment_variables.txt", "w", encoding="utf-8-sig") as file:
     for key, value in sorted(os.environ.items()):
         separated_values = [separated_value for separated_value in value.split(main_separator) if separated_value] # Works like len(separated_value) > 0.
+
         if is_first_variable:
             is_first_variable = False
         else:
             file.write("\n")
             print()
+
         file.write(f"[{key}]\n")
         print(f"[{key}]")
+
         is_path = key.upper() == "PATH" # Case-insensitively, just in case.
+
         if is_debugging():
             if any(separator in value for separator in other_separators):
                 print(f"{Fore.YELLOW}Contains another separator.{Fore.RESET}") # Worth investigating.
+
         if separated_values:
             for separated_value in separated_values:
                 file.write(f"{separated_value}\n")
+
                 if is_path and os.path.isdir(separated_value) == False:
                     print(f"{Fore.RED}{separated_value}{Fore.RESET}") # Missing directory.
                     # We could also look for duplicates,
