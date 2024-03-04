@@ -33,6 +33,31 @@ def show_merged_kvs_data():
     for key, value in merged_kvs_data.items():
         print(f"    {key}: {value}")
 
+# ------------------------------------------------------------------------------
+#     CRUD operations
+# ------------------------------------------------------------------------------
+
+# If the key is not in the dictionary, get(key) returns None while [key] raises a KeyError.
+# https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
+
+def read_from_first_kvs_data(key):
+    return first_kvs_data.get(key)
+
+def read_from_first_kvs_data_or_default(key, default_value):
+    return first_kvs_data.get(key, default_value)
+
+def read_from_second_kvs_data(key):
+    return second_kvs_data.get(key)
+
+def read_from_second_kvs_data_or_default(key, default_value):
+    return second_kvs_data.get(key, default_value)
+
+def read_from_merged_kvs_data(key):
+    return merged_kvs_data.get(key)
+
+def read_from_merged_kvs_data_or_default(key, default_value):
+    return merged_kvs_data.get(key, default_value)
+
 def update_first_kvs_data(key, value):
     first_kvs_data[key] = value
 
@@ -56,6 +81,8 @@ def delete_from_second_kvs_data(key):
 
     if key in merged_kvs_data and key not in first_kvs_data:
         del merged_kvs_data[key]
+
+# ------------------------------------------------------------------------------
 
 def save_kvs_data(path, data):
     json_string = json.dumps(data, indent=4)
