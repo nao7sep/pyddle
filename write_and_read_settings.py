@@ -4,9 +4,9 @@
 import base64
 import configparser
 import csv
-import debugging
-import file_system
 import json
+import pyddle_lib.debugging as debugging
+import pyddle_lib.file_system as file_system
 import sqlite3
 import xml.dom.minidom
 import xml.etree.ElementTree

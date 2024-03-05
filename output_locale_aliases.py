@@ -1,9 +1,9 @@
 ﻿# Created: 2024-02-21
 # This script outputs all the locale aliases.
 
-import debugging
-import file_system
 import locale
+import pyddle_lib.debugging as debugging
+import pyddle_lib.file_system as file_system
 
 file_system.make_and_move_to_output_subdirectory()
 

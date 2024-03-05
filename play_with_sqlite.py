@@ -2,7 +2,7 @@
 # This script plays with SQLite for educational purposes.
 
 import datetime
-import debugging
+import pyddle_lib.debugging as debugging
 import sqlite3
 
 # https://www.sqlite.org/inmemorydb.html

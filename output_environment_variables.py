@@ -2,9 +2,9 @@
 # This script outputs all environment variables and their values.
 
 import colorama
-import debugging
-import file_system
 import os
+import pyddle_lib.debugging as debugging
+import pyddle_lib.file_system as file_system
 
 main_separator = ''
 other_separators = []

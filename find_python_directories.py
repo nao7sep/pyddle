@@ -1,8 +1,8 @@
 ﻿# Created: 2024-02-29
 # This script finds all Python-looking directories on all Windows drives / Mac volumes.
 
-import debugging
 import os
+import pyddle_lib.debugging as debugging
 
 def is_python_looking_directory(path):
     expected_directory_names = ['include', 'lib'] # These 2 are always expected.

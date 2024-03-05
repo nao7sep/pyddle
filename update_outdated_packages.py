@@ -1,10 +1,10 @@
 ﻿# Created 2024-02-21
 # This script updates all outdated packages.
 
-import debugging
 import importlib.util
 import json
 import os
+import pyddle_lib.debugging as debugging
 import subprocess
 import sys
 
