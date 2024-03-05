@@ -4,8 +4,8 @@
 import importlib.util
 import json
 import os
-import pyddle_lib.pyddle_debugging as debugging
-import pyddle_lib.pyddle_string as string
+import pyddle_debugging as debugging
+import pyddle_string as string
 import subprocess
 import sys
 

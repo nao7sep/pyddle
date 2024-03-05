@@ -1,8 +1,8 @@
 ﻿# Created: 2024-03-05
 # This script tests the core functionalities of the file_system module.
 
-import pyddle_lib.pyddle_debugging as debugging
-import pyddle_lib.pyddle_file_system as file_system
+import pyddle_debugging as debugging
+import pyddle_file_system as file_system
 
 file_system.make_and_move_to_output_subdirectory()
 

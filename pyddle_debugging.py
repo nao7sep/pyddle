@@ -2,7 +2,7 @@
 # This scripts contains debugging-related functions.
 
 import os
-import pyddle_lib.pyddle_string as string
+import pyddle_string as string
 
 def is_debugging():
     return string.equals_ignore_case(os.getenv('TERM_PROGRAM'), 'vscode') # Must be updated periodically.

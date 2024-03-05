@@ -3,9 +3,9 @@
 
 import colorama
 import os
-import pyddle_lib.pyddle_debugging as debugging
-import pyddle_lib.pyddle_file_system as file_system
-import pyddle_lib.pyddle_string as string
+import pyddle_debugging as debugging
+import pyddle_file_system as file_system
+import pyddle_string as string
 
 main_separator = ''
 other_separators = []

@@ -1,8 +1,8 @@
 ﻿# Created: 2024-02-21
 # This script outputs all the available timezones.
 
-import pyddle_lib.pyddle_debugging as debugging
-import pyddle_lib.pyddle_file_system as file_system
+import pyddle_debugging as debugging
+import pyddle_file_system as file_system
 import zoneinfo
 
 file_system.make_and_move_to_output_subdirectory()
