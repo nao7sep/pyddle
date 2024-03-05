@@ -2,6 +2,7 @@
 # This scripts offers a simple key-value store (KVS) using JSON files.
 
 import datetime
+import file_system
 import json
 import os
 import sqlite3
@@ -16,18 +17,18 @@ second_kvs_file_path = os.path.join(os.path.expanduser("~"), ".pyddle_kvs.json")
 first_kvs_data = {}
 
 if os.path.isfile(first_kvs_file_path):
-    with open(first_kvs_file_path, "r") as file:
-        first_kvs_data = json.load(file)
+    content = file_system.read_all_text_from_file(first_kvs_file_path)
+    first_kvs_data = json.loads(content)
 
 second_kvs_data = {}
 
 if os.path.isfile(second_kvs_file_path):
-    with open(second_kvs_file_path, "r") as file:
-        second_kvs_data = json.load(file)
+    content = file_system.read_all_text_from_file(second_kvs_file_path)
+    second_kvs_data = json.loads(content)
 
 merged_kvs_data = {**first_kvs_data, **second_kvs_data}
 
-def show_merged_kvs_data():
+def display_merged_kvs_data():
     print("Merged KVS data:")
 
     for key, value in merged_kvs_data.items():
@@ -84,11 +85,9 @@ def delete_from_second_kvs_data(key):
 
 # ------------------------------------------------------------------------------
 
-def save_kvs_data(path, data):
+def save_kvs_data_to_file(path, data):
     json_string = json.dumps(data, indent=4)
-
-    with open(path, "w") as file:
-        file.write(json_string)
+    file_system.write_all_text_to_file(path, json_string)
 
     root, _ = os.path.splitext(path)
     db_file_path = root + ".db"
@@ -106,8 +105,8 @@ def save_kvs_data(path, data):
 
         connection.commit()
 
-def save_first_kvs_data():
-    save_kvs_data(first_kvs_file_path, first_kvs_data)
+def save_first_kvs_data_to_file():
+    save_kvs_data_to_file(first_kvs_file_path, first_kvs_data)
 
-def save_second_kvs_data():
-    save_kvs_data(second_kvs_file_path, second_kvs_data)
+def save_second_kvs_data_to_file():
+    save_kvs_data_to_file(second_kvs_file_path, second_kvs_data)
