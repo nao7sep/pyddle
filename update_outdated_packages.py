@@ -4,7 +4,8 @@
 import importlib.util
 import json
 import os
-import pyddle_lib.debugging as debugging
+import pyddle_lib.pyddle_debugging as debugging
+import pyddle_lib.pyddle_string as string
 import subprocess
 import sys
 
@@ -53,7 +54,7 @@ if debugging.is_debugging():
 # Install tzdata 2023.4, which is obsolete, for testing purposes.
 
 if debugging.is_debugging():
-    subprocess.run([pip_file_path, "install", "tzdata==2023.4"])
+    subprocess.run([pip_file_path, "install", "tzdata\u003D\u003D2023.4"])
 
 # Remember whether beautifulsoup4 was originally installed.
 # Oh well, I just liked the name of the package.
@@ -69,7 +70,7 @@ if debugging.is_debugging():
 # Install beautifulsoup4 4.12.2, which is obsolete, for testing purposes.
 
 if debugging.is_debugging():
-    subprocess.run([pip_file_path, "install", "beautifulsoup4==4.12.2"])
+    subprocess.run([pip_file_path, "install", "beautifulsoup4\u003D\u003D4.12.2"])
 
 # Get a list of all outdated packages as a JSON string.
 
@@ -85,10 +86,10 @@ if len(outdated_packages) > 0:
     for package in outdated_packages:
         print(f'    {package["name"]} {package["version"]} => {package["latest_version"]}')
 
-    if input("Would you like to update all outdated packages? (y/n) ").lower() == "y":
+    if string.equals_ignore_case(input("Would you like to update all outdated packages? (y/n) "), "y"):
         for package in outdated_packages:
             # Specify the version to avoid installing a newer version than intended.
-            subprocess.run([pip_file_path, "install", f'{package["name"]}=={package["latest_version"]}'])
+            subprocess.run([pip_file_path, "install", f'{package["name"]}\u003D\u003D{package["latest_version"]}'])
 
 else:
     print("No outdated packages.")

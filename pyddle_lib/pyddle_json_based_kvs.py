@@ -2,9 +2,9 @@
 # This scripts offers a simple key-value store (KVS) using JSON files.
 
 import datetime
-import file_system
 import json
 import os
+import pyddle_file_system as file_system
 import sqlite3
 
 # https://docs.python.org/3/reference/datamodel.html#modules

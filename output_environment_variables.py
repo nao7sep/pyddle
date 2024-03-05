@@ -3,8 +3,9 @@
 
 import colorama
 import os
-import pyddle_lib.debugging as debugging
-import pyddle_lib.file_system as file_system
+import pyddle_lib.pyddle_debugging as debugging
+import pyddle_lib.pyddle_file_system as file_system
+import pyddle_lib.pyddle_string as string
 
 main_separator = ''
 other_separators = []
@@ -15,7 +16,7 @@ other_separators = []
 # Out of the 3, we look for what's not the most commonly used one on each platform,
 #     excluding ':', which frequently appears in paths on Windows.
 
-if os.name == "nt":
+if string.equals_ignore_case(os.name, 'nt'):
     main_separator = ';'
     other_separators = [',']
 else:
@@ -39,7 +40,7 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
         file.write(f"[{key}]\n")
         print(f"[{key}]")
 
-        is_path = key.upper() == "PATH" # Case-insensitively, just in case.
+        is_path = string.equals_ignore_case(key, "PATH") # Case-insensitively, just in case.
 
         if debugging.is_debugging():
             if any(separator in value for separator in other_separators):

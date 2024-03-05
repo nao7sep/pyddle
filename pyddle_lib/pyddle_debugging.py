@@ -2,9 +2,10 @@
 # This scripts contains debugging-related functions.
 
 import os
+import pyddle_lib.pyddle_string as string
 
 def is_debugging():
-    return os.getenv('TERM_PROGRAM') == 'vscode' # Must be updated periodically.
+    return string.equals_ignore_case(os.getenv('TERM_PROGRAM'), 'vscode') # Must be updated periodically.
 
 # For console apps not to close immediately after execution.
 

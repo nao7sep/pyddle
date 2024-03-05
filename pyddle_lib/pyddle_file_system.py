@@ -2,6 +2,7 @@
 # This script contains file-system-related functions.
 
 import os
+import pyddle_lib.pyddle_string as string
 
 def make_and_move_to_output_subdirectory():
     # Supposing this module is in a subdirectory of the project's root directory.
@@ -32,7 +33,7 @@ def get_utf_encoding_bom(encoding):
     uppercase_encoding = encoding.upper()
 
     for encoding, bom in utf_encodings_and_boms:
-        if encoding == uppercase_encoding:
+        if string.equals(encoding, uppercase_encoding):
             return bom
 
 def write_utf_encoding_bom_to_file(file, encoding):
@@ -77,7 +78,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
     encoding, bom = detect_utf_encoding_of_file(file.buffer)
 
     if encoding:
-        if encoding == "UTF-8":
+        if string.equals_ignore_case(encoding, "UTF-8"):
             # The position should be right after the BOM.
             return file
         else:
@@ -88,7 +89,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
             return file
 
     else:
-        if fallback_encoding == "UTF-8":
+        if string.equals_ignore_case(fallback_encoding, "UTF-8"):
             # The position should be at the beginning of the file.
             return file
         else:
@@ -122,5 +123,5 @@ def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
         with open_file_and_write_utf_encoding_bom(path, encoding) as file:
             file.write(text)
     else:
-        with open(path, "w", encoding) as file:
+        with open(path, "w", encoding=encoding) as file:
             file.write(text)
