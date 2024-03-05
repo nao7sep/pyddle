@@ -35,7 +35,6 @@ def get_utf_encoding_bom(encoding):
         if encoding == uppercase_encoding:
             return bom
 
-# Assuming the file is open in binary mode.
 def write_utf_encoding_bom_to_file(file, encoding):
     bom = get_utf_encoding_bom(encoding)
 
@@ -49,7 +48,6 @@ def detect_utf_encoding(bytes):
 
     return None, None
 
-# Assuming the file is open in binary mode.
 def detect_utf_encoding_of_file(file):
     position = file.tell()
     bytes = file.read(4)
@@ -58,6 +56,7 @@ def detect_utf_encoding_of_file(file):
     if encoding:
         file.seek(position + len(bom))
     else:
+        # If the encoding isnt detected, the position goes back to where it was.
         file.seek(position)
 
     return encoding, bom
@@ -69,30 +68,34 @@ def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8"):
         # Here, we cant ignore this because writing the BOM is the whole point.
         raise ValueError(f"Unsupported encoding: {encoding}")
 
-    with open(path, "wb") as file:
-        file.write(bom)
-
-    # The position is automatically set to the end of the file.
-    # If we dont specify the argument name, encoding will be interpreted as "buffering: int".
-    return open(path, "a", encoding=encoding)
+    file = open(path, "w", encoding=encoding)
+    file.buffer.write(bom) # Using the underlying buffer.
+    return file
 
 def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
-    with open(path, "rb") as file:
-        encoding, bom = detect_utf_encoding_of_file(file)
+    file = open(path, "r", encoding="UTF-8") # The strongly encouraged default encoding.
+    encoding, bom = detect_utf_encoding_of_file(file.buffer)
 
     if encoding:
-        bom_length = len(bom)
-        file = open(path, "r", encoding=encoding)
-
-        if bom_length == 3:
-            file.seek(3)
+        if encoding == "UTF-8":
+            # The position should be right after the BOM.
+            return file
         else:
-            file.seek(1)
-
-        return file
+            file.close()
+            file = open(path, "r", encoding=encoding)
+            # Adjust the position to be right after the BOM.
+            file.buffer.seek(len(bom))
+            return file
 
     else:
-        return open(path, "r", encoding=fallback_encoding)
+        if fallback_encoding == "UTF-8":
+            # The position should be at the beginning of the file.
+            return file
+        else:
+            file.close()
+            file = open(path, "r", encoding=fallback_encoding)
+            # No position adjustment is necessary.
+            return file
 
 # ------------------------------------------------------------------------------
 #     All-at-once operations
