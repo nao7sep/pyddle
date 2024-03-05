@@ -8,3 +8,116 @@ def make_and_move_to_output_subdirectory():
     output_directory_path = os.path.join(os.path.dirname(__file__), "../", "output")
     os.makedirs(output_directory_path, exist_ok=True)
     os.chdir(output_directory_path)
+
+# ------------------------------------------------------------------------------
+#     UTF encodings
+# ------------------------------------------------------------------------------
+
+# https://en.wikipedia.org/wiki/Byte_order_mark
+
+# The following encodings and some others are not supported here.
+# https://en.wikipedia.org/wiki/UTF-7
+# https://en.wikipedia.org/wiki/UTF-1
+
+utf_encodings_and_boms = {
+    # Names must be in uppercase.
+    ("UTF-8", b"\xEF\xBB\xBF"),
+    ("UTF-16BE", b"\xFE\xFF"),
+    ("UTF-16LE", b"\xFF\xFE"),
+    ("UTF-32BE", b"\x00\x00\xFE\xFF"),
+    ("UTF-32LE", b"\xFF\xFE\x00\x00"),
+}
+
+def get_utf_encoding_bom(encoding):
+    uppercase_encoding = encoding.upper()
+
+    for encoding, bom in utf_encodings_and_boms:
+        if encoding == uppercase_encoding:
+            return bom
+
+# Assuming the file is open in binary mode.
+def write_utf_encoding_bom_to_file(file, encoding):
+    bom = get_utf_encoding_bom(encoding)
+
+    if bom:
+        file.write(bom)
+
+def detect_utf_encoding(bytes):
+    for encoding, bom in utf_encodings_and_boms:
+        if bytes.startswith(bom):
+            return encoding, bom
+
+    return None, None
+
+# Assuming the file is open in binary mode.
+def detect_utf_encoding_of_file(file):
+    position = file.tell()
+    bytes = file.read(4)
+    encoding, bom = detect_utf_encoding(bytes)
+
+    if encoding:
+        file.seek(position + len(bom))
+    else:
+        file.seek(position)
+
+    return encoding, bom
+
+def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8"):
+    bom = get_utf_encoding_bom(encoding)
+
+    if not bom:
+        # Here, we cant ignore this because writing the BOM is the whole point.
+        raise ValueError(f"Unsupported encoding: {encoding}")
+
+    with open(path, "wb") as file:
+        file.write(bom)
+
+    # The position is automatically set to the end of the file.
+    # If we dont specify the argument name, encoding will be interpreted as "buffering: int".
+    return open(path, "a", encoding=encoding)
+
+def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
+    with open(path, "rb") as file:
+        encoding, bom = detect_utf_encoding_of_file(file)
+
+    if encoding:
+        bom_length = len(bom)
+        file = open(path, "r", encoding=encoding)
+
+        if bom_length == 3:
+            file.seek(3)
+        else:
+            file.seek(1)
+
+        return file
+
+    else:
+        return open(path, "r", encoding=fallback_encoding)
+
+# ------------------------------------------------------------------------------
+#     All-at-once operations
+# ------------------------------------------------------------------------------
+
+def read_all_bytes_from_file(path):
+    with open(path, "rb") as file:
+        return file.read()
+
+def read_all_text_from_file(path, detect_encoding=True, fallback_encoding="UTF-8"):
+    if detect_encoding:
+        with open_file_and_detect_utf_encoding(path, fallback_encoding) as file:
+            return file.read()
+    else:
+        with open(path, "r", encoding=fallback_encoding) as file:
+            return file.read()
+
+def write_all_bytes_to_file(path, bytes):
+    with open(path, "wb") as file:
+        file.write(bytes)
+
+def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
+    if write_bom:
+        with open_file_and_write_utf_encoding_bom(path, encoding) as file:
+            file.write(text)
+    else:
+        with open(path, "w", encoding) as file:
+            file.write(text)
