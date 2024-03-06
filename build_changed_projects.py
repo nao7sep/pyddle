@@ -47,14 +47,20 @@ try:
 
     solution_directories = {}
 
+    # "os.listdir" returns not only directories but also files.
+    # https://www.geeksforgeeks.org/python-os-listdir-method/
     for directory_name in os.listdir(repositories_directory_path):
+        possible_solution_directory_path = os.path.join(repositories_directory_path, directory_name)
+
+        if not os.path.isdir(possible_solution_directory_path):
+            continue
+
         if string.contains_ignore_case(ignored_directory_names, directory_name):
             if debugging.is_debugging():
                 print(f"Ignored directory: {directory_name}")
 
             continue
 
-        possible_solution_directory_path = os.path.join(repositories_directory_path, directory_name)
         solution_file_paths = glob.glob(os.path.join(possible_solution_directory_path, "*.sln"))
 
         if not solution_file_paths:
@@ -71,6 +77,42 @@ try:
         # "sys.exit" raises a "SystemExit" exception, which is NOT caught by the "except" block if a type is specified, allowing the script to execute the "finally" block.
         # "exit", on the other hand, is merely a helper for the interactive shell and should not be used in production code.
         sys.exit()
+
+    # ------------------------------------------------------------------------------
+    #     Find project directories
+    # ------------------------------------------------------------------------------
+
+    for solution_name, solution_directory_path in solution_directories.items():
+        project_directories = {}
+
+        for directory_name in os.listdir(solution_directory_path):
+            possible_project_directory_path = os.path.join(solution_directory_path, directory_name)
+
+            if not os.path.isdir(possible_project_directory_path):
+                continue
+
+            # It's highly unlikely that a known better-to-avoid name (such as ".git") is used as a valid solution/project directory name.
+            if string.contains_ignore_case(ignored_directory_names, directory_name):
+                if debugging.is_debugging():
+                    print(f"Ignored directory: {solution_name}/{directory_name}")
+
+                continue
+
+            project_file_paths = glob.glob(os.path.join(possible_project_directory_path, "*.csproj"))
+
+            if not project_file_paths:
+                if debugging.is_debugging():
+                    print(f"No project files found in directory: {solution_name}/{directory_name}")
+
+                continue
+
+            project_directories[directory_name] = possible_project_directory_path
+
+        if not project_directories:
+            print(f"No project directories found in solution: {solution_name}")
+            continue
+
+        solution_directories[solution_name] = solution_directory_path, project_directories
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:
