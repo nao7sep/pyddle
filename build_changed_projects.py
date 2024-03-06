@@ -69,8 +69,11 @@ try:
 
             continue
 
-        # Set the full path for now.
-        solution_directories[directory_name] = possible_solution_directory_path
+        if len(solution_file_paths) > 1:
+            print(f"Multiple solution files found in directory: {directory_name}")
+            continue
+
+        solution_directories[directory_name] = dotnet.SolutionInfo(possible_solution_directory_path, solution_file_paths[0])
 
     if not solution_directories:
         print("No solution directories found.")
@@ -82,11 +85,11 @@ try:
     #     Find project directories
     # ------------------------------------------------------------------------------
 
-    for solution_name, solution_directory_path in solution_directories.items():
+    for solution_name, solution in solution_directories.items():
         project_directories = {}
 
-        for directory_name in os.listdir(solution_directory_path):
-            possible_project_directory_path = os.path.join(solution_directory_path, directory_name)
+        for directory_name in os.listdir(solution.directory_path):
+            possible_project_directory_path = os.path.join(solution.directory_path, directory_name)
 
             if not os.path.isdir(possible_project_directory_path):
                 continue
@@ -106,13 +109,26 @@ try:
 
                 continue
 
-            project_directories[directory_name] = possible_project_directory_path
+            if len(project_file_paths) > 1:
+                print(f"Multiple project files found in directory: {solution_name}/{directory_name}")
+                continue
+
+            project_directories[directory_name] = dotnet.ProjectInfo(possible_project_directory_path, project_file_paths[0])
 
         if not project_directories:
             print(f"No project directories found in solution: {solution_name}")
             continue
 
-        solution_directories[solution_name] = solution_directory_path, project_directories
+        solution_directories[solution_name].projects = project_directories
+
+    # ------------------------------------------------------------------------------
+    #     Read version info
+    # ------------------------------------------------------------------------------
+
+    for solution_name, solution in sorted(solution_directories.items()):
+        for project_name, project in sorted(solution.projects.items()):
+            project.extract_and_normalize_version_string()
+            print(f"{solution_name}/{project_name}: v{project.version_string}")
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:

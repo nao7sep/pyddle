@@ -1,10 +1,80 @@
 ﻿# Created: 2024-03-06
 # This script contains functions related to compilation and distribution of .NET projects.
 
-import enum
+import colorama
+import os
+import pyddle_debugging as debugging
 import pyddle_file_system as file_system
+import pyddle_string as string
 import re
 import xml.etree.ElementTree
+
+# ------------------------------------------------------------------------------
+#     Solution/project info
+# ------------------------------------------------------------------------------
+
+# I wont be implementing the searching-for-things part in this module because it would need to output various messages and also MIGHT become interactive in the future.
+
+class SolutionInfo:
+    def __init__(self, directory_path, file_path, projects=None):
+        self.directory_path = directory_path
+        self.file_path = file_path
+        self.projects = projects
+
+class ProjectInfo:
+    def __init__(self, directory_path, file_path, version_string=None):
+        self.directory_path = directory_path
+        self.file_path = file_path
+        self.version_string = version_string
+
+    # This could be a property with the @property thing attached, but currently there seems to be no built-in Lazy mechanism in Python,
+    #    and I dont want the property-ish thing to try to initialize itself multiple times if it cant extract the version string.
+
+    def extract_and_normalize_version_string(self):
+        if self.version_string:
+            raise RuntimeError("Version string already exists.")
+
+        try:
+            extracted_version_string = extract_version_string_from_csproj_file(self.file_path)
+
+            if extracted_version_string:
+                extracted_version_string = version_digits_to_string(parse_version_string(extracted_version_string))
+
+                # Avalonia UI may contain a version string in "app.manifest" that should, but not necessarily have to, match the one in the .csproj file.
+                # If the file exists and contains a version string, why dont we just check it?
+                # The check occurs only in the debugging mode because I dont like it directly displaying a warning message (while I'm too lazy to do better).
+
+                if debugging.is_debugging():
+                    app_manifest_file_path = os.path.join(self.directory_path, "app.manifest")
+
+                    if os.path.isfile(app_manifest_file_path):
+                        alternatively_extracted_version_string = extract_version_string_from_app_manifest_file(app_manifest_file_path)
+
+                        if alternatively_extracted_version_string:
+                            alternatively_extracted_version_string = version_digits_to_string(parse_version_string(alternatively_extracted_version_string))
+
+                            if not string.equals(alternatively_extracted_version_string, extracted_version_string):
+                                print(f"{colorama.Fore.YELLOW}Version strings from '{os.path.basename(self.file_path)}' and 'app.manifest' differ in directory: {self.directory_path}{colorama.Fore.RESET}")
+                                return
+
+                self.version_string = extracted_version_string
+
+                return
+
+            # Old .NET projects may contain a version string in "AssemblyInfo.cs".
+            # I used to set the same value to AssemblyVersion and AssemblyFileVersion,
+            #     but I wont be checking the latter because all my old .NET projects are deprecated.
+
+            assembly_info_file_path = os.path.join(self.directory_path, "Properties", "AssemblyInfo.cs")
+
+            if os.path.isfile(assembly_info_file_path):
+                extracted_version_string = extract_version_string_from_assembly_info_file(assembly_info_file_path)
+
+                if extracted_version_string:
+                    self.version_string = version_digits_to_string(parse_version_string(extracted_version_string))
+
+        except Exception:
+            pass
 
 # ------------------------------------------------------------------------------
 #     Version strings
@@ -74,21 +144,3 @@ def version_digits_to_string(digits, minimum_digit_count=2):
     meaningful_digit_count = max(minimum_digit_count, index + 1)
 
     return ".".join(str(digit) for digit in digits[:meaningful_digit_count])
-
-class VersionStringContainingFileType(enum.Enum):
-    CSPROJ = 1
-    APP_MANIFEST = 2
-    ASSEMBLY_INFO = 3
-
-def extract_and_normalize_version_string_from_file(path, type, minimum_digit_count=2):
-    extracted_string = ""
-
-    if type == VersionStringContainingFileType.CSPROJ:
-        extracted_string = extract_version_string_from_csproj_file(path)
-    elif type == VersionStringContainingFileType.APP_MANIFEST:
-        extracted_string = extract_version_string_from_app_manifest_file(path)
-    elif type == VersionStringContainingFileType.ASSEMBLY_INFO:
-        extracted_string = extract_version_string_from_assembly_info_file(path)
-
-    # If the file doesnt contain a valid version string, an exception must be raised.
-    return version_digits_to_string(parse_version_string(extracted_string), minimum_digit_count)
