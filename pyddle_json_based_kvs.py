@@ -41,6 +41,10 @@ def display_merged_kvs_data():
 # If the key is not in the dictionary, get(key) returns None while [key] raises a KeyError.
 # https://docs.python.org/3/library/stdtypes.html#mapping-types-dict
 
+# Important: Keys are compared case-sensitively.
+# There seems to be no elegant way (like C#'s IEqualityComparer<T>) to make a case-insensitive dictionary in Python.
+# That would be one reason to use only lower-cased keys in JSON files that are meant to be read by Python.
+
 def read_from_first_kvs_data(key):
     return first_kvs_data.get(key)
 

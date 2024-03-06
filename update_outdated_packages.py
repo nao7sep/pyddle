@@ -35,7 +35,7 @@ pip_file_path = get_pip_file_path()
 
 if pip_file_path is None:
     print("pip executable not found.")
-    exit()
+    sys.exit()
 
 print("pip executable: ", pip_file_path)
 

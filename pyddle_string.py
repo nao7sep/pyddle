@@ -30,3 +30,24 @@ def equals_casefold(str1, str2):
             return False
         else:
             return True
+
+def contains(str_array, str):
+    for item in str_array:
+        if equals(item, str):
+            return True
+
+    return False
+
+def contains_ignore_case(str_array, str):
+    for item in str_array:
+        if equals_ignore_case(item, str):
+            return True
+
+    return False
+
+def contains_casefold(str_array, str):
+    for item in str_array:
+        if equals_casefold(item, str):
+            return True
+
+    return False
