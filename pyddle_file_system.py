@@ -56,21 +56,31 @@ def detect_utf_encoding_of_file(file):
 
     if encoding:
         file.seek(position + len(bom))
+
     else:
         # If the encoding isnt detected, the position goes back to where it was.
         file.seek(position)
 
     return encoding, bom
 
-def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8"):
+def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append=False):
     bom = get_utf_encoding_bom(encoding)
 
     if not bom:
         # Here, we cant ignore this because writing the BOM is the whole point.
         raise ValueError(f"Unsupported encoding: {encoding}")
 
-    file = open(path, "w", encoding=encoding)
-    file.buffer.write(bom) # Using the underlying buffer.
+    if not append:
+        file = open(path, "w", encoding=encoding)
+        file.buffer.write(bom) # Using the underlying buffer.
+
+    else:
+        file = open(path, "a", encoding=encoding)
+        file.buffer.seek(0, os.SEEK_END) # Just to make sure.
+
+        if file.buffer.tell() == 0:
+            file.buffer.write(bom)
+
     return file
 
 def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
@@ -81,6 +91,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
         if string.equals_ignore_case(encoding, "UTF-8"):
             # The position should be right after the BOM.
             return file
+
         else:
             file.close()
             file = open(path, "r", encoding=encoding)
@@ -92,6 +103,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
         if string.equals_ignore_case(fallback_encoding, "UTF-8"):
             # The position should be at the beginning of the file.
             return file
+
         else:
             file.close()
             file = open(path, "r", encoding=fallback_encoding)
@@ -110,6 +122,7 @@ def read_all_text_from_file(path, detect_encoding=True, fallback_encoding="UTF-8
     if detect_encoding:
         with open_file_and_detect_utf_encoding(path, fallback_encoding) as file:
             return file.read()
+
     else:
         with open(path, "r", encoding=fallback_encoding) as file:
             return file.read()
@@ -122,6 +135,20 @@ def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
     if write_bom:
         with open_file_and_write_utf_encoding_bom(path, encoding) as file:
             file.write(text)
+
     else:
         with open(path, "w", encoding=encoding) as file:
+            file.write(text)
+
+def append_all_bytes_to_file(path, bytes):
+    with open(path, "ab") as file:
+        file.write(bytes)
+
+def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
+    if write_bom:
+        with open_file_and_write_utf_encoding_bom(path, encoding, append=True) as file:
+            file.write(text)
+
+    else:
+        with open(path, "a", encoding=encoding) as file:
             file.write(text)

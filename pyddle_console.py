@@ -6,6 +6,11 @@ import colorama
 # Specified colors appear differently depending on the platform.
 # These should be an acceptable starting point.
 
+# Sugar coating.
+# We may be adding some shared functionalities to all print-related functions in the future.
+def print(str, end="\n"):
+    print(str, end=end)
+
 def print_important(str, end="\n"):
     print(f"{colorama.Back.BLUE}{colorama.Fore.WHITE}{str}{colorama.Style.RESET_ALL}", end=end)
 

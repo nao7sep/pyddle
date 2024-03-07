@@ -19,6 +19,7 @@ other_separators = []
 if string.equals_ignore_case(os.name, 'nt'):
     main_separator = ';'
     other_separators = [',']
+
 else:
     main_separator = ':'
     other_separators = [';', ',']
@@ -33,6 +34,7 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
 
         if is_first_variable:
             is_first_variable = False
+
         else:
             file.write("\n")
             print()
@@ -55,8 +57,10 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
                     # We could also look for duplicates,
                     #     but on Windows for example, each user's environment variables are merged with the system's,
                     #     and we wouldnt always know which ones must be preserved.
+
                 else:
                     print(separated_value)
+
         else:
             file.write("(Empty)\n")
             print(f"{colorama.Fore.YELLOW}(Empty){colorama.Fore.RESET}") # Not necessary an error.

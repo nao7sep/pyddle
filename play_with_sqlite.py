@@ -70,6 +70,7 @@ data = cursor.fetchall()
 
 if data[0][0]: # Assuming one row with one column is returned.
     print(f"There's a row in table1 with a datetime value from the current year.")
+
 else:
     print(f"There's no row in table1 with a datetime value from the current year.")
 

@@ -28,6 +28,7 @@ def get_all_drive_or_volume_paths():
         for drive_letter in [chr(code) for code in range(ord('A'), ord('Z') + 1)]:
             if os.path.isdir(f"{drive_letter}:\\"):
                 yield f"{drive_letter}:\\"
+
     else:
         for volume_name in os.listdir('/Volumes'):
             yield os.path.join('/Volumes', volume_name) # As a string.

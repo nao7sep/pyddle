@@ -25,6 +25,7 @@ def get_pip_file_path():
         for pip_file_name in pip_file_names:
             if subdirectory_name is not None:
                 pip_file_path = os.path.join(directory_path, subdirectory_name, pip_file_name)
+
             else:
                 pip_file_path = os.path.join(directory_path, pip_file_name)
 

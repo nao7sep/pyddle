@@ -11,11 +11,14 @@ def equals_ignore_case(str1, str2):
     if str1:
         if str2:
             return str1.lower() == str2.lower()
+
         else:
             return False
+
     else:
         if str2:
             return False
+
         else:
             return True
 
@@ -23,11 +26,14 @@ def equals_casefold(str1, str2):
     if str1:
         if str2:
             return str1.casefold() == str2.casefold()
+
         else:
             return False
+
     else:
         if str2:
             return False
+
         else:
             return True
 
