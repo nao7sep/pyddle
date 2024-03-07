@@ -3,6 +3,8 @@ import os
 import pyddle_debugging as debugging
 import pyddle_dotnet as dotnet
 import pyddle_json_based_kvs as kvs
+import pyddle_logging as logging
+import pyddle_output as output
 import pyddle_string as string
 import sys
 import traceback
@@ -15,10 +17,10 @@ try:
     kvs_key_prefix = "build_changed_projects/"
 
     repositories_directory_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}repositories_directory_path")
-    print(f"repositories_directory_path: {repositories_directory_path}")
+    output.print_and_log(f"repositories_directory_path: {repositories_directory_path}")
 
     archives_directory_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}archives_directory_path")
-    print(f"archives_directory_path: {archives_directory_path}")
+    output.print_and_log(f"archives_directory_path: {archives_directory_path}")
 
     # A neutral character that is rarely used in solution/project names.
     value_separator = "|"
@@ -30,7 +32,7 @@ try:
         ignored_directory_names = [value.strip() for value in ignored_directory_names_string.split(value_separator) if value.strip()]
 
         if ignored_directory_names:
-            print(f"ignored_directory_names: {ignored_directory_names}")
+            output.print_and_log(f"ignored_directory_names: {ignored_directory_names}")
 
     obsolete_solution_names = []
     obsolete_solution_names_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}obsolete_solution_names")
@@ -39,7 +41,7 @@ try:
         obsolete_solution_names = [value.strip() for value in obsolete_solution_names_string.split(value_separator) if value.strip()]
 
         if obsolete_solution_names:
-            print(f"obsolete_solution_names: {obsolete_solution_names}")
+            output.print_and_log(f"obsolete_solution_names: {obsolete_solution_names}")
 
     # ------------------------------------------------------------------------------
     #     Find solution directories
@@ -57,7 +59,7 @@ try:
 
         if string.contains_ignore_case(ignored_directory_names, directory_name):
             if debugging.is_debugging():
-                print(f"Ignored directory: {directory_name}")
+                output.print_and_log(f"Ignored directory: {directory_name}")
 
             continue
 
@@ -65,18 +67,18 @@ try:
 
         if not solution_file_paths:
             if debugging.is_debugging():
-                print(f"No solution files found in directory: {directory_name}")
+                output.print_and_log_warning(f"No solution files found in directory: {directory_name}")
 
             continue
 
         if len(solution_file_paths) > 1:
-            print(f"Multiple solution files found in directory: {directory_name}")
+            output.print_and_log_warning(f"Multiple solution files found in directory: {directory_name}")
             continue
 
         solution_directories[directory_name] = dotnet.SolutionInfo(possible_solution_directory_path, solution_file_paths[0])
 
     if not solution_directories:
-        print("No solution directories found.")
+        output.print_and_log_warning(f"No solution directories found.")
         # "sys.exit" raises a "SystemExit" exception, which is NOT caught by the "except" block if a type is specified, allowing the script to execute the "finally" block.
         # "exit", on the other hand, is merely a helper for the interactive shell and should not be used in production code.
         sys.exit()
@@ -97,7 +99,7 @@ try:
             # It's highly unlikely that a known better-to-avoid name (such as ".git") is used as a valid solution/project directory name.
             if string.contains_ignore_case(ignored_directory_names, directory_name):
                 if debugging.is_debugging():
-                    print(f"Ignored directory: {solution_name}/{directory_name}")
+                    output.print_and_log(f"Ignored directory: {solution_name}/{directory_name}")
 
                 continue
 
@@ -105,18 +107,18 @@ try:
 
             if not project_file_paths:
                 if debugging.is_debugging():
-                    print(f"No project files found in directory: {solution_name}/{directory_name}")
+                    output.print_and_log_warning(f"No project files found in directory: {solution_name}/{directory_name}")
 
                 continue
 
             if len(project_file_paths) > 1:
-                print(f"Multiple project files found in directory: {solution_name}/{directory_name}")
+                output.print_and_log_warning(f"Multiple project files found in directory: {solution_name}/{directory_name}")
                 continue
 
             project_directories[directory_name] = dotnet.ProjectInfo(possible_project_directory_path, project_file_paths[0])
 
         if not project_directories:
-            print(f"No project directories found in solution: {solution_name}")
+            output.print_and_log_warning(f"No project directories found in solution: {solution_name}")
             continue
 
         solution_directories[solution_name].projects = project_directories
@@ -125,14 +127,27 @@ try:
     #     Read version info
     # ------------------------------------------------------------------------------
 
+    valid_project_count = 0
+
     for solution_name, solution in sorted(solution_directories.items()):
         for project_name, project in sorted(solution.projects.items()):
-            project.extract_and_normalize_version_string()
-            print(f"{solution_name}/{project_name}: v{project.version_string}")
+            if project.extract_and_normalize_version_string():
+                valid_project_count += 1
+
+            else:
+                output.print_and_log_error(f"Failed to extract a version string from: {solution_name}/{project_name}")
+
+    if valid_project_count:
+        output.print_and_log(f"{valid_project_count} valid projects found.")
+
+    else:
+        output.print_and_log_warning("No valid projects found.")
+        sys.exit()
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:
     traceback.print_exc()
 
 finally:
+    logging.flush()
     debugging.display_press_enter_key_to_continue_if_not_debugging()

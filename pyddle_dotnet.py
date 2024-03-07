@@ -1,8 +1,8 @@
 ﻿# Created: 2024-03-06
 # This script contains functions related to compilation and distribution of .NET projects.
 
-import colorama
 import os
+import pyddle_console as console
 import pyddle_debugging as debugging
 import pyddle_file_system as file_system
 import pyddle_string as string
@@ -54,7 +54,7 @@ class ProjectInfo:
                             alternatively_extracted_version_string = version_digits_to_string(parse_version_string(alternatively_extracted_version_string))
 
                             if not string.equals(alternatively_extracted_version_string, extracted_version_string):
-                                print(f"{colorama.Fore.YELLOW}Version strings from '{os.path.basename(self.file_path)}' and 'app.manifest' differ in directory: {self.directory_path}{colorama.Fore.RESET}")
+                                console.print_warning(f"Version strings from '{os.path.basename(self.file_path)}' and 'app.manifest' differ in directory: {self.directory_path}")
                                 return False
 
                         # If the file exists and doesnt contain a version string,

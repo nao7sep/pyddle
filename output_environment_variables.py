@@ -1,8 +1,8 @@
 ﻿# Created: 2024-03-02
 # This script outputs all environment variables and their values.
 
-import colorama
 import os
+import pyddle_console as console
 import pyddle_debugging as debugging
 import pyddle_file_system as file_system
 import pyddle_string as string
@@ -46,14 +46,14 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
 
         if debugging.is_debugging():
             if any(separator in value for separator in other_separators):
-                print(f"{colorama.Fore.YELLOW}Contains another separator.{colorama.Fore.RESET}") # Worth investigating.
+                console.print_warning("Contains another separator.") # Worth investigating.
 
         if separated_values:
             for separated_value in separated_values:
                 file.write(f"{separated_value}\n")
 
                 if is_path and not os.path.isdir(separated_value):
-                    print(f"{colorama.Fore.RED}{separated_value}{colorama.Fore.RESET}") # Missing directory.
+                    console.print_warning(separated_value) # Missing directory.
                     # We could also look for duplicates,
                     #     but on Windows for example, each user's environment variables are merged with the system's,
                     #     and we wouldnt always know which ones must be preserved.
@@ -63,6 +63,6 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
 
         else:
             file.write("(Empty)\n")
-            print(f"{colorama.Fore.YELLOW}(Empty){colorama.Fore.RESET}") # Not necessary an error.
+            console.print_warning("(Empty)") # Not necessary an error.
 
 debugging.display_press_enter_key_to_continue_if_not_debugging()
