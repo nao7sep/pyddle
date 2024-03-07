@@ -55,11 +55,14 @@ class ProjectInfo:
 
                             if not string.equals(alternatively_extracted_version_string, extracted_version_string):
                                 print(f"{colorama.Fore.YELLOW}Version strings from '{os.path.basename(self.file_path)}' and 'app.manifest' differ in directory: {self.directory_path}{colorama.Fore.RESET}")
-                                return
+                                return False
+
+                        # If the file exists and doesnt contain a version string,
+                        #     it's probably a different kind of "app.manifest" and it's not a problem.
 
                 self.version_string = extracted_version_string
 
-                return
+                return True
 
             # Old .NET projects may contain a version string in "AssemblyInfo.cs".
             # I used to set the same value to AssemblyVersion and AssemblyFileVersion,
@@ -72,9 +75,10 @@ class ProjectInfo:
 
                 if extracted_version_string:
                     self.version_string = version_digits_to_string(parse_version_string(extracted_version_string))
+                    return True
 
         except Exception:
-            pass
+            return False
 
 # ------------------------------------------------------------------------------
 #     Version strings
