@@ -5,9 +5,13 @@ import datetime
 import os
 import pyddle_datetime
 import pyddle_file_system as file_system
+import pyddle_first as first
 
 logs_directory_path = os.path.join(os.path.dirname(__file__), "logs")
-log_file_path = os.path.join(logs_directory_path, pyddle_datetime.utc_to_roundtrip_file_name_string(datetime.datetime.now(datetime.UTC)) + ".log")
+
+# Requires the developer to call pyddle_first.set_main_script_file_path() before using this module.
+# I think it's OK; it's quick, runs at negligible cost and certainly improves the usability of the log file.
+log_file_path = os.path.join(logs_directory_path, f"log-{pyddle_datetime.utc_to_roundtrip_file_name_string(datetime.datetime.now(datetime.UTC))}-{first.get_main_script_file_name_without_extension()}.log")
 
 logs = []
 

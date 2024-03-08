@@ -1,3 +1,7 @@
+import pyddle_first as first
+
+first.set_main_script_file_path(__file__)
+
 import glob
 import os
 import pyddle_debugging as debugging
@@ -131,11 +135,13 @@ try:
 
     for solution_name, solution in sorted(solution_directories.items()):
         for project_name, project in sorted(solution.projects.items()):
-            if project.extract_and_normalize_version_string():
+            result, message = project.extract_and_normalize_version_string()
+
+            if result:
                 valid_project_count += 1
 
             else:
-                output.print_and_log_error(f"Failed to extract a version string from: {solution_name}/{project_name}")
+                output.print_and_log_error(f"{solution_name}/{project_name}: {message}")
 
     if valid_project_count:
         output.print_and_log(f"{valid_project_count} valid projects found.")

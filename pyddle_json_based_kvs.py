@@ -46,18 +46,21 @@ def display_merged_kvs_data():
 # That would be one reason to use only lower-cased keys in JSON files that are meant to be read by Python.
 
 def read_from_first_kvs_data(key):
+    """ Returns None if the key is not in the dictionary. """
     return first_kvs_data.get(key)
 
 def read_from_first_kvs_data_or_default(key, default_value):
     return first_kvs_data.get(key, default_value)
 
 def read_from_second_kvs_data(key):
+    """ Returns None if the key is not in the dictionary. """
     return second_kvs_data.get(key)
 
 def read_from_second_kvs_data_or_default(key, default_value):
     return second_kvs_data.get(key, default_value)
 
 def read_from_merged_kvs_data(key):
+    """ Returns None if the key is not in the dictionary. """
     return merged_kvs_data.get(key)
 
 def read_from_merged_kvs_data_or_default(key, default_value):

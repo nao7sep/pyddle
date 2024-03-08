@@ -11,4 +11,5 @@ import datetime
 roundtrip_file_name_string_format = '%Y%m%dT%H%M%S-%fZ'
 
 def utc_to_roundtrip_file_name_string(utc):
+    """ Returns something like "20240307T075556-212728Z". """
     return utc.strftime(roundtrip_file_name_string_format)
