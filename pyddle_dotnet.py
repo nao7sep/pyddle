@@ -21,10 +21,11 @@ class SolutionInfo:
         self.projects = projects
 
 class ProjectInfo:
-    def __init__(self, directory_path, file_path, version_string=None):
+    def __init__(self, directory_path, file_path, version_string=None, reference_names=None):
         self.directory_path = directory_path
         self.file_path = file_path
         self.version_string = version_string
+        self.reference_names = reference_names
 
     # This could be a property with the @property thing attached, but currently there seems to be no built-in Lazy mechanism in Python,
     #    and I dont want the property-ish thing to try to initialize itself multiple times if it cant extract the version string.
@@ -36,7 +37,7 @@ class ProjectInfo:
             Returns False and a message explaining why if unsuccessful.
         """
         if self.version_string:
-            return False, "Version string already exists."
+            return False, "Version string already extracted."
 
         extracted_version_string = extract_version_string_from_csproj_file(self.file_path)
 
@@ -94,6 +95,25 @@ class ProjectInfo:
 
         return False, "Version string not extracted."
 
+    def extract_reference_names(self):
+        """
+            Tries to extract reference names from the .csproj file.
+            Returns True and an OPTIONAL message if successful.
+            Returns False and a message explaining why if unsuccessful.
+        """
+        if self.reference_names:
+            return False, "Reference names already extracted."
+
+        extracted_reference_names = extract_reference_names_from_csproj_file(self.file_path)
+
+        if extracted_reference_names:
+            self.reference_names = extracted_reference_names
+
+            return True, ""
+
+        # Explained in extract_reference_names_from_csproj_file.
+        return True, "Reference names not extracted."
+
 # ------------------------------------------------------------------------------
 #     Version strings
 # ------------------------------------------------------------------------------
@@ -116,13 +136,19 @@ def extract_version_string_from_csproj_file(path):
             if version is not None:
                 return version.text
 
+def extract_default_namespace_from_root_tag(tag):
+    """ Returns None if the default namespace is not found. """
+    if tag.startswith("{"):
+        return { "": tag[1 : tag.index("}")] }
+
 def extract_version_string_from_app_manifest_file(path):
     """ Returns None if the version string is not found. """
     with file_system.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # assembly
+        namespaces = extract_default_namespace_from_root_tag(root.tag)
 
-        assembly_identity = root.find("{urn:schemas-microsoft-com:asm.v1}assemblyIdentity")
+        assembly_identity = root.find("assemblyIdentity", namespaces=namespaces)
 
         if assembly_identity is not None:
             # https://docs.python.org/3/library/xml.etree.elementtree.html#xml.etree.ElementTree.Element.get
@@ -177,3 +203,84 @@ def version_digits_to_string(digits, minimum_digit_count=2):
     meaningful_digit_count = max(minimum_digit_count, index + 1)
 
     return ".".join(str(digit) for digit in digits[:meaningful_digit_count])
+
+# ------------------------------------------------------------------------------
+#     References
+# ------------------------------------------------------------------------------
+
+# We cant guarantee that this method will always find all references.
+# Although .csproj files have been greatly simplified in .NET Core, we never know what will be added in the future.
+
+# The fundamental approach, then, is to read the default namespace if it's in the root tag, read whatever that could be a reference name,
+#     loosely validate it, look for a referenced project matching the name and let it crush if the settings or the implementation require an update.
+
+# When a .csproj file doesnt seem to contain any references, there is a chance that the implementation is just outdated.
+# So, in the debug mode, the calling script should check the second return value even if the first one is True, signaling that the operation was successful.
+
+def extract_reference_names_from_csproj_file(path):
+    """ Returns an empty list if no references are found. """
+    with file_system.open_file_and_detect_utf_encoding(path) as file:
+        tree = xml.etree.ElementTree.parse(file)
+        root = tree.getroot() # Project
+        namespaces = extract_default_namespace_from_root_tag(root.tag)
+
+        reference_names = []
+
+        for item_group in root.findall("ItemGroup", namespaces=namespaces):
+            for project_reference in item_group.findall("ProjectReference", namespaces=namespaces):
+                include = project_reference.get("Include")
+
+                if include:
+                    # It's usually like: <ProjectReference Include="..\yyLib\yyLib.csproj" />
+                    file_name_without_extension, _ = os.path.splitext(os.path.basename(include))
+                    reference_names.append(file_name_without_extension)
+
+            for reference in item_group.findall("Reference", namespaces=namespaces):
+                include = reference.get("Include")
+
+                if include:
+                    # This one can be like:
+                    #     <Reference Include="System" />
+                    #     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"> ...
+                    #     <Reference Include="yyLib"> ...
+
+                    if is_valid_reference_name(include):
+                        reference_names.append(include)
+
+        return reference_names
+
+def is_valid_reference_name(str):
+    if '=' in str:
+        return False
+
+    # We must keep updating the following part.
+    # Fortunately, since .NET Core, .csproj files contain only what's absolutely necessary.
+
+    if string.equals_ignore_case(str, "System"):
+        return False
+
+    if string.startswith_ignore_case(str, "System."):
+        return False
+
+    if string.equals_ignore_case(str, "PresentationCore"):
+        return False
+
+    if string.equals_ignore_case(str, "WindowsBase"):
+        return False
+
+    if string.startswith_ignore_case(str, "Microsoft."):
+        return False
+
+    return True
+
+def find_referenced_project(solution_directories, reference_name):
+    """
+        Returns solution_name, solution, project_name and project.
+        Returns None, None, None, None if the referenced project is not found.
+    """
+    for solution_name, solution in solution_directories.items():
+        for project_name, project in solution.projects.items():
+            if string.equals_ignore_case(project_name, reference_name):
+                return solution_name, solution, project_name, project
+
+    return None, None, None, None

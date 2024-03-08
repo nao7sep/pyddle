@@ -128,7 +128,7 @@ try:
         solution_directories[solution_name].projects = project_directories
 
     # ------------------------------------------------------------------------------
-    #     Read version info
+    #     Read version strings and references
     # ------------------------------------------------------------------------------
 
     valid_project_count = 0
@@ -138,7 +138,24 @@ try:
             result, message = project.extract_and_normalize_version_string()
 
             if result:
-                valid_project_count += 1
+                result, message = project.extract_reference_names()
+
+                if result:
+                    valid_project_count += 1
+
+                    output.print_and_log(f"{solution_name}/{project_name}: {project.version_string}")
+
+                    if project.reference_names:
+                        for reference_name in sorted(project.reference_names):
+                            _, _, referenced_project_name, referenced_project = dotnet.find_referenced_project(solution_directories, reference_name)
+                            print(f"    {referenced_project_name}: {referenced_project.version_string}")
+
+                    else:
+                        # If there are no references, extract_reference_names returns True AND a message.
+                        output.print_and_log(f"    {message}")
+
+                else:
+                    output.print_and_log_error(f"{solution_name}/{project_name}: {message}")
 
             else:
                 output.print_and_log_error(f"{solution_name}/{project_name}: {message}")
