@@ -4,18 +4,18 @@
 import pyddle_console as console
 import pyddle_logging as logging
 
-def print_and_log(str, end="\n", flush=False):
-    console.print(str, end=end)
-    logging.log(str, end=end, flush=flush)
+def print_and_log(str, indent="", end="\n", flush=False):
+    console.print(str, indent=indent, end=end)
+    logging.log(str, indent=indent, end=end, flush=flush)
 
-def print_and_log_important(str, end="\n", flush=False):
-    console.print_important(str, end=end)
-    logging.log(str, end=end, flush=flush)
+def print_and_log_important(str, indent="", end="\n", flush=False):
+    console.print_important(str, indent=indent, end=end)
+    logging.log(str, indent=indent, end=end, flush=flush)
 
-def print_and_log_warning(str, end="\n", flush=False):
-    console.print_warning(str, end=end)
-    logging.log(str, end=end, flush=flush)
+def print_and_log_warning(str, indent="", end="\n", flush=False):
+    console.print_warning(str, indent=indent, end=end)
+    logging.log(str, indent=indent, end=end, flush=flush)
 
-def print_and_log_error(str, end="\n", flush=False):
-    console.print_error(str, end=end)
-    logging.log(str, end=end, flush=flush)
+def print_and_log_error(str, indent="", end="\n", flush=False):
+    console.print_error(str, indent=indent, end=end)
+    logging.log(str, indent=indent, end=end, flush=flush)

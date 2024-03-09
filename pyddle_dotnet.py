@@ -15,17 +15,19 @@ import xml.etree.ElementTree
 # I wont be implementing the searching-for-things part in this module because it would need to output various messages and also MIGHT become interactive in the future.
 
 class SolutionInfo:
-    def __init__(self, directory_path, file_path, projects=None):
+    def __init__(self, name, directory_path, file_path, projects=None):
+        self.name = name
         self.directory_path = directory_path
         self.file_path = file_path
         self.projects = projects
 
 class ProjectInfo:
-    def __init__(self, directory_path, file_path, version_string=None, reference_names=None):
+    def __init__(self, name, directory_path, file_path, version_string=None, referenced_projects=None):
+        self.name = name
         self.directory_path = directory_path
         self.file_path = file_path
         self.version_string = version_string
-        self.reference_names = reference_names
+        self.referenced_projects = referenced_projects
 
     # This could be a property with the @property thing attached, but currently there seems to be no built-in Lazy mechanism in Python,
     #    and I dont want the property-ish thing to try to initialize itself multiple times if it cant extract the version string.
@@ -95,24 +97,38 @@ class ProjectInfo:
 
         return False, "Version string not extracted."
 
-    def extract_reference_names(self):
+    def extract_referenced_project_names_and_find_them(self, solution_directories):
         """
-            Tries to extract reference names from the .csproj file.
             Returns True and an OPTIONAL message if successful.
-            Returns False and a message explaining why if unsuccessful.
+            Returns False and a message if unsuccessful.
+            referenced_projects is set only if the operation is successful.
         """
-        if self.reference_names:
-            return False, "Reference names already extracted."
+        # Doesnt work if the project just doesnt reference anything,
+        #     but extract_and_normalize_version_string should have done its job before this method is called.
+        if self.referenced_projects:
+            return False, "Referenced projects already found."
 
-        extracted_reference_names = extract_reference_names_from_csproj_file(self.file_path)
+        extracted_referenced_project_names = extract_referenced_project_names_from_csproj_file(self.file_path)
 
-        if extracted_reference_names:
-            self.reference_names = extracted_reference_names
+        if extracted_referenced_project_names:
+            referenced_projects = []
+
+            for referenced_project_name in extracted_referenced_project_names:
+                _, _, _, project = find_referenced_project(solution_directories, referenced_project_name)
+
+                if not project:
+                    return False, f"Referenced project not found: {referenced_project_name}"
+
+                referenced_projects.append(project)
+
+            self.referenced_projects = referenced_projects
 
             return True, ""
 
-        # Explained in extract_reference_names_from_csproj_file.
-        return True, "Reference names not extracted."
+        self.referenced_projects = []
+
+        # The situation, technically, is that no referenced project names are extracted and therefore no search has been performed, but that would be a redundant message.
+        return True, "No references found."
 
 # ------------------------------------------------------------------------------
 #     Version strings
@@ -211,20 +227,17 @@ def version_digits_to_string(digits, minimum_digit_count=2):
 # We cant guarantee that this method will always find all references.
 # Although .csproj files have been greatly simplified in .NET Core, we never know what will be added in the future.
 
-# The fundamental approach, then, is to read the default namespace if it's in the root tag, read whatever that could be a reference name,
+# The fundamental approach, then, is to read the default namespace if it's in the root tag, read whatever that could be a reference,
 #     loosely validate it, look for a referenced project matching the name and let it crush if the settings or the implementation require an update.
 
-# When a .csproj file doesnt seem to contain any references, there is a chance that the implementation is just outdated.
-# So, in the debug mode, the calling script should check the second return value even if the first one is True, signaling that the operation was successful.
-
-def extract_reference_names_from_csproj_file(path):
+def extract_referenced_project_names_from_csproj_file(path):
     """ Returns an empty list if no references are found. """
     with file_system.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # Project
         namespaces = extract_default_namespace_from_root_tag(root.tag)
 
-        reference_names = []
+        referenced_project_names = []
 
         for item_group in root.findall("ItemGroup", namespaces=namespaces):
             for project_reference in item_group.findall("ProjectReference", namespaces=namespaces):
@@ -233,7 +246,7 @@ def extract_reference_names_from_csproj_file(path):
                 if include:
                     # It's usually like: <ProjectReference Include="..\yyLib\yyLib.csproj" />
                     file_name_without_extension, _ = os.path.splitext(os.path.basename(include))
-                    reference_names.append(file_name_without_extension)
+                    referenced_project_names.append(file_name_without_extension)
 
             for reference in item_group.findall("Reference", namespaces=namespaces):
                 include = reference.get("Include")
@@ -244,12 +257,12 @@ def extract_reference_names_from_csproj_file(path):
                     #     <Reference Include="System.ValueTuple, Version=4.0.3.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL"> ...
                     #     <Reference Include="yyLib"> ...
 
-                    if is_valid_reference_name(include):
-                        reference_names.append(include)
+                    if is_valid_referenced_project_name(include):
+                        referenced_project_names.append(include)
 
-        return reference_names
+        return referenced_project_names
 
-def is_valid_reference_name(str):
+def is_valid_referenced_project_name(str):
     if '=' in str:
         return False
 
@@ -273,14 +286,15 @@ def is_valid_reference_name(str):
 
     return True
 
-def find_referenced_project(solution_directories, reference_name):
+def find_referenced_project(solution_directories, referenced_project_name):
     """
+        Takes a dictionary of solution names and solutions as SolutionInfo objects.
         Returns solution_name, solution, project_name and project.
         Returns None, None, None, None if the referenced project is not found.
     """
     for solution_name, solution in solution_directories.items():
         for project_name, project in solution.projects.items():
-            if string.equals_ignore_case(project_name, reference_name):
+            if string.equals_ignore_case(project_name, referenced_project_name):
                 return solution_name, solution, project_name, project
 
     return None, None, None, None

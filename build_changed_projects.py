@@ -79,7 +79,7 @@ try:
             output.print_and_log_warning(f"Multiple solution files found in directory: {directory_name}")
             continue
 
-        solution_directories[directory_name] = dotnet.SolutionInfo(possible_solution_directory_path, solution_file_paths[0])
+        solution_directories[directory_name] = dotnet.SolutionInfo(directory_name, possible_solution_directory_path, solution_file_paths[0])
 
     if not solution_directories:
         output.print_and_log_warning(f"No solution directories found.")
@@ -119,7 +119,7 @@ try:
                 output.print_and_log_warning(f"Multiple project files found in directory: {solution_name}/{directory_name}")
                 continue
 
-            project_directories[directory_name] = dotnet.ProjectInfo(possible_project_directory_path, project_file_paths[0])
+            project_directories[directory_name] = dotnet.ProjectInfo(directory_name, possible_project_directory_path, project_file_paths[0])
 
         if not project_directories:
             output.print_and_log_warning(f"No project directories found in solution: {solution_name}")
@@ -128,7 +128,7 @@ try:
         solution_directories[solution_name].projects = project_directories
 
     # ------------------------------------------------------------------------------
-    #     Read version strings and references
+    #     Read version strings, references, etc
     # ------------------------------------------------------------------------------
 
     valid_project_count = 0
@@ -137,27 +137,27 @@ try:
         for project_name, project in sorted(solution.projects.items()):
             result, message = project.extract_and_normalize_version_string()
 
-            if result:
-                result, message = project.extract_reference_names()
+            if result: # Has a valid version string.
+                output.print_and_log(f"{solution_name}/{project_name}: {project.version_string}")
 
-                if result:
-                    valid_project_count += 1
+                result, message = project.extract_referenced_project_names_and_find_them(solution_directories)
 
-                    output.print_and_log(f"{solution_name}/{project_name}: {project.version_string}")
-
-                    if project.reference_names:
-                        for reference_name in sorted(project.reference_names):
-                            _, _, referenced_project_name, referenced_project = dotnet.find_referenced_project(solution_directories, reference_name)
-                            print(f"    {referenced_project_name}: {referenced_project.version_string}")
+                if result: # All referenced projects are found or there are no references.
+                    if project.referenced_projects:
+                        for referenced_project in sorted(project.referenced_projects, key=lambda x: x.name):
+                            output.print_and_log(f"{referenced_project.name}{referenced_project.version_string}", indent="    ")
 
                     else:
-                        # If there are no references, extract_reference_names returns True AND a message.
-                        output.print_and_log(f"    {message}")
+                        # Displays the message that there are no references.
+                        output.print_and_log(message, indent="    ")
 
-                else:
-                    output.print_and_log_error(f"{solution_name}/{project_name}: {message}")
+                    valid_project_count += 1
 
-            else:
+                else: # At least one of the referenced projects is not found.
+                    output.print_and_log_error(message, indent="    ")
+
+            else: # Doesnt have a valid version string.
+                # Indentation not required here.
                 output.print_and_log_error(f"{solution_name}/{project_name}: {message}")
 
     if valid_project_count:
