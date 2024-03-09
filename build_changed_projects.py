@@ -167,6 +167,28 @@ try:
         output.print_and_log_warning("No valid projects found.")
         sys.exit()
 
+    for solution_name, solution in sorted(solution_directories.items()):
+        result, message = solution.set_common_version_string()
+
+        if result:
+            is_obsolete = string.contains_ignore_case(obsolete_solution_names, solution_name)
+            result, message = solution.set_source_archive_file_path(archives_directory_path, is_obsolete=is_obsolete)
+
+            if result:
+                output.print_and_log(f"{solution_name} => ", end="")
+
+                if not os.path.isfile(solution.source_archive_file_path):
+                    output.print_and_log_important(solution.source_archive_file_path)
+
+                else:
+                    output.print_and_log(solution.source_archive_file_path)
+
+            else:
+                output.print_and_log_error(f"{solution_name}: {message}")
+
+        else:
+            output.print_and_log_error(f"{solution_name}: {message}")
+
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:
     traceback.print_exc()

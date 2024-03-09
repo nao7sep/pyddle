@@ -15,11 +15,51 @@ import xml.etree.ElementTree
 # I wont be implementing the searching-for-things part in this module because it would need to output various messages and also MIGHT become interactive in the future.
 
 class SolutionInfo:
-    def __init__(self, name, directory_path, file_path, projects=None):
+    def __init__(self, name, directory_path, file_path, projects=None, common_version_string=None, source_archive_file_path=None):
         self.name = name
         self.directory_path = directory_path
         self.file_path = file_path
         self.projects = projects
+        self.common_version_string = common_version_string
+        self.source_archive_file_path = source_archive_file_path
+
+    def set_common_version_string(self):
+        """
+            Returns True and "" if successful.
+            Returns False and a message if unsuccessful.
+        """
+        # Only since Python 3.7, dictionaries are guaranteed to be insertion-oriented.
+        project_list = list(self.projects.values())
+
+        # Should exist.
+        first_version_string = project_list[0].version_string
+
+        for project in project_list[1:]:
+            if not string.equals(project.version_string, first_version_string):
+                return False, "Version strings differ."
+
+        self.common_version_string = first_version_string
+
+        return True, ""
+
+    def set_source_archive_file_path(self, archives_directory_path, is_obsolete=False):
+        """
+            Returns True and "" if successful.
+            Returns False and a message if unsuccessful.
+        """
+        if self.source_archive_file_path:
+            return False, "Source archive file path already set."
+
+        source_archive_file_name = f"{self.name}-v{self.common_version_string}-src.zip"
+
+        if is_obsolete:
+            # The directory already exists and its name starts with a capital letter.
+            self.source_archive_file_path = os.path.join(archives_directory_path, "Obsolete", self.name, source_archive_file_name)
+
+        else:
+            self.source_archive_file_path = os.path.join(archives_directory_path, self.name, source_archive_file_name)
+
+        return True, ""
 
 class ProjectInfo:
     def __init__(self, name, directory_path, file_path, version_string=None, referenced_projects=None):
