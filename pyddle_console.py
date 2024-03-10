@@ -9,14 +9,14 @@ import colorama
 
 # Sugar coating.
 # We may be adding some shared functionalities to all print-related functions in the future.
-def print(str, indent="", end="\n"):
-    builtin_print(f"{indent}{str}", end=end)
+def print(str, indents="", end="\n"):
+    builtin_print(f"{indents}{str}", end=end)
 
-def print_important(str, indent="", end="\n"):
-    builtin_print(f"{indent}{colorama.Back.BLUE}{colorama.Fore.WHITE}{str}{colorama.Style.RESET_ALL}", end=end) # The indentation is not colored.
+def print_important(str, indents="", end="\n"):
+    builtin_print(f"{indents}{colorama.Back.BLUE}{colorama.Fore.WHITE}{str}{colorama.Style.RESET_ALL}", end=end) # The indentation is not colored.
 
-def print_warning(str, indent="", end="\n"):
-    builtin_print(f"{indent}{colorama.Back.YELLOW}{colorama.Fore.BLACK}{str}{colorama.Style.RESET_ALL}", end=end)
+def print_warning(str, indents="", end="\n"):
+    builtin_print(f"{indents}{colorama.Back.YELLOW}{colorama.Fore.BLACK}{str}{colorama.Style.RESET_ALL}", end=end)
 
-def print_error(str, indent="", end="\n"):
-    builtin_print(f"{indent}{colorama.Back.RED}{colorama.Fore.WHITE}{str}{colorama.Style.RESET_ALL}", end=end)
+def print_error(str, indents="", end="\n"):
+    builtin_print(f"{indents}{colorama.Back.RED}{colorama.Fore.WHITE}{str}{colorama.Style.RESET_ALL}", end=end)

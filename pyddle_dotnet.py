@@ -17,9 +17,9 @@ import xml.etree.ElementTree
 # For this reason, "projects" is set from the outside.
 
 class SolutionInfo:
-    def __init__(self, solutions, archived_directory_path, name, directory_path, file_path, is_obsolete):
+    def __init__(self, solutions, archives_directory_path, name, directory_path, file_path, is_obsolete):
         self.solutions = solutions
-        self.archived_directory_path = archived_directory_path
+        self.archives_directory_path = archives_directory_path
         self.name = name
         self.directory_path = directory_path
         self.file_path = file_path
@@ -30,7 +30,7 @@ class SolutionInfo:
 
     @property
     def common_version_string(self):
-        if not self.__common_version_string is None:
+        if self.__common_version_string is None:
             # Should exist.
             first_version_string = self.projects[0].version_string
 
@@ -50,10 +50,10 @@ class SolutionInfo:
 
             if self.is_obsolete:
                 # The directory already exists and its name starts with a capital letter.
-                self.source_archive_file_path = os.path.join(self.archives_directory_path, "Obsolete", self.name, source_archive_file_name)
+                self.__source_archive_file_path = os.path.join(self.archives_directory_path, "Obsolete", self.name, source_archive_file_name)
 
             else:
-                self.source_archive_file_path = os.path.join(self.archives_directory_path, self.name, source_archive_file_name)
+                self.__source_archive_file_path = os.path.join(self.archives_directory_path, self.name, source_archive_file_name)
 
         return self.__source_archive_file_path
 
@@ -109,6 +109,9 @@ class ProjectInfo:
                         except Exception:
                             raise RuntimeError(f"Invalid version string: {extracted_version_string}")
 
+            if self.__version_string is None:
+                raise RuntimeError(f"Version string not extracted.")
+
         return self.__version_string
 
     @property
@@ -120,17 +123,17 @@ class ProjectInfo:
                 referenced_projects = []
 
                 for referenced_project_name in extracted_referenced_project_names:
-                    _, _, _, project = find_referenced_project(self.solutions, referenced_project_name)
+                    referenced_project = find_referenced_project(self.solutions, referenced_project_name)
 
-                    if not project:
+                    if not referenced_project:
                         raise RuntimeError(f"Referenced project not found: {referenced_project_name}")
 
-                    referenced_projects.append(project)
+                    referenced_projects.append(referenced_project)
 
-                self.referenced_projects = referenced_projects
+                self.__referenced_projects = referenced_projects
 
             else:
-                self.referenced_projects = []
+                self.__referenced_projects = []
 
         return self.__referenced_projects
 

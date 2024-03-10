@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import pyddle_file_system as file_system
+import pyddle_string as string
 import sqlite3
 
 # https://docs.python.org/3/reference/datamodel.html#modules
@@ -32,7 +33,7 @@ def display_merged_kvs_data():
     print("Merged KVS data:")
 
     for key, value in merged_kvs_data.items():
-        print(f"    {key}: {value}")
+        print(f"{string.leveledIndents[1]}{key}: {value}")
 
 # ------------------------------------------------------------------------------
 #     CRUD operations

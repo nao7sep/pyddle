@@ -1,6 +1,19 @@
 ﻿# Created: 2024-03-05
 # This script contains string-related functions.
 
+leveledIndents = [
+    "",
+    "    ",
+    "        ",
+    "            ",
+    "                ",
+    "                    ",
+    "                        ",
+    "                            ",
+    "                                ",
+    "                                    " # Index: 9
+] # Length: 10
+
 # A sugar coating method to reduce writing "==" in code.
 # Sometimes, we need to check the case-sensitivity of string comparisons.
 

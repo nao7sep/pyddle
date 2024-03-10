@@ -7,6 +7,7 @@ import csv
 import json
 import pyddle_debugging as debugging
 import pyddle_file_system as file_system
+import pyddle_string as string
 import sqlite3
 import xml.dom.minidom
 import xml.etree.ElementTree
@@ -64,7 +65,7 @@ with file_system.open_file_and_detect_utf_encoding("write_and_read_settings.ini"
 print("Data from the INI file:")
 
 for key, value in config["data"].items():
-    print(f"    {key}: {value}")
+    print(f"{string.leveledIndents[1]}{key}: {value}")
 
 # ------------------------------------------------------------------------------
 #     JSON file
@@ -94,7 +95,7 @@ data_from_json["bytes"] = base64.b64decode(data_from_json["bytes"])
 print("Data from the JSON file:")
 
 for key, value in data_from_json.items():
-    print(f"    {key}: {value}")
+    print(f"{string.leveledIndents[1]}{key}: {value}")
 
 # ------------------------------------------------------------------------------
 #     XML file
@@ -109,7 +110,7 @@ for key, value in data.items():
 
 # Convert to pretty XML.
 
-pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'UTF-8')).toprettyxml(indent="    ")
+pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'UTF-8')).toprettyxml(indent=string.leveledIndents[1])
 
 with file_system.open_file_and_write_utf_encoding_bom("write_and_read_settings.xml") as xml_file:
     xml_file.write(pretty_xml)
@@ -124,7 +125,7 @@ root = tree.getroot()
 print("Data from the XML file:")
 
 for child in root:
-    print(f"    {child.tag}: {child.text}")
+    print(f"{string.leveledIndents[1]}{child.tag}: {child.text}")
 
 # ------------------------------------------------------------------------------
 #     CSV file
@@ -150,7 +151,7 @@ with file_system.open_file_and_detect_utf_encoding("write_and_read_settings.csv"
 print("Data from the CSV file:")
 
 for row in data_from_csv:
-    print(f"    {row[0]}: {row[1]}")
+    print(f"{string.leveledIndents[1]}{row[0]}: {row[1]}")
 
 # ------------------------------------------------------------------------------
 #     SQLite database
@@ -192,6 +193,6 @@ conn.close()
 print("Data from the SQLite database:")
 
 for row in data_from_sqlite:
-    print(f"    {row[0]}: {row[1]}")
+    print(f"{string.leveledIndents[1]}{row[0]}: {row[1]}")
 
 debugging.display_press_enter_key_to_continue_if_not_debugging()
