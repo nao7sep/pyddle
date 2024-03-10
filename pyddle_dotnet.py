@@ -298,3 +298,31 @@ def find_referenced_project(solutions, referenced_project_name):
         for project in solution.projects:
             if string.equals_ignore_case(project.name, referenced_project_name):
                 return project
+
+# We should be able to compare the object references, but just making sure.
+def is_referenced_project(project, referenced_projects):
+    for referenced_project in referenced_projects:
+        if string.equals_ignore_case(project.name, referenced_project.name):
+            return True
+
+    return False
+
+def sort_projects_to_build(projects):
+    # A simple algorithm that assumes there's no cross-referencing issues between the projects.
+    # As long as the number of the projects is small, it should perform just fine.
+
+    sorted_projects = []
+
+    for project in projects:
+        is_referenced = False
+
+        for index in range(len(sorted_projects)):
+            if is_referenced_project(project, sorted_projects[index].referenced_projects):
+                sorted_projects.insert(index, project)
+                is_referenced = True
+                break
+
+        if not is_referenced:
+            sorted_projects.append(project)
+
+    return sorted_projects

@@ -13,6 +13,7 @@ import pyddle_json_based_kvs as kvs
 import pyddle_logging as logging
 import pyddle_output as output
 import pyddle_string as string
+import random
 import sys
 import traceback
 
@@ -174,6 +175,34 @@ try:
     else:
         output.print_and_log_warning("No valid projects found.")
         sys.exit()
+
+    # ------------------------------------------------------------------------------
+    #     Build projects
+    # ------------------------------------------------------------------------------
+
+    projects_to_build = []
+
+    for solution in solutions:
+        if not os.path.isfile(solution.source_archive_file_path):
+            for project in solution.projects:
+                    projects_to_build.append(project)
+
+    if not projects_to_build:
+        output.print_and_log("No projects to build.")
+        sys.exit()
+
+    # Mostly for testing purposes.
+    random.shuffle(projects_to_build)
+
+    # In real-world scenarios, we need to build the projects repeatedly until all issues are resolved and the code has been committed.
+    # Then, we can archive the built binaries and the source code on each platform, effectively marking the projects as "built".
+
+    projects_to_build = dotnet.sort_projects_to_build(projects_to_build)
+
+    output.print_and_log(f"Projects to build:")
+
+    for project in projects_to_build:
+        output.print_and_log(project.name, indents=string.leveledIndents[1])
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:
