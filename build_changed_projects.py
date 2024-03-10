@@ -1,3 +1,6 @@
+# Created:
+#
+
 import pyddle_first as first
 
 first.set_main_script_file_path(__file__)
@@ -51,7 +54,7 @@ try:
     #     Find solution directories
     # ------------------------------------------------------------------------------
 
-    solution_directories = {}
+    solutions = {}
 
     # "os.listdir" returns not only directories but also files.
     # https://www.geeksforgeeks.org/python-os-listdir-method/
@@ -79,9 +82,9 @@ try:
             output.print_and_log_warning(f"Multiple solution files found in directory: {directory_name}")
             continue
 
-        solution_directories[directory_name] = dotnet.SolutionInfo(directory_name, possible_solution_directory_path, solution_file_paths[0])
+        solutions[directory_name] = dotnet.SolutionInfo(solutions, directory_name, possible_solution_directory_path, solution_file_paths[0])
 
-    if not solution_directories:
+    if not solutions:
         output.print_and_log_warning(f"No solution directories found.")
         # "sys.exit" raises a "SystemExit" exception, which is NOT caught by the "except" block if a type is specified, allowing the script to execute the "finally" block.
         # "exit", on the other hand, is merely a helper for the interactive shell and should not be used in production code.
@@ -91,7 +94,7 @@ try:
     #     Find project directories
     # ------------------------------------------------------------------------------
 
-    for solution_name, solution in solution_directories.items():
+    for solution in solutions.items():
         project_directories = {}
 
         for directory_name in os.listdir(solution.directory_path):
@@ -103,7 +106,7 @@ try:
             # It's highly unlikely that a known better-to-avoid name (such as ".git") is used as a valid solution/project directory name.
             if string.contains_ignore_case(ignored_directory_names, directory_name):
                 if debugging.is_debugging():
-                    output.print_and_log(f"Ignored directory: {solution_name}/{directory_name}")
+                    output.print_and_log(f"Ignored directory: {solution.name}/{directory_name}")
 
                 continue
 
@@ -111,21 +114,21 @@ try:
 
             if not project_file_paths:
                 if debugging.is_debugging():
-                    output.print_and_log_warning(f"No project files found in directory: {solution_name}/{directory_name}")
+                    output.print_and_log_warning(f"No project files found in directory: {solution.name}/{directory_name}")
 
                 continue
 
             if len(project_file_paths) > 1:
-                output.print_and_log_warning(f"Multiple project files found in directory: {solution_name}/{directory_name}")
+                output.print_and_log_warning(f"Multiple project files found in directory: {solution.name}/{directory_name}")
                 continue
 
-            project_directories[directory_name] = dotnet.ProjectInfo(directory_name, possible_project_directory_path, project_file_paths[0])
+            project_directories[directory_name] = dotnet.ProjectInfo(solutions, directory_name, possible_project_directory_path, project_file_paths[0])
 
         if not project_directories:
-            output.print_and_log_warning(f"No project directories found in solution: {solution_name}")
+            output.print_and_log_warning(f"No project directories found in solution: {solution.name}")
             continue
 
-        solution_directories[solution_name].projects = project_directories
+        solutions[solution.name].projects = project_directories
 
     # ------------------------------------------------------------------------------
     #     Read version strings, references, etc
@@ -133,32 +136,34 @@ try:
 
     valid_project_count = 0
 
-    for solution_name, solution in sorted(solution_directories.items()):
-        for project_name, project in sorted(solution.projects.items()):
-            result, message = project.extract_and_normalize_version_string()
+    for solution in sorted(solutions, key=lambda x: x.name):
+        try:
+            output.print_and_log(f"{solution.name} v{solution.common_version_string}", end="")
 
-            if result: # Has a valid version string.
-                output.print_and_log(f"{solution_name}/{project_name}: {project.version_string}")
+            if not os.path.isfile(solution.source_archive_file_path):
+                output.print_and_log(f" => ", end="")
+                output.print_and_log_important(solution.source_archive_file_path)
 
-                result, message = project.extract_referenced_project_names_and_find_them(solution_directories)
+            else:
+                output.print_and_log("")
 
-                if result: # All referenced projects are found or there are no references.
+            for project in sorted(solution.projects, key=lambda x: x.name):
+                try:
+                    output.print_and_log(f"{project.name} v{project.version_string}", indent="    ", end="") # todo
+
                     if project.referenced_projects:
-                        for referenced_project in sorted(project.referenced_projects, key=lambda x: x.name):
-                            output.print_and_log(f"{referenced_project.name}{referenced_project.version_string}", indent="    ")
+                        output.print_and_log(f" => {sorted(project.referenced_projects, key=lambda x: x.name)}")
 
                     else:
-                        # Displays the message that there are no references.
-                        output.print_and_log(message, indent="    ")
+                        output.print_and_log("")
 
                     valid_project_count += 1
 
-                else: # At least one of the referenced projects is not found.
-                    output.print_and_log_error(message, indent="    ")
+                except Exception as exception:
+                    output.print_and_log_error(f"{project.name}: {exception}")
 
-            else: # Doesnt have a valid version string.
-                # Indentation not required here.
-                output.print_and_log_error(f"{solution_name}/{project_name}: {message}")
+        except Exception as exception:
+            output.print_and_log_error(f"{solution.name}: {exception}")
 
     if valid_project_count:
         output.print_and_log(f"{valid_project_count} valid projects found.")
@@ -166,28 +171,6 @@ try:
     else:
         output.print_and_log_warning("No valid projects found.")
         sys.exit()
-
-    for solution_name, solution in sorted(solution_directories.items()):
-        result, message = solution.set_common_version_string()
-
-        if result:
-            is_obsolete = string.contains_ignore_case(obsolete_solution_names, solution_name)
-            result, message = solution.set_source_archive_file_path(archives_directory_path, is_obsolete=is_obsolete)
-
-            if result:
-                output.print_and_log(f"{solution_name} => ", end="")
-
-                if not os.path.isfile(solution.source_archive_file_path):
-                    output.print_and_log_important(solution.source_archive_file_path)
-
-                else:
-                    output.print_and_log(solution.source_archive_file_path)
-
-            else:
-                output.print_and_log_error(f"{solution_name}: {message}")
-
-        else:
-            output.print_and_log_error(f"{solution_name}: {message}")
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:

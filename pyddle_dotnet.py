@@ -12,88 +12,72 @@ import xml.etree.ElementTree
 #     Solution/project info
 # ------------------------------------------------------------------------------
 
-# I wont be implementing the searching-for-things part in this module because it would need to output various messages and also MIGHT become interactive in the future.
+# I wont be implementing the searching-for-things part in this module
+#     because it would need to output various messages and also MIGHT become interactive in the future.
+# For this reason, "projects" is set from the outside.
 
 class SolutionInfo:
-    def __init__(self, name, directory_path, file_path, projects=None, common_version_string=None, source_archive_file_path=None):
+    def __init__(self, solutions, archived_directory_path, name, directory_path, file_path, is_obsolete):
+        self.solutions = solutions
+        self.archived_directory_path = archived_directory_path
         self.name = name
         self.directory_path = directory_path
         self.file_path = file_path
-        self.projects = projects
-        self.common_version_string = common_version_string
-        self.source_archive_file_path = source_archive_file_path
+        self.is_obsolete = is_obsolete
+        self.projects = None
+        self.__common_version_string = None
+        self.__source_archive_file_path = None
 
-    def set_common_version_string(self):
-        """
-            Returns True and "" if successful.
-            Returns False and a message if unsuccessful.
-        """
-        # Only since Python 3.7, dictionaries are guaranteed to be insertion-oriented.
-        project_list = list(self.projects.values())
+    @property
+    def common_version_string(self):
+        if not self.__common_version_string is None:
+            # Should exist.
+            first_version_string = self.projects[0].version_string
 
-        # Should exist.
-        first_version_string = project_list[0].version_string
+            for project in self.projects[1:]:
+                if not string.equals(project.version_string, first_version_string):
+                    raise RuntimeError(f"Version strings differ.")
 
-        for project in project_list[1:]:
-            if not string.equals(project.version_string, first_version_string):
-                return False, "Version strings differ."
+            self.__common_version_string = first_version_string
 
-        self.common_version_string = first_version_string
+        return self.__common_version_string
 
-        return True, ""
+    @property
+    def source_archive_file_path(self):
+        if self.__source_archive_file_path is None:
 
-    def set_source_archive_file_path(self, archives_directory_path, is_obsolete=False):
-        """
-            Returns True and "" if successful.
-            Returns False and a message if unsuccessful.
-        """
-        if self.source_archive_file_path:
-            return False, "Source archive file path already set."
+            source_archive_file_name = f"{self.name}-v{self.common_version_string}-src.zip"
 
-        source_archive_file_name = f"{self.name}-v{self.common_version_string}-src.zip"
+            if self.is_obsolete:
+                # The directory already exists and its name starts with a capital letter.
+                self.source_archive_file_path = os.path.join(self.archives_directory_path, "Obsolete", self.name, source_archive_file_name)
 
-        if is_obsolete:
-            # The directory already exists and its name starts with a capital letter.
-            self.source_archive_file_path = os.path.join(archives_directory_path, "Obsolete", self.name, source_archive_file_name)
+            else:
+                self.source_archive_file_path = os.path.join(self.archives_directory_path, self.name, source_archive_file_name)
 
-        else:
-            self.source_archive_file_path = os.path.join(archives_directory_path, self.name, source_archive_file_name)
-
-        return True, ""
+        return self.__source_archive_file_path
 
 class ProjectInfo:
-    def __init__(self, name, directory_path, file_path, version_string=None, referenced_projects=None):
+    def __init__(self, solutions, name, directory_path, file_path):
+        self.solutions = solutions
         self.name = name
         self.directory_path = directory_path
         self.file_path = file_path
-        self.version_string = version_string
-        self.referenced_projects = referenced_projects
+        self.__version_string = None
+        self.__referenced_projects = None
 
-    # This could be a property with the @property thing attached, but currently there seems to be no built-in Lazy mechanism in Python,
-    #    and I dont want the property-ish thing to try to initialize itself multiple times if it cant extract the version string.
+    @property
+    def version_string(self):
+        if self.__version_string is None:
+            extracted_version_string = extract_version_string_from_csproj_file(self.file_path)
 
-    def extract_and_normalize_version_string(self):
-        """
-            Tries to extract the version string in multiple ways.
-            Returns True and "" if successful.
-            Returns False and a message explaining why if unsuccessful.
-        """
-        if self.version_string:
-            return False, "Version string already extracted."
+            if extracted_version_string:
+                try:
+                    extracted_version_string = version_digits_to_string(parse_version_string(extracted_version_string))
 
-        extracted_version_string = extract_version_string_from_csproj_file(self.file_path)
+                except Exception:
+                    raise RuntimeError(f"Invalid version string: {extracted_version_string}")
 
-        if extracted_version_string:
-            try:
-                extracted_version_string = version_digits_to_string(parse_version_string(extracted_version_string))
-
-            except ValueError:
-                return False, f"Invalid version string: {extracted_version_string}"
-
-            # Avalonia UI may contain a version string in "app.manifest" that should, but not necessarily have to, match the one in the .csproj file.
-            # If the file exists and contains a version string, why dont we just check it?
-
-            if debugging.is_debugging():
                 app_manifest_file_path = os.path.join(self.directory_path, "app.manifest")
 
                 if os.path.isfile(app_manifest_file_path):
@@ -103,72 +87,52 @@ class ProjectInfo:
                         try:
                             alternatively_extracted_version_string = version_digits_to_string(parse_version_string(alternatively_extracted_version_string))
 
-                        except ValueError:
-                            return False, f"Invalid version string: {alternatively_extracted_version_string}"
+                        except Exception:
+                            raise RuntimeError(f"Invalid version string: {alternatively_extracted_version_string}")
 
                         if not string.equals(alternatively_extracted_version_string, extracted_version_string):
-                            return False, f"Version strings from 2 files differ."
+                            raise RuntimeError(f"Version strings from 2 files differ.")
 
-                    # If the file exists and doesnt contain a version string,
-                    #     it's probably a different kind of "app.manifest" and should not be a problem.
+                self.__version_string = extracted_version_string
 
-            self.version_string = extracted_version_string
+            else:
+                assembly_info_file_path = os.path.join(self.directory_path, "Properties", "AssemblyInfo.cs")
 
-            return True, ""
+                if os.path.isfile(assembly_info_file_path):
+                    extracted_version_string = extract_version_string_from_assembly_info_file(assembly_info_file_path)
 
-        # Old .NET projects may contain a version string in "AssemblyInfo.cs".
-        # I used to set the same value to AssemblyVersion and AssemblyFileVersion,
-        #     but I wont be checking the latter because all my old .NET projects are deprecated.
+                    if extracted_version_string:
+                        # As the version string is extracted with a regex, it should be valid.
+                        try:
+                            self.__version_string = version_digits_to_string(parse_version_string(extracted_version_string))
 
-        assembly_info_file_path = os.path.join(self.directory_path, "Properties", "AssemblyInfo.cs")
+                        except Exception:
+                            raise RuntimeError(f"Invalid version string: {extracted_version_string}")
 
-        if os.path.isfile(assembly_info_file_path):
-            extracted_version_string = extract_version_string_from_assembly_info_file(assembly_info_file_path)
+        return self.__version_string
 
-            if extracted_version_string:
-                # As the version string is extracted with a regex, it should be valid.
-                try:
-                    self.version_string = version_digits_to_string(parse_version_string(extracted_version_string))
+    @property
+    def referenced_projects(self):
+        if self.__referenced_projects is None:
+            extracted_referenced_project_names = extract_referenced_project_names_from_csproj_file(self.file_path)
 
-                except ValueError:
-                    return False, f"Invalid version string: {extracted_version_string}"
+            if extracted_referenced_project_names:
+                referenced_projects = []
 
-                return True, ""
+                for referenced_project_name in extracted_referenced_project_names:
+                    _, _, _, project = find_referenced_project(self.solutions, referenced_project_name)
 
-        return False, "Version string not extracted."
+                    if not project:
+                        raise RuntimeError(f"Referenced project not found: {referenced_project_name}")
 
-    def extract_referenced_project_names_and_find_them(self, solution_directories):
-        """
-            Returns True and an OPTIONAL message if successful.
-            Returns False and a message if unsuccessful.
-            referenced_projects is set only if the operation is successful.
-        """
-        # Doesnt work if the project just doesnt reference anything,
-        #     but extract_and_normalize_version_string should have done its job before this method is called.
-        if self.referenced_projects:
-            return False, "Referenced projects already found."
+                    referenced_projects.append(project)
 
-        extracted_referenced_project_names = extract_referenced_project_names_from_csproj_file(self.file_path)
+                self.referenced_projects = referenced_projects
 
-        if extracted_referenced_project_names:
-            referenced_projects = []
+            else:
+                self.referenced_projects = []
 
-            for referenced_project_name in extracted_referenced_project_names:
-                _, _, _, project = find_referenced_project(solution_directories, referenced_project_name)
-
-                if not project:
-                    return False, f"Referenced project not found: {referenced_project_name}"
-
-                referenced_projects.append(project)
-
-            self.referenced_projects = referenced_projects
-
-            return True, ""
-
-        self.referenced_projects = []
-
-        # The situation, technically, is that no referenced project names are extracted and therefore no search has been performed, but that would be a redundant message.
-        return True, "No references found."
+        return self.__referenced_projects
 
 # ------------------------------------------------------------------------------
 #     Version strings
@@ -326,15 +290,8 @@ def is_valid_referenced_project_name(str):
 
     return True
 
-def find_referenced_project(solution_directories, referenced_project_name):
-    """
-        Takes a dictionary of solution names and solutions as SolutionInfo objects.
-        Returns solution_name, solution, project_name and project.
-        Returns None, None, None, None if the referenced project is not found.
-    """
-    for solution_name, solution in solution_directories.items():
-        for project_name, project in solution.projects.items():
-            if string.equals_ignore_case(project_name, referenced_project_name):
-                return solution_name, solution, project_name, project
-
-    return None, None, None, None
+def find_referenced_project(solutions, referenced_project_name):
+    for solution in solutions:
+        for project in solution.projects:
+            if string.equals_ignore_case(project.name, referenced_project_name):
+                return project

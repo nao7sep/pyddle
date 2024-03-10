@@ -20,7 +20,7 @@ def set_main_script_file_path(file_path):
     global main_script_file_extension
 
     if not os.path.isfile(file_path):
-        raise FileNotFoundError(f"File not found: {file_path}")
+        raise RuntimeError(f"File not found: {file_path}")
 
     main_script_file_path = file_path
     main_script_file_name = os.path.basename(file_path)
