@@ -7,6 +7,7 @@ first.set_main_script_file_path(__file__)
 
 import glob
 import os
+import pyddle_console as console
 import pyddle_debugging as debugging
 import pyddle_dotnet as dotnet
 import pyddle_json_based_kvs as kvs
@@ -177,7 +178,7 @@ try:
         sys.exit()
 
     # ------------------------------------------------------------------------------
-    #     Build projects
+    #     Main loop
     # ------------------------------------------------------------------------------
 
     projects_to_build = []
@@ -204,9 +205,94 @@ try:
     for project in projects_to_build:
         output.print_and_log(project.name, indents=string.leveledIndents[1])
 
+    while True:
+        try:
+            # From here, some interaction is not logged.
+
+            print(
+"""Options:
+    1) Build
+    2) Update NuGet packages
+    3) Analyze code
+    4) Build and archive
+    5) Exclude a project
+    6) Exit""")
+
+            choice = input("Enter your choice: ")
+
+            if choice == "1":
+                # Marked as important for attention.
+                output.print_and_log_important("Building...")
+
+                for project in projects_to_build:
+                    try:
+                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.build(), indents=string.leveledIndents[2]))
+
+                    except Exception as exception:
+                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+
+            elif choice == "2":
+                output.print_and_log_important("Updating NuGet packages...")
+
+                for project in projects_to_build:
+                    try:
+                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.update_nuget_packages(), indents=string.leveledIndents[2]))
+
+                    except Exception as exception:
+                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+
+            elif choice == "3":
+                output.print_and_log_important("Analyzing code...")
+
+                for project in projects_to_build:
+                    try:
+                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.analyze_code(), indents=string.leveledIndents[2]))
+
+                    except Exception as exception:
+                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+
+            elif choice == "4":
+                output.print_and_log_important("Building and archiving...")
+
+                for project in projects_to_build:
+                    try:
+                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.build_and_archive(), indents=string.leveledIndents[2]))
+
+                    except Exception as exception:
+                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+
+            elif choice == "5":
+                print("Projects:")
+
+                for index, project in enumerate(projects_to_build):
+                    print(f"{string.leveledIndents[1]}{index + 1}) {project.name}")
+
+                try:
+                    index = int(input("Enter the index of the project to exclude: ")) - 1
+
+                    if 0 <= index < len(projects_to_build):
+                        project = projects_to_build.pop(index)
+                        print(f"{project.name} excluded.")
+
+                    else:
+                        console.print_warning("Invalid index.") # Not logged.
+
+                except Exception:
+                    console.print_warning("Invalid input.")
+
+            elif choice == "6":
+                break
+
+        except Exception:
+            output.print_and_log_error(traceback.format_exc())
+
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:
-    traceback.print_exc()
+    output.print_and_log_error(traceback.format_exc())
 
 finally:
     logging.flush()

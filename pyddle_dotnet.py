@@ -6,6 +6,7 @@ import pyddle_debugging as debugging
 import pyddle_file_system as file_system
 import pyddle_string as string
 import re
+import subprocess
 import xml.etree.ElementTree
 
 # ------------------------------------------------------------------------------
@@ -136,6 +137,18 @@ class ProjectInfo:
                 self.__referenced_projects = []
 
         return self.__referenced_projects
+
+    def build(self):
+        return build_project(self)
+
+    def update_nuget_packages(self):
+        return update_nuget_packages_in_project(self)
+
+    def analyze_code(self):
+        return analyze_code_in_project(self)
+
+    def build_and_archive(self):
+        return build_and_archive_project(self)
 
 # ------------------------------------------------------------------------------
 #     Version strings
@@ -326,3 +339,26 @@ def sort_projects_to_build(projects):
             sorted_projects.append(project)
 
     return sorted_projects
+
+# ------------------------------------------------------------------------------
+#     Project-related operations
+# ------------------------------------------------------------------------------
+
+def build_project(project):
+    return []
+
+def update_nuget_packages_in_project(project):
+    return []
+
+def analyze_code_in_project(project):
+    return []
+
+def build_and_archive_project(project):
+    return []
+
+# ------------------------------------------------------------------------------
+#     Misc
+# ------------------------------------------------------------------------------
+
+def format_result_string_from_messages(messages, indents="", end="\n"):
+    return end.join(f"{indents}{message}" for message in messages)
