@@ -138,8 +138,8 @@ class ProjectInfo:
 
         return self.__referenced_projects
 
-    def build(self):
-        return build_project(self)
+    def build(self, no_restore=False):
+        return build_project(self, no_restore)
 
     def update_nuget_packages(self):
         return update_nuget_packages_in_project(self)
@@ -344,8 +344,17 @@ def sort_projects_to_build(projects):
 #     Project-related operations
 # ------------------------------------------------------------------------------
 
-def build_project(project):
-    return []
+def build_project(project, no_restore=False):
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build
+
+    # "--nologo" isnt included so that we can log the version of the tool.
+    # It should look like: MSBuild のバージョン 17.9.4+90725d08d (.NET)
+    args = [ "dotnet", "build", project.file_path, "--configuration", "Release" ]
+
+    if no_restore:
+        args.append("--no-restore")
+
+    return subprocess_result_into_messages(subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path))
 
 def update_nuget_packages_in_project(project):
     return []
@@ -359,6 +368,19 @@ def build_and_archive_project(project):
 # ------------------------------------------------------------------------------
 #     Misc
 # ------------------------------------------------------------------------------
+
+def subprocess_result_into_messages(result):
+    messages = []
+
+    if result.stdout:
+        messages.append("stdout:")
+        messages.extend(f'{string.leveledIndents[1]}{message}' for message in result.stdout.decode("utf-8").splitlines() if message)
+
+    if result.stderr:
+        messages.append("stderr:")
+        messages.extend(f'{string.leveledIndents[1]}{message}' for message in result.stderr.decode("utf-8").splitlines() if message)
+
+    return messages
 
 def format_result_string_from_messages(messages, indents="", end="\n"):
     return end.join(f"{indents}{message}" for message in messages)

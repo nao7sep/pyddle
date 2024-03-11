@@ -205,6 +205,10 @@ try:
     for project in projects_to_build:
         output.print_and_log(project.name, indents=string.leveledIndents[1])
 
+    logging.flush()
+
+    iteration_count = 0
+
     while True:
         try:
             # From here, some interaction is not logged.
@@ -227,7 +231,8 @@ try:
                 for project in projects_to_build:
                     try:
                         output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.build(), indents=string.leveledIndents[2]))
+                        no_restore = iteration_count >= 1
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.build(no_restore), indents=string.leveledIndents[2]))
 
                     except Exception as exception:
                         output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
@@ -289,6 +294,11 @@ try:
 
         except Exception:
             output.print_and_log_error(traceback.format_exc())
+
+        # Within the loop, at the end of each iteration.
+        logging.flush()
+
+        iteration_count += 1
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:
