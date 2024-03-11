@@ -207,6 +207,9 @@ try:
 
     logging.flush()
 
+    # Incremented at the end of EVERY iteration to avoid restoring the same packages repeatedly.
+    # Restoration is automatically executed by SOME of the .NET commands; not all.
+    # "build" is almost always the first command we choose, effectively ensuring the first restoration is executed.
     iteration_count = 0
 
     while True:

@@ -1,6 +1,7 @@
 ﻿# Created: 2024-03-06
 # This script contains functions related to compilation and distribution of .NET projects.
 
+import json
 import os
 import pyddle_debugging as debugging
 import pyddle_file_system as file_system
@@ -354,10 +355,51 @@ def build_project(project, no_restore=False):
     if no_restore:
         args.append("--no-restore")
 
-    return subprocess_result_into_messages(subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path))
+    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+    return subprocess_result_into_messages(result)
 
 def update_nuget_packages_in_project(project):
-    return []
+    messages = []
+
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-list-package
+
+    args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "console" ] # Output for display.
+    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+    messages.extend(subprocess_result_into_messages(result))
+
+    args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "json" ] # For parsing.
+    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+
+    # When an old project contains "package.config", which isnt supported by the "dotnet" command, we get a string like the following set to "stderr":
+    #     プロジェクト 'C:\Repositories\Nekote2018\Nekote2018\Nekote2018.csproj' では NuGet パッケージに package.config を使用しますが、コマンドはパッケージ参照プロジェクトでのみ動作します。
+    # But the JSON output, regardless of whether there's been an error or not, seems to have the same structure, allowing us to simply look for the "frameworks" key.
+
+    # We need to look for "projects/frameworks/topLevelPackages", which should be an array of dictionaries.
+    # In each dictionary, we get "id", "requestedVersion", "resolvedVersion", "latestVersion".
+    # Maybe oneday, we might need to utilize other tools to check compatibility.
+    # For now, considering that a lot of issues can be resolved manually, we'll just attempt to update each package to the latest version suggested.
+
+    json_string = result.stdout.decode("utf-8")
+    data_from_json = json.loads(json_string)
+
+    # Assuming the JSON structure is correct.
+    # That is by design, hoping to find errors the implementation could miss otherwise.
+
+    for project_in_json in data_from_json["projects"]:
+        if "frameworks" in project_in_json:
+            for framework in project_in_json["frameworks"]:
+                if "topLevelPackages" in framework:
+                    for package in framework["topLevelPackages"]:
+                        id = package["id"]
+                        latest_version = package["latestVersion"]
+
+                        # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package
+
+                        args = [ "dotnet", "add", project.file_path, "package", id, "--version", latest_version ]
+                        result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+                        messages.extend(subprocess_result_into_messages(result))
+
+    return messages
 
 def analyze_code_in_project(project):
     return []
