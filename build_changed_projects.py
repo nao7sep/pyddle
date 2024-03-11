@@ -220,10 +220,9 @@ try:
 """Options:
     1) Build
     2) Update NuGet packages
-    3) Analyze code
-    4) Build and archive
-    5) Exclude a project
-    6) Exit""")
+    3) Build and archive
+    4) Exclude a project
+    5) Exit""")
 
             choice = input("Enter your choice: ")
 
@@ -252,17 +251,6 @@ try:
                         output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
 
             elif choice == "3":
-                output.print_and_log_important("Analyzing code...")
-
-                for project in projects_to_build:
-                    try:
-                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.analyze_code(), indents=string.leveledIndents[2]))
-
-                    except Exception as exception:
-                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
-
-            elif choice == "4":
                 output.print_and_log_important("Building and archiving...")
 
                 for project in projects_to_build:
@@ -273,7 +261,7 @@ try:
                     except Exception as exception:
                         output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
 
-            elif choice == "5":
+            elif choice == "4":
                 print("Projects:")
 
                 for index, project in enumerate(projects_to_build):
@@ -292,7 +280,7 @@ try:
                 except Exception:
                     console.print_warning("Invalid input.")
 
-            elif choice == "6":
+            elif choice == "5":
                 break
 
         except Exception:

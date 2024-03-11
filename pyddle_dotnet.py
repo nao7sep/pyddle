@@ -145,9 +145,6 @@ class ProjectInfo:
     def update_nuget_packages(self):
         return update_nuget_packages_in_project(self)
 
-    def analyze_code(self):
-        return analyze_code_in_project(self)
-
     def build_and_archive(self):
         return build_and_archive_project(self)
 
@@ -401,8 +398,14 @@ def update_nuget_packages_in_project(project):
 
     return messages
 
-def analyze_code_in_project(project):
-    return []
+# Originally planned to implement code analysis too, but I believe that would actually lower the productivity.
+# By adding <AnalysisMode>AllEnabledByDefault</AnalysisMode> to the .csproj file, we can observe a lot more warnings on Visual Studio.
+# The problem is that the analysis doesnt know what it's analyzing and so only coding-manner-related things come out.
+# Like, "Use the async version instead", "Consider making this read-only", "Dont embed a literal string", "There's a newer way of writing this", etc.
+# As far as I remember, the only (slightly) useful message I have ever got was a suggestion to use AsSpan instead of Substring.
+# But code analysis anyway wouldnt tell us to use IndexOf rather than a for/foreach loop when that could drastically improve the performance.
+# Soon, AI will start refactoring large portions of code, changing the design completely.
+# Until then, although we cant say there's absolutely no merit in code analysis, it doesnt need to be a part of everyday development.
 
 def build_and_archive_project(project):
     return []
