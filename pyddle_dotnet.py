@@ -3,10 +3,10 @@
 
 import json
 import os
-import pyddle_debugging as debugging
 import pyddle_file_system as file_system
 import pyddle_string as string
 import re
+import shutil
 import subprocess
 import xml.etree.ElementTree
 
@@ -47,7 +47,6 @@ class SolutionInfo:
     @property
     def source_archive_file_path(self):
         if self.__source_archive_file_path is None:
-
             source_archive_file_name = f"{self.name}-v{self.common_version_string}-src.zip"
 
             if self.is_obsolete:
@@ -59,9 +58,13 @@ class SolutionInfo:
 
         return self.__source_archive_file_path
 
+    def archive(self, not_archived_directory_names=None, not_archived_file_names=None):
+        return archive_solution(self, not_archived_directory_names, not_archived_file_names)
+
 class ProjectInfo:
-    def __init__(self, solutions, name, directory_path, file_path):
+    def __init__(self, solutions, solution, name, directory_path, file_path):
         self.solutions = solutions
+        self.solution = solution
         self.name = name
         self.directory_path = directory_path
         self.file_path = file_path
@@ -145,8 +148,8 @@ class ProjectInfo:
     def update_nuget_packages(self):
         return update_nuget_packages_in_project(self)
 
-    def build_and_archive(self):
-        return build_and_archive_project(self)
+    def build_and_archive(self, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
+        return build_and_archive_project(self, supported_runtimes, not_archived_directory_names, not_archived_file_names)
 
 # ------------------------------------------------------------------------------
 #     Version strings
@@ -339,6 +342,27 @@ def sort_projects_to_build(projects):
     return sorted_projects
 
 # ------------------------------------------------------------------------------
+#     Solution-related operations
+# ------------------------------------------------------------------------------
+
+def archive_solution(solution, not_archived_directory_names=None, not_archived_file_names=None):
+    messages = []
+
+    solution_archives_directory_path = os.path.dirname(solution.source_archive_file_path)
+    os.makedirs(solution_archives_directory_path, exist_ok=True)
+
+    archived_file_count = file_system.zip_archive_directory(solution.directory_path, solution.source_archive_file_path, not_archived_directory_names, not_archived_file_names)
+
+    if archived_file_count:
+        messages.append(f"Archive file created: {solution.source_archive_file_path}")
+
+    else:
+        os.remove(solution.source_archive_file_path)
+        messages.append(f"Empty archive file deleted: {solution.source_archive_file_path}")
+
+    return messages
+
+# ------------------------------------------------------------------------------
 #     Project-related operations
 # ------------------------------------------------------------------------------
 
@@ -407,8 +431,36 @@ def update_nuget_packages_in_project(project):
 # Soon, AI will start refactoring large portions of code, changing the design completely.
 # Until then, although we cant say there's absolutely no merit in code analysis, it doesnt need to be a part of everyday development.
 
-def build_and_archive_project(project):
-    return []
+def build_and_archive_project(project, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
+    messages = []
+
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
+
+    for supported_runtime in supported_runtimes:
+        runtime_specific_publish_directory_path = os.path.join(project.directory_path, "bin", "Publish", supported_runtime)
+
+        if os.path.isdir(runtime_specific_publish_directory_path):
+            shutil.rmtree(runtime_specific_publish_directory_path)
+
+        args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
+        result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+        messages.extend(subprocess_result_into_messages(result))
+
+        solution_archives_directory_path = os.path.dirname(project.solution.source_archive_file_path)
+        os.makedirs(solution_archives_directory_path, exist_ok=True) # Negligible cost to be repeated.
+
+        binaries_archive_file_name = f"{project.name}-v{project.version_string}-{supported_runtime}.zip"
+        binaries_archive_file_path = os.path.join(solution_archives_directory_path, binaries_archive_file_name)
+        archived_file_count = file_system.zip_archive_directory(runtime_specific_publish_directory_path, binaries_archive_file_path, not_archived_directory_names, not_archived_file_names)
+
+        if archived_file_count:
+            messages.append(f"Archive file created: {binaries_archive_file_path}")
+
+        else:
+            os.remove(binaries_archive_file_path)
+            messages.append(f"Empty archive file deleted: {binaries_archive_file_path}")
+
+    return messages
 
 # ------------------------------------------------------------------------------
 #     Misc

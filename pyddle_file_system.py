@@ -3,6 +3,7 @@
 
 import os
 import pyddle_string as string
+import zipfile
 
 def make_and_move_to_output_subdirectory():
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
@@ -166,3 +167,43 @@ def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
     else:
         with open(path, "a", encoding=encoding) as file:
             file.write(text)
+
+# ------------------------------------------------------------------------------
+#     ZIP archives
+# ------------------------------------------------------------------------------
+
+def zip_archive_directory(directory_path, archive_file_path, not_archived_directory_names=None, not_archived_file_names=None):
+    archive_directory_path = os.path.dirname(archive_file_path)
+    os.makedirs(archive_directory_path, exist_ok=True)
+
+    # https://docs.python.org/3/library/zipfile.html
+
+    with zipfile.ZipFile(archive_file_path, "w", zipfile.ZIP_DEFLATED) as zip_file:
+        if os.path.isdir(directory_path):
+            return zip_archive_subdirectory(zip_file, directory_path, directory_path, not_archived_directory_names, not_archived_file_names)
+
+def zip_archive_subdirectory(zip_file, root_directory_path, subdirectory_path, not_archived_directory_names, not_archived_file_names):
+    archived_file_count = 0
+
+    for name in os.listdir(subdirectory_path):
+        path = os.path.join(subdirectory_path, name)
+
+        if os.path.isdir(path):
+            if not_archived_directory_names and string.contains_ignore_case(not_archived_directory_names, name):
+                continue
+
+            zip_archive_subdirectory(zip_file, root_directory_path, path, not_archived_directory_names, not_archived_file_names)
+
+        elif os.path.isfile(path):
+            if not_archived_file_names and string.contains_ignore_case(not_archived_file_names, name):
+                continue
+
+            # https://docs.python.org/3/library/os.path.html#os.path.relpath
+            relative_file_path = os.path.relpath(path, root_directory_path)
+            zip_file.write(path, relative_file_path)
+            archived_file_count += 1
+
+        else:
+            raise RuntimeError(f"Unsupported file system object: {path}")
+
+    return archived_file_count

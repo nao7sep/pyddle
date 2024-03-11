@@ -52,6 +52,33 @@ try:
         if obsolete_solution_names:
             output.print_and_log(f"obsolete_solution_names: {obsolete_solution_names}")
 
+    supported_runtimes = []
+    supported_runtimes_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}supported_runtimes")
+
+    if supported_runtimes_string:
+        supported_runtimes = [value.strip() for value in supported_runtimes_string.split(value_separator) if value.strip()]
+
+        if supported_runtimes:
+            output.print_and_log(f"supported_runtimes: {supported_runtimes}")
+
+    not_archived_directory_names = []
+    not_archived_directory_names_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}not_archived_directory_names")
+
+    if not_archived_directory_names_string:
+        not_archived_directory_names = [value.strip() for value in not_archived_directory_names_string.split(value_separator) if value.strip()]
+
+        if not_archived_directory_names:
+            output.print_and_log(f"not_archived_directory_names: {not_archived_directory_names}")
+
+    not_archived_file_names = []
+    not_archived_file_names_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}not_archived_file_names")
+
+    if not_archived_file_names_string:
+        not_archived_file_names = [value.strip() for value in not_archived_file_names_string.split(value_separator) if value.strip()]
+
+        if not_archived_file_names:
+            output.print_and_log(f"not_archived_file_names: {not_archived_file_names}")
+
     # ------------------------------------------------------------------------------
     #     Find solution directories
     # ------------------------------------------------------------------------------
@@ -125,7 +152,7 @@ try:
                 output.print_and_log_warning(f"Multiple project files found in directory: {solution.name}/{directory_name}")
                 continue
 
-            project_directories.append(dotnet.ProjectInfo(solutions, directory_name, possible_project_directory_path, project_file_paths[0]))
+            project_directories.append(dotnet.ProjectInfo(solutions, solution, directory_name, possible_project_directory_path, project_file_paths[0]))
 
         if not project_directories:
             output.print_and_log_warning(f"No project directories found in solution: {solution.name}")
@@ -253,10 +280,19 @@ try:
             elif choice == "3":
                 output.print_and_log_important("Building and archiving...")
 
+                archived_solutions = []
+
                 for project in projects_to_build:
                     try:
                         output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.build_and_archive(), indents=string.leveledIndents[2]))
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.build_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=string.leveledIndents[2]))
+
+                        # When we archive source code, usually, tests have been done and the projects can be built without issues.
+                        # So, I wont be implementing one more loop to complicate the interaction.
+
+                        if project.solution not in archived_solutions:
+                            output.print_and_log(dotnet.format_result_string_from_messages(project.solution.archive(not_archived_directory_names, not_archived_file_names), indents=string.leveledIndents[2]))
+                            archived_solutions.append(project.solution)
 
                     except Exception as exception:
                         output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
