@@ -1,5 +1,5 @@
-# Created:
-#
+# Created: 2024-03-11
+# This script builds and archives all changed projects in the specified repositories directory.
 
 import pyddle_first as first
 
