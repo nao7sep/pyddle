@@ -1,9 +1,9 @@
 ﻿# Directories
 __pycache__/
+logs/
 
 # Files
-*.db
 .DS_Store
-*.log
 output_environment_variables.txt
 Thumbs.db
+write_and_read_settings.db
