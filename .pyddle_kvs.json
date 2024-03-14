@@ -5,5 +5,8 @@
     "build_changed_projects/obsolete_solution_names": "fileDel|flayground|Nekote|Nekote2018|photoPage|repoCheck|runAll|srcZip|taskKiller|timeLog|tk2Text",
     "build_changed_projects/supported_runtimes": "win-x64",
     "build_changed_projects/not_archived_directory_names": ".git|.vs|bin|obj",
-    "build_changed_projects/not_archived_file_names": ""
+    "build_changed_projects/not_archived_file_names": "",
+
+    "low_priority_queue/tasks_file_path": "C:\\Repositories\\pyddle\\data\\tasks.json",
+    "low_priority_queue/done_tasks_file_path": "C:\\Repositories\\pyddle\\data\\done_tasks.json"
 }
