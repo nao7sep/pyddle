@@ -1,3 +1,6 @@
+﻿# Created: 2024-03-14
+# A simple app to manage a queue of low-priority tasks.
+
 import copy
 import json
 import os
@@ -91,6 +94,33 @@ class TaskList:
 #     Helpers
 # ------------------------------------------------------------------------------
 
+def select_shown_tasks(done_task_list, task_list, shows_all):
+    seven_days_ago_utc = datetime.get_utc_now() - datetime.datetime.timedelta(days=7)
+    done_tasks_in_last_seven_days = [task for task in done_task_list.tasks if task.done_utc is not None and task.done_utc > seven_days_ago_utc]
+
+    execution_counts = {}
+
+    for task in done_tasks_in_last_seven_days:
+        if task.guid in execution_counts:
+            execution_counts[task.guid] += 1
+
+        else:
+            execution_counts[task.guid] = 1
+
+    shown_tasks = []
+
+    for task in task_list.tasks:
+        if task.is_active and task.is_shown:
+            if task.guid in execution_counts:
+                if execution_counts[task.guid] < task.times_per_week:
+                    shown_tasks.append(task)
+
+            else:
+                shown_tasks.append(task)
+
+    # Not great coding, but I dont want to change shown_tasks to an array of tuples.
+    return shown_tasks, execution_counts
+
 def parse_command_str(command_str):
     match = re.match(r"^(?P<command>[a-z]+)(\s+(?P<number>[0-9]+)(\s+(?P<parameter>.+))?)?$", command_str, re.IGNORECASE)
 
@@ -146,17 +176,19 @@ try:
 
     while True:
         try:
-            if shows_all_next_time:
-                shown_tasks = task_list.tasks
-
-            else:
-                shown_tasks = [task for task in task_list.tasks if task.is_active and task.is_shown]
+            shown_tasks, execution_counts = select_shown_tasks(done_task_list, task_list, shows_all_next_time)
 
             if shown_tasks:
                 console.print("Tasks:")
 
                 for index, task in enumerate(shown_tasks):
-                    console.print(f"{index + 1}. {task.content}", indents=string.leveledIndents[1])
+                    if task.guid in execution_counts:
+                        execution_count = execution_counts[task.guid]
+
+                    else:
+                        execution_count = 0
+
+                    console.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week})", indents=string.leveledIndents[1])
 
             shows_all_next_time = False
 
