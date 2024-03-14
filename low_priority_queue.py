@@ -117,6 +117,12 @@ def parse_command_str(command_str):
 
     return None, None, None
 
+def validate_shown_task_index(shown_tasks, number):
+    return number is not None and number > 0 and number <= len(shown_tasks)
+
+def validate_times_per_week(number):
+    return number is not None and number > 0
+
 # ------------------------------------------------------------------------------
 #     Application
 # ------------------------------------------------------------------------------
@@ -160,7 +166,7 @@ try:
             command, number, parameter = parse_command_str(command_str)
 
             if string.equals_ignore_case(command, "create"):
-                if number is not None and parameter:
+                if validate_times_per_week(number) and parameter:
                     task_list.create_task(TaskInfo(uuid.uuid4(), datetime.get_utc_now(), None, True, True, parameter, number))
                     continue
 
@@ -169,7 +175,7 @@ try:
                 continue
 
             elif string.equals_ignore_case(command, "done"):
-                if shown_tasks and number is not None:
+                if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = False
                     # is_shown is not saved.
@@ -181,42 +187,42 @@ try:
                     continue
 
             elif string.equals_ignore_case(command, "deactivate"):
-                if shown_tasks and number is not None:
+                if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_active = False
                     task_list.update_task(task)
                     continue
 
             elif string.equals_ignore_case(command, "activate"):
-                if shown_tasks and number is not None:
+                if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_active = True
                     task_list.update_task(task)
                     continue
 
             elif string.equals_ignore_case(command, "hide"):
-                if shown_tasks and number is not None:
+                if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = False
                     task_list.update_task(task)
                     continue
 
             elif string.equals_ignore_case(command, "show"):
-                if shown_tasks and number is not None:
+                if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = True
                     task_list.update_task(task)
                     continue
 
             elif string.equals_ignore_case(command, "content"):
-                if shown_tasks and number is not None and parameter:
+                if shown_tasks and validate_shown_task_index(shown_tasks, number) and parameter:
                     task = shown_tasks[number - 1]
                     task.content = parameter
                     task_list.update_task(task)
                     continue
 
             elif string.equals_ignore_case(command, "times"):
-                if shown_tasks and number is not None and parameter:
+                if shown_tasks and validate_shown_task_index(shown_tasks, number) and parameter:
                     try:
                         task = shown_tasks[number - 1]
                         task.times_per_week = int(parameter)
@@ -227,15 +233,22 @@ try:
                         pass
 
             elif string.equals_ignore_case(command, "delete"):
-                if shown_tasks and number is not None and string.equals_ignore_case(parameter, "confirm"):
-                    task = shown_tasks[number - 1]
-                    task_list.delete_task(task)
+                if shown_tasks and validate_shown_task_index(shown_tasks, number):
+                    if  string.equals_ignore_case(parameter, "confirm"):
+                        task = shown_tasks[number - 1]
+                        task_list.delete_task(task)
+
+                    else:
+                        console.print_warning("Destructive operation.")
+                        console.print_warning("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.")
+
                     continue
 
             elif string.equals_ignore_case(command, "exit"):
                 break
 
-            console.print_error("Invalid command string.")
+            if command:
+               console.print_error("Invalid command string.")
 
         except Exception:
             console.print_error(traceback.format_exc())
