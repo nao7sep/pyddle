@@ -5,6 +5,12 @@ import os
 import pyddle_string as string
 import zipfile
 
+def create_parent_directory(path):
+    parent_directory_path = os.path.dirname(path)
+
+    if parent_directory_path:
+        os.makedirs(parent_directory_path, exist_ok=True)
+
 def make_and_move_to_output_subdirectory():
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
     # Supposing this module is in a subdirectory of the project's root directory.
