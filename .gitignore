@@ -4,6 +4,10 @@ logs/
 
 # Files
 .DS_Store
-output_environment_variables.txt
 Thumbs.db
-write_and_read_settings.db
+
+# Specific files
+data/handled_tasks.db
+data/tasks.db
+output/output_environment_variables.txt
+output/write_and_read_settings.db
