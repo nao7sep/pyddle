@@ -2,15 +2,17 @@
 # A simple app to manage a queue of low-priority tasks.
 
 import copy
+import datetime
 import enum
 import json
 import os
 import pyddle_console as console
-import pyddle_datetime as datetime
+import pyddle_datetime as dt
 import pyddle_debugging as debugging
 import pyddle_file_system as file_system
 import pyddle_json_based_kvs as kvs
 import pyddle_string as string
+import random
 import re
 import traceback
 import uuid
@@ -42,8 +44,8 @@ def serialize_task(task):
     if isinstance(task, TaskInfo):
         return {
             "guid": str(task.guid),
-            "creation_utc": datetime.utc_to_roundtrip_string(task.creation_utc),
-            "handled_utc": datetime.utc_to_roundtrip_string(task.handled_utc) if task.handled_utc is not None else None,
+            "creation_utc": dt.utc_to_roundtrip_string(task.creation_utc),
+            "handled_utc": dt.utc_to_roundtrip_string(task.handled_utc) if task.handled_utc is not None else None,
             "is_active": task.is_active,
             # is_shown is not saved.
             # It is a state that persists only during the current run of the app.
@@ -63,8 +65,8 @@ def serialize_task(task):
 def deserialize_task(task_data):
     return TaskInfo(
         uuid.UUID(task_data["guid"]),
-        datetime.roundtrip_string_to_utc(task_data["creation_utc"]),
-        datetime.roundtrip_string_to_utc(task_data["handled_utc"]) if task_data["handled_utc"] is not None else None,
+        dt.roundtrip_string_to_utc(task_data["creation_utc"]),
+        dt.roundtrip_string_to_utc(task_data["handled_utc"]) if task_data["handled_utc"] is not None else None,
         task_data["is_active"],
         True, # is_shown is not saved.
         task_data["content"],
@@ -92,9 +94,12 @@ class TaskList:
         with file_system.open_file_and_write_utf_encoding_bom(self.file_path) as tasks_file:
             json.dump(self.tasks, tasks_file, indent=4, default=serialize_task)
 
-    def create_task(self, task):
+    def create_task(self, task, no_save=False):
         self.tasks.append(task)
-        self.save()
+
+        if not no_save:
+            self.save()
+
         return task
 
     def update_task(self, task):
@@ -119,8 +124,111 @@ class TaskList:
 #     Helpers
 # ------------------------------------------------------------------------------
 
+def generate_sample_data(handled_task_list, task_list):
+    tasks = [
+        # AI-generated trivial life-related tasks that are not valuable but must not be neglected:
+
+        ("Check the mail", 3),
+        ("Water indoor plants", 2),
+        ("Take out the trash", 3),
+        ("Make the bed daily", 7),
+        ("Dust the living room", 1),
+        ("Get a haircut", 1),
+        ("Charge electronics", 4),
+        ("Clean the bathroom sink", 2),
+        ("Restock toiletries", 1),
+        ("Vacuum the floor", 2),
+        ("Check home security devices", 1),
+        ("Review personal finances", 1),
+        ("Wipe kitchen counters", 4),
+        ("Check the refrigerator for expired items", 1),
+        ("Clean the microwave", 1),
+        ("Do the laundry", 2),
+        ("Change the bed sheets", 1),
+        ("Clean the windows", 1),
+        ("Sweep the porch", 1),
+        ("Water the garden", 3),
+        ("Check for mail packages", 2),
+        ("Clean out the car", 1),
+        ("Back up digital files", 1),
+        ("Update computer software", 1),
+        ("Check smoke detectors", 1),
+        ("Replace air filters", 1),
+        ("Organize the desk", 1),
+        ("Tidy living spaces", 3),
+        ("Wash the dishes", 7),
+        ("Restock the fridge and pantry", 1),
+        ("Check for needed repairs around the home", 1),
+        ("Plan weekly meals", 1),
+        ("Prepare work or school bags", 5),
+        ("Check pet supplies", 1),
+        ("Review appointments and schedules", 3)
+    ]
+
+    for content, times_per_week in tasks:
+        # As the goal of the sample data is to test the app's "stat" command,
+        #     trivial attributes such as creation_utc and is_active are not randomized here.
+        task_list.create_task(TaskInfo(uuid.uuid4(), dt.get_utc_now(), None, True, True, content, times_per_week, None), no_save=True)
+
+    task_list.save()
+
+    # As of 2024-03-15, generating handled tasks in the past 30 * 365 days on my 15 year old computer takes 2 minutes.
+    # The size of handled_tasks.json is 41,771 KB.
+    # Running the script in Windows Explorer takes 3 seconds until the tasks are shown.
+    # Re-showing them by the Enter key causes no noticeable delay.
+
+    # Python appears to handle arrays reasonably fast.
+    # The bottleneck would be JSON serialization; deserialization is OK.
+    # It's anyway unwise to recursively serialize such a large number of objects into a JSON file,
+    #     but it doesnt hurt to remember incremental serialization should drastically improve performance,
+    #     allowing JSON to handle relatively large data sets (if it's absolutely necessary).
+
+    days = 365 # Just enough to test the "stat" command.
+    inclusive_min_handled_tasks_per_day = 0
+    inclusive_max_handled_tasks_per_day = round(len(tasks) * 7 / 10)
+    done_tasks_out_of_10_handled_ones = 7
+
+    utc_now = dt.get_utc_now()
+
+    for day_offset in range(days - 1, -1, -1):
+        # "utc" is like an adjective here.
+        utc_then = utc_now - datetime.timedelta(days=day_offset)
+        handled_tasks = random.randint(inclusive_min_handled_tasks_per_day, inclusive_max_handled_tasks_per_day)
+        done_tasks = round(handled_tasks * done_tasks_out_of_10_handled_ones / 10)
+
+        for index in range(handled_tasks):
+            # In python, datetime objects are offset-aware OR offset-naive.
+            # Maybe I'm missing something, but datetime.date() seems to return an offset-naive object,
+            #     not an offset-aware representation of the moment the day has started.
+            # So, date() + timedelta(seconds) resultantly causes a comparison error between offset-aware and offset-naive objects.
+            # That's why the following code uses datetime's constructor to create a randomized offset-aware object.
+            # https://docs.python.org/3/library/datetime.html
+
+            total_seconds = random.randint(0, 24 * 60 * 60 - 1)
+            hours = total_seconds // (60 * 60)
+            minutes = (total_seconds % (60 * 60)) // 60
+            seconds = total_seconds % 60
+
+            # "utc" is a noun here.
+            handled_utc = datetime.datetime(utc_then.year, utc_then.month, utc_then.day, hours, minutes, seconds, random.randint(0, 1000000 - 1), tzinfo=datetime.UTC)
+
+            task = random.choice(task_list.tasks) # Allowing duplicates.
+
+            handled_task = copy.copy(task)
+            handled_task.handled_utc = handled_utc
+
+            if index < done_tasks:
+                handled_task.result = TaskResult.Done
+
+            else:
+                handled_task.result = TaskResult.Postponed
+
+            handled_task_list.create_task(handled_task, no_save=True)
+
+    handled_task_list.save()
+
 def select_shown_tasks(handled_task_list, task_list, shows_all):
-    seven_days_ago_utc = datetime.get_utc_now() - datetime.datetime.timedelta(days=7)
+    seven_days_ago_utc = dt.get_utc_now() - datetime.timedelta(days=7)
     handled_tasks_in_last_seven_days = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > seven_days_ago_utc]
 
     execution_counts = {}
@@ -242,6 +350,10 @@ try:
             if string.equals_ignore_case(command, "help"):
                 console.print("Commands:")
                 console.print("help", indents=string.leveledIndents[1])
+
+                if debugging.is_debugging():
+                    console.print("sample => Generates sample data.", indents=string.leveledIndents[1])
+
                 console.print("create <times_per_week> <content>", indents=string.leveledIndents[1])
                 console.print("all => Shows all tasks including inactive/hidden ones.", indents=string.leveledIndents[1])
                 console.print("done <task_number>", indents=string.leveledIndents[1])
@@ -256,9 +368,13 @@ try:
                 console.print("exit", indents=string.leveledIndents[1])
                 continue
 
+            elif debugging.is_debugging() and string.equals_ignore_case(command, "sample"):
+                generate_sample_data(handled_task_list, task_list)
+                continue
+
             elif string.equals_ignore_case(command, "create"):
                 if validate_times_per_week(number) and parameter:
-                    task_list.create_task(TaskInfo(uuid.uuid4(), datetime.get_utc_now(), None, True, True, parameter, number, None))
+                    task_list.create_task(TaskInfo(uuid.uuid4(), dt.get_utc_now(), None, True, True, parameter, number, None))
                     continue
 
             elif string.equals_ignore_case(command, "all"):
@@ -272,7 +388,7 @@ try:
                     # is_shown is not saved.
 
                     handled_task = copy.copy(task)
-                    handled_task.handled_utc = datetime.get_utc_now()
+                    handled_task.handled_utc = dt.get_utc_now()
                     handled_task.result = TaskResult.Done
                     handled_task_list.create_task(handled_task)
 
@@ -285,7 +401,7 @@ try:
                     # is_shown is not saved.
 
                     handled_task = copy.copy(task)
-                    handled_task.handled_utc = datetime.get_utc_now()
+                    handled_task.handled_utc = dt.get_utc_now()
                     handled_task.result = TaskResult.Postponed
                     handled_task_list.create_task(handled_task)
 

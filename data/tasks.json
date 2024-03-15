@@ -1,92 +1,317 @@
 ﻿[
     {
-        "guid": "0e3fa562-fcb1-4b81-9071-80f04e46468a",
-        "creation_utc": "2024-03-14T08:34:27.469371+00:00",
+        "guid": "cf3070cd-c073-4e9d-9cfb-23eaa69d6d9b",
+        "creation_utc": "2024-03-15T05:30:45.249262+00:00",
         "handled_utc": null,
         "is_active": true,
-        "content": "Vacuum living room",
-        "times_per_week": 1,
-        "result": null
-    },
-    {
-        "guid": "eef432df-2761-4dd1-b48a-e96ffa18dee2",
-        "creation_utc": "2024-03-14T08:34:33.210950+00:00",
-        "handled_utc": null,
-        "is_active": true,
-        "content": "Do laundry",
-        "times_per_week": 2,
-        "result": null
-    },
-    {
-        "guid": "11e1aeec-a6c6-427a-a022-9bcdd7f98074",
-        "creation_utc": "2024-03-14T08:34:38.031287+00:00",
-        "handled_utc": null,
-        "is_active": true,
-        "content": "Prepare healthy meals",
-        "times_per_week": 7,
-        "result": null
-    },
-    {
-        "guid": "13c02ee3-507a-4aae-a6aa-e73fbdd0ef8b",
-        "creation_utc": "2024-03-14T08:34:44.632627+00:00",
-        "handled_utc": null,
-        "is_active": true,
-        "content": "Exercise for 30 minutes",
+        "content": "Check the mail",
         "times_per_week": 3,
         "result": null
     },
     {
-        "guid": "0517aba8-3030-4986-ae52-4c061d55a0ff",
-        "creation_utc": "2024-03-14T08:34:49.677013+00:00",
+        "guid": "845fe3b3-b714-4394-9fd2-5f4538f8a5bc",
+        "creation_utc": "2024-03-15T05:30:45.249262+00:00",
         "handled_utc": null,
         "is_active": true,
-        "content": "Call a family member or friend",
+        "content": "Water indoor plants",
         "times_per_week": 2,
         "result": null
     },
     {
-        "guid": "96cd56d7-a9e7-499b-a014-c8b78687b424",
-        "creation_utc": "2024-03-14T08:34:55.356250+00:00",
+        "guid": "7a3e00eb-faa7-45d9-9065-19aecc91439f",
+        "creation_utc": "2024-03-15T05:30:45.249262+00:00",
         "handled_utc": null,
         "is_active": true,
-        "content": "Write in a journal",
+        "content": "Take out the trash",
         "times_per_week": 3,
         "result": null
     },
     {
-        "guid": "2d561de0-4a32-43bc-bad3-e0c85df01a01",
-        "creation_utc": "2024-03-14T08:35:00.941004+00:00",
+        "guid": "59e2ed56-1c8c-4540-906b-5b603cb678f7",
+        "creation_utc": "2024-03-15T05:30:45.249262+00:00",
         "handled_utc": null,
         "is_active": true,
-        "content": "Spend time in nature",
-        "times_per_week": 2,
+        "content": "Make the bed daily",
+        "times_per_week": 7,
         "result": null
     },
     {
-        "guid": "a0c0db44-489e-4d5e-869d-ab286a2587f8",
-        "creation_utc": "2024-03-14T08:35:06.223376+00:00",
+        "guid": "2bbde17b-88b7-4e7f-acfe-afcc57c9a34c",
+        "creation_utc": "2024-03-15T05:30:45.249262+00:00",
         "handled_utc": null,
         "is_active": true,
-        "content": "Review and pay bills",
+        "content": "Dust the living room",
         "times_per_week": 1,
         "result": null
     },
     {
-        "guid": "105f3839-1944-4a4d-92be-b6f2f6de23c5",
-        "creation_utc": "2024-03-14T08:35:11.088357+00:00",
+        "guid": "a4e83ae9-b51b-4802-b206-4fa4e3b08593",
+        "creation_utc": "2024-03-15T05:30:45.249262+00:00",
         "handled_utc": null,
         "is_active": true,
-        "content": "Run errands",
+        "content": "Get a haircut",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "e4330411-1fe2-4bca-91a6-2eb69bd8fc93",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Charge electronics",
+        "times_per_week": 4,
+        "result": null
+    },
+    {
+        "guid": "c8b3ede7-e79f-4173-9326-8793433b4c79",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Clean the bathroom sink",
         "times_per_week": 2,
         "result": null
     },
     {
-        "guid": "feabbb2f-d55f-4306-adcc-de5f968669b2",
-        "creation_utc": "2024-03-14T08:35:16.229912+00:00",
+        "guid": "1146cc28-e1d5-45a8-a0b6-edcc2ceb4ce6",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
         "handled_utc": null,
         "is_active": true,
-        "content": "Pet care tasks",
+        "content": "Restock toiletries",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "fb9d8aee-fe33-4225-99a0-1a6b28f7b81b",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Vacuum the floor",
+        "times_per_week": 2,
+        "result": null
+    },
+    {
+        "guid": "d99f915d-e439-4271-b36d-2a29d2e4ede4",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Check home security devices",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "b99e2396-60c3-4a63-82f2-ba8b72a97552",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Review personal finances",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "69511d39-b493-4fa3-a654-b02052eafd74",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Wipe kitchen counters",
+        "times_per_week": 4,
+        "result": null
+    },
+    {
+        "guid": "5ea8ef09-2266-4b34-a80b-cb410d5bb7e8",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Check the refrigerator for expired items",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "18a46cde-2825-46ae-8564-c9cae94077e7",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Clean the microwave",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "1ef30ed3-9f2a-4cda-992b-e5f43c5cc752",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Do the laundry",
+        "times_per_week": 2,
+        "result": null
+    },
+    {
+        "guid": "c524ed20-07cc-4909-b719-6cc6e9351f8f",
+        "creation_utc": "2024-03-15T05:30:45.250738+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Change the bed sheets",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "269d1e64-6af2-4a16-99cd-2eb39e0f6fc7",
+        "creation_utc": "2024-03-15T05:30:45.251766+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Clean the windows",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "390fe16e-cdcb-4a64-933c-6edbe5b659f3",
+        "creation_utc": "2024-03-15T05:30:45.251766+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Sweep the porch",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "5c010331-c66d-49cb-8a5b-b24ab48df1e3",
+        "creation_utc": "2024-03-15T05:30:45.251766+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Water the garden",
+        "times_per_week": 3,
+        "result": null
+    },
+    {
+        "guid": "4118aff7-64d0-47c4-b0b2-c851bdd744ae",
+        "creation_utc": "2024-03-15T05:30:45.251766+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Check for mail packages",
+        "times_per_week": 2,
+        "result": null
+    },
+    {
+        "guid": "a6e036ed-d036-4123-a09a-fcefb1961ad0",
+        "creation_utc": "2024-03-15T05:30:45.251766+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Clean out the car",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "ec9c3c93-34fc-4acf-b88d-c09b0b980675",
+        "creation_utc": "2024-03-15T05:30:45.251766+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Back up digital files",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "ec1fd301-7cad-42a0-ae60-15c38ee11fa0",
+        "creation_utc": "2024-03-15T05:30:45.251766+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Update computer software",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "7ac02733-075c-4869-bcd0-2aa55030dd78",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Check smoke detectors",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "0c828eca-2f5c-4934-9de3-c32f88998015",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Replace air filters",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "624a43e4-460d-4fe9-8eea-46117907f782",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Organize the desk",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "dddb9897-0870-4359-bb71-56edbe9e4b09",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Tidy living spaces",
+        "times_per_week": 3,
+        "result": null
+    },
+    {
+        "guid": "9cca5b6a-c6de-4075-8d2f-28611815cbc2",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Wash the dishes",
         "times_per_week": 7,
+        "result": null
+    },
+    {
+        "guid": "37ae2c89-472e-4b44-8dd7-97b743c40ee8",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Restock the fridge and pantry",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "b1eb984c-353d-4a97-bb7a-40601480f66d",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Check for needed repairs around the home",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "8ebc1050-7c9b-426b-b33b-59a2ad303a70",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Plan weekly meals",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "e9dc9129-e43e-4413-8258-9e1a679d32a4",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Prepare work or school bags",
+        "times_per_week": 5,
+        "result": null
+    },
+    {
+        "guid": "05a640cd-1214-4c92-923d-2870ab8fdf76",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Check pet supplies",
+        "times_per_week": 1,
+        "result": null
+    },
+    {
+        "guid": "bcfab33d-e9bd-4f02-9134-134c922474dc",
+        "creation_utc": "2024-03-15T05:30:45.252269+00:00",
+        "handled_utc": null,
+        "is_active": true,
+        "content": "Review appointments and schedules",
+        "times_per_week": 3,
         "result": null
     }
 ]
