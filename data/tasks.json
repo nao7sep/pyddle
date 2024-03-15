@@ -2,81 +2,91 @@
     {
         "guid": "0e3fa562-fcb1-4b81-9071-80f04e46468a",
         "creation_utc": "2024-03-14T08:34:27.469371+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Vacuum living room",
-        "times_per_week": 1
+        "times_per_week": 1,
+        "result": null
     },
     {
         "guid": "eef432df-2761-4dd1-b48a-e96ffa18dee2",
         "creation_utc": "2024-03-14T08:34:33.210950+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Do laundry",
-        "times_per_week": 2
+        "times_per_week": 2,
+        "result": null
     },
     {
         "guid": "11e1aeec-a6c6-427a-a022-9bcdd7f98074",
         "creation_utc": "2024-03-14T08:34:38.031287+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Prepare healthy meals",
-        "times_per_week": 7
+        "times_per_week": 7,
+        "result": null
     },
     {
         "guid": "13c02ee3-507a-4aae-a6aa-e73fbdd0ef8b",
         "creation_utc": "2024-03-14T08:34:44.632627+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Exercise for 30 minutes",
-        "times_per_week": 3
+        "times_per_week": 3,
+        "result": null
     },
     {
         "guid": "0517aba8-3030-4986-ae52-4c061d55a0ff",
         "creation_utc": "2024-03-14T08:34:49.677013+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Call a family member or friend",
-        "times_per_week": 2
+        "times_per_week": 2,
+        "result": null
     },
     {
         "guid": "96cd56d7-a9e7-499b-a014-c8b78687b424",
         "creation_utc": "2024-03-14T08:34:55.356250+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Write in a journal",
-        "times_per_week": 3
+        "times_per_week": 3,
+        "result": null
     },
     {
         "guid": "2d561de0-4a32-43bc-bad3-e0c85df01a01",
         "creation_utc": "2024-03-14T08:35:00.941004+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Spend time in nature",
-        "times_per_week": 2
+        "times_per_week": 2,
+        "result": null
     },
     {
         "guid": "a0c0db44-489e-4d5e-869d-ab286a2587f8",
         "creation_utc": "2024-03-14T08:35:06.223376+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Review and pay bills",
-        "times_per_week": 1
+        "times_per_week": 1,
+        "result": null
     },
     {
         "guid": "105f3839-1944-4a4d-92be-b6f2f6de23c5",
         "creation_utc": "2024-03-14T08:35:11.088357+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Run errands",
-        "times_per_week": 2
+        "times_per_week": 2,
+        "result": null
     },
     {
         "guid": "feabbb2f-d55f-4306-adcc-de5f968669b2",
         "creation_utc": "2024-03-14T08:35:16.229912+00:00",
-        "done_utc": null,
+        "handled_utc": null,
         "is_active": true,
         "content": "Pet care tasks",
-        "times_per_week": 7
+        "times_per_week": 7,
+        "result": null
     }
 ]

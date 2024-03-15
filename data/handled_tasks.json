@@ -2,25 +2,28 @@
     {
         "guid": "105f3839-1944-4a4d-92be-b6f2f6de23c5",
         "creation_utc": "2024-03-14T08:35:11.088357+00:00",
-        "done_utc": "2024-03-14T08:36:11.433590+00:00",
+        "handled_utc": "2024-03-14T08:36:11.433590+00:00",
         "is_active": true,
         "content": "Run errands",
-        "times_per_week": 2
+        "times_per_week": 2,
+        "result": "Done"
     },
     {
         "guid": "96cd56d7-a9e7-499b-a014-c8b78687b424",
         "creation_utc": "2024-03-14T08:34:55.356250+00:00",
-        "done_utc": "2024-03-14T08:36:14.006693+00:00",
+        "handled_utc": "2024-03-14T08:36:14.006693+00:00",
         "is_active": true,
         "content": "Write in a journal",
-        "times_per_week": 3
+        "times_per_week": 3,
+        "result": "Done"
     },
     {
         "guid": "11e1aeec-a6c6-427a-a022-9bcdd7f98074",
         "creation_utc": "2024-03-14T08:34:38.031287+00:00",
-        "done_utc": "2024-03-14T08:36:16.022346+00:00",
+        "handled_utc": "2024-03-14T08:36:16.022346+00:00",
         "is_active": true,
         "content": "Prepare healthy meals",
-        "times_per_week": 7
+        "times_per_week": 7,
+        "result": "Done"
     }
 ]
