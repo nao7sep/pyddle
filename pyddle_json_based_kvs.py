@@ -109,7 +109,7 @@ def save_kvs_data_to_file(path, data):
 
         cursor.execute("INSERT INTO pyddle_kvs_strings (utc, string) "
                            "VALUES (?, ?)",
-                           (datetime.datetime.now(datetime.UTC), json_string))
+                           (datetime.datetime.now(datetime.UTC).isoformat(), json_string))
 
         connection.commit()
 

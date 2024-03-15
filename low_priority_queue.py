@@ -14,6 +14,7 @@ import pyddle_json_based_kvs as kvs
 import pyddle_string as string
 import random
 import re
+import sqlite3
 import traceback
 import uuid
 
@@ -78,8 +79,9 @@ def deserialize_task(task_data):
     )
 
 class TaskList:
-    def __init__(self, file_path):
+    def __init__(self, file_path, backups):
         self.file_path = file_path
+        self.backups = backups
         self.tasks = []
 
     def load(self):
@@ -89,10 +91,27 @@ class TaskList:
                 self.tasks = [deserialize_task(task_data) for task_data in data_from_json]
 
     def save(self):
-        file_system.create_parent_directory(self.file_path)
+        json_string = json.dumps(self.tasks, indent=4, default=serialize_task)
 
-        with file_system.open_file_and_write_utf_encoding_bom(self.file_path) as tasks_file:
-            json.dump(self.tasks, tasks_file, indent=4, default=serialize_task)
+        file_system.create_parent_directory(self.file_path)
+        file_system.write_all_text_to_file(self.file_path, json_string)
+
+        if self.backups:
+            root, _ = os.path.splitext(self.file_path)
+            backup_file_path = root + ".db"
+
+            with sqlite3.connect(backup_file_path) as connection:
+                cursor = connection.cursor()
+
+                cursor.execute("CREATE TABLE IF NOT EXISTS low_priority_queue_task_list_strings ("
+                                   "utc DATETIME NOT NULL, "
+                                   "string TEXT NOT NULL)")
+
+                cursor.execute("INSERT INTO low_priority_queue_task_list_strings (utc, string) "
+                                   "VALUES (?, ?)",
+                                   (dt.get_utc_now().isoformat(), json_string))
+
+                connection.commit()
 
     def create_task(self, task, no_save=False):
         self.tasks.append(task)
@@ -303,10 +322,13 @@ try:
     handled_tasks_file_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}handled_tasks_file_path")
     console.print(f"handled_tasks_file_path: {handled_tasks_file_path}")
 
-    task_list = TaskList(tasks_file_path)
+    backups_task_lists = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}backups_task_lists")
+    console.print(f"backups_task_lists: {backups_task_lists}")
+
+    task_list = TaskList(tasks_file_path, backups_task_lists)
     task_list.load()
 
-    handled_task_list = TaskList(handled_tasks_file_path)
+    handled_task_list = TaskList(handled_tasks_file_path, backups_task_lists)
     handled_task_list.load()
 
     console.print("Type 'help' for a list of commands.")
