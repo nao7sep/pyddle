@@ -355,7 +355,10 @@ def show_statistics(handled_task_list, task_list, days):
             first_handled_utc = task.handled_utc
 
     # Used when the "days" parameter is not provided.
-    actual_days = (dt.get_utc_now() - first_handled_utc).days
+    # Additional note: Specified "days" will extract exactly the right amount of data from the past regardless of the current time.
+    # "stat" alone, on the other hand, lets the user see time subjectively, seeing even one second ago as a part of the first day past.
+    # So, even before 24 hours have passed since the first handling of a task, we must consider one day has passed.
+    actual_days = (dt.get_utc_now() - first_handled_utc).days + 1
 
     # Making a flat list of tuples for sorting:
 
@@ -376,11 +379,14 @@ def show_statistics(handled_task_list, task_list, days):
             # If the user has been using the app for 3 days and "stat 7" is executed for example,
             #     it would be quite natural to display how many times the tasks should be done in 7 days, rather than 3.
             expected_times = task.times_per_week * days / 7
+            # Tested.
+            # console.print_important(f"{task.content}: {execution_count}/{expected_times} times in {days} days")
 
         else:
             expected_times = task.times_per_week * actual_days / 7
+            # console.print_important(f"{task.content}: {execution_count}/{expected_times} times in {actual_days} days")
 
-        completion_rate = round(execution_count / expected_times * 100)
+        completion_rate = round(execution_count / expected_times * 100) # expected_times is guaranteed to be non-zero.
         statistics[index] = (task, execution_count, last_DONE_utc, completion_rate)
 
     # Sorting by completion_rate.
@@ -417,6 +423,8 @@ def show_statistics(handled_task_list, task_list, days):
 
             else:
                 # If we round these values, we might get a number larger than "days" here.
+                # So, the displayed values may sometimes be inconsistent with the user's subjective recognition of time.
+                # We wont consider it a problem because this app focuses on frequency/quantity management; it's not a calender.
                 past_time_string = f", {math.ceil(past_total_seconds / (24 * 60 * 60))} days ago"
 
         output_str = f"{task.content}, {completion_rate}%{past_time_string}"
