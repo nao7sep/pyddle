@@ -309,6 +309,86 @@ def validate_shown_task_index(shown_tasks, number):
 def validate_times_per_week(number):
     return number is not None and number > 0
 
+def show_statistics(handled_task_list, task_list, days):
+    # This method should only return organized data and there must be another method that displays it,
+    #     but I'll start with a simple implementation to see how it goes.
+    # At this moment, I'm not entirely sure how the data should appear and how useful it'll be.
+
+    # The following code is merely an improvised version of select_shown_tasks.
+    # If it does its job, I might just leave it as-is, though. :)
+
+    too_old_utc = dt.get_utc_now() - datetime.timedelta(days=days)
+    not_too_old_handled_tasks = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > too_old_utc]
+
+    execution_counts_and_more = {}
+
+    for task in not_too_old_handled_tasks:
+        if task.guid in execution_counts_and_more:
+            execution_count, last_handled_utc = execution_counts_and_more[task.guid]
+
+            execution_count += 1
+
+            if task.handled_utc > last_handled_utc:
+                last_handled_utc = task.handled_utc
+
+            execution_counts_and_more[task.guid] = execution_count, last_handled_utc
+
+        else:
+            execution_counts_and_more[task.guid] = 1, task.handled_utc
+
+    # Making a flat list of tuples for sorting:
+
+    statistics = []
+
+    for task in task_list.tasks:
+        if task.is_active: # We consider inactive tasks as if they had been deleted.
+            if task.guid in execution_counts_and_more:
+                execution_count, last_handled_utc = execution_counts_and_more[task.guid]
+                # The last field is completion_rate.
+                statistics.append((task, execution_count, last_handled_utc, 0))
+
+            else:
+                statistics.append((task, 0, None, 0))
+
+    for index, (task, execution_count, last_handled_utc, _) in enumerate(statistics):
+        expected_times = task.times_per_week * days / 7
+        completion_rate = round(execution_count / expected_times * 100)
+        statistics[index] = (task, execution_count, last_handled_utc, completion_rate)
+
+    # Sorting by completion_rate.
+    statistics = sorted(statistics, key=lambda x: x[3], reverse=True)
+
+    console.print("Statistics:")
+
+    for task, execution_count, last_handled_utc, completion_rate in statistics:
+        past_time_string = ""
+
+        if last_handled_utc:
+            past_total_seconds = (dt.get_utc_now() - last_handled_utc).total_seconds()
+
+            if past_total_seconds < 60:
+                past_time_string = f", {past_total_seconds // 1} seconds ago"
+
+            elif past_total_seconds < 60 * 60:
+                past_time_string = f", {past_total_seconds // 60} minutes ago"
+
+            elif past_total_seconds < 24 * 60 * 60:
+                past_time_string = f", {past_total_seconds // (60 * 60)} hours ago"
+
+            else:
+                past_time_string = f", {past_total_seconds // (24 * 60 * 60)} days ago"
+
+        output_str = f"{task.content}, {completion_rate}%{past_time_string}"
+
+        if completion_rate >= (200 / 3):
+            console.print(output_str, indents=string.leveledIndents[1])
+
+        elif completion_rate >= (100 / 3):
+            console.print_warning(output_str, indents=string.leveledIndents[1])
+
+        else:
+            console.print_error(output_str, indents=string.leveledIndents[1])
+
 # ------------------------------------------------------------------------------
 #     Application
 # ------------------------------------------------------------------------------
@@ -387,6 +467,7 @@ try:
                 console.print("content <task_number> <content>", indents=string.leveledIndents[1])
                 console.print("times <task_number> <times_per_week>", indents=string.leveledIndents[1])
                 console.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=string.leveledIndents[1])
+                console.print("stat <days>", indents=string.leveledIndents[1])
                 console.print("exit", indents=string.leveledIndents[1])
                 continue
 
@@ -485,6 +566,11 @@ try:
                         console.print_warning("Destructive operation.")
                         console.print_warning("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.")
 
+                    continue
+
+            elif string.equals_ignore_case(command, "stat"):
+                if validate_times_per_week(number): # Well, it just works. :P
+                    show_statistics(handled_task_list, task_list, number)
                     continue
 
             elif string.equals_ignore_case(command, "exit"):
