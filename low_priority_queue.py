@@ -5,6 +5,7 @@ import copy
 import datetime
 import enum
 import json
+import math
 import os
 import pyddle_console as console
 import pyddle_datetime as dt
@@ -24,7 +25,7 @@ import uuid
 
 class TaskResult(enum.Enum):
     Done = 1,
-    Postponed = 2
+    Checked = 2
 
 class TaskInfo:
     def __init__(self, guid, creation_utc, handled_utc, is_active, is_shown, content, times_per_week, result: TaskResult):
@@ -204,12 +205,12 @@ def generate_sample_data(handled_task_list, task_list):
 
     days = 365 # Just enough to test the "stat" command.
     inclusive_min_handled_tasks_per_day = 0
-    inclusive_max_handled_tasks_per_day = round(len(tasks) * 7 / 10)
-    done_tasks_out_of_10_handled_ones = 7
+    inclusive_max_handled_tasks_per_day = round(len(tasks) * 2 / 3)
+    done_tasks_out_of_10_handled_ones = 20 / 3 # Preserving the old name.
 
     utc_now = dt.get_utc_now()
 
-    for day_offset in range(days - 1, -1, -1):
+    for day_offset in range(days - 1 + 1, -1 + 1, -1): # Modified not to generate a future datetime.
         # "utc" is like an adjective here.
         utc_then = utc_now - datetime.timedelta(days=day_offset)
         handled_tasks = random.randint(inclusive_min_handled_tasks_per_day, inclusive_max_handled_tasks_per_day)
@@ -224,8 +225,8 @@ def generate_sample_data(handled_task_list, task_list):
             # https://docs.python.org/3/library/datetime.html
 
             total_seconds = random.randint(0, 24 * 60 * 60 - 1)
-            hours = total_seconds // (60 * 60)
-            minutes = (total_seconds % (60 * 60)) // 60
+            hours = math.ceil(total_seconds / (60 * 60))
+            minutes = math.ceil((total_seconds % (60 * 60)) / 60)
             seconds = total_seconds % 60
 
             # "utc" is a noun here.
@@ -240,7 +241,7 @@ def generate_sample_data(handled_task_list, task_list):
                 handled_task.result = TaskResult.Done
 
             else:
-                handled_task.result = TaskResult.Postponed
+                handled_task.result = TaskResult.Checked
 
             handled_task_list.create_task(handled_task, no_save=True)
 
@@ -317,24 +318,44 @@ def show_statistics(handled_task_list, task_list, days):
     # The following code is merely an improvised version of select_shown_tasks.
     # If it does its job, I might just leave it as-is, though. :)
 
-    too_old_utc = dt.get_utc_now() - datetime.timedelta(days=days)
-    not_too_old_handled_tasks = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > too_old_utc]
+    if days:
+        too_old_utc = dt.get_utc_now() - datetime.timedelta(days=days)
+        not_too_old_handled_tasks = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > too_old_utc]
+
+    else:
+        not_too_old_handled_tasks = handled_task_list.tasks
 
     execution_counts_and_more = {}
+    first_handled_utc = dt.get_utc_now()
 
     for task in not_too_old_handled_tasks:
         if task.guid in execution_counts_and_more:
-            execution_count, last_handled_utc = execution_counts_and_more[task.guid]
+            execution_count, last_DONE_utc = execution_counts_and_more[task.guid]
 
             execution_count += 1
 
-            if task.handled_utc > last_handled_utc:
-                last_handled_utc = task.handled_utc
+            if task.result is TaskResult.Done:
+                if last_DONE_utc:
+                    if task.handled_utc > last_DONE_utc:
+                        last_DONE_utc = task.handled_utc
 
-            execution_counts_and_more[task.guid] = execution_count, last_handled_utc
+                else:
+                    last_DONE_utc = task.handled_utc
+
+            execution_counts_and_more[task.guid] = execution_count, last_DONE_utc
 
         else:
-            execution_counts_and_more[task.guid] = 1, task.handled_utc
+            if task.result is TaskResult.Done:
+                execution_counts_and_more[task.guid] = 1, task.handled_utc
+
+            else:
+                execution_counts_and_more[task.guid] = 1, None
+
+        if task.handled_utc < first_handled_utc:
+            first_handled_utc = task.handled_utc
+
+    # Used when the "days" parameter is not provided.
+    actual_days = (dt.get_utc_now() - first_handled_utc).days
 
     # Making a flat list of tuples for sorting:
 
@@ -343,40 +364,60 @@ def show_statistics(handled_task_list, task_list, days):
     for task in task_list.tasks:
         if task.is_active: # We consider inactive tasks as if they had been deleted.
             if task.guid in execution_counts_and_more:
-                execution_count, last_handled_utc = execution_counts_and_more[task.guid]
+                execution_count, last_DONE_utc = execution_counts_and_more[task.guid]
                 # The last field is completion_rate.
-                statistics.append((task, execution_count, last_handled_utc, 0))
+                statistics.append((task, execution_count, last_DONE_utc, 0))
 
             else:
                 statistics.append((task, 0, None, 0))
 
-    for index, (task, execution_count, last_handled_utc, _) in enumerate(statistics):
-        expected_times = task.times_per_week * days / 7
+    for index, (task, execution_count, last_DONE_utc, _) in enumerate(statistics):
+        if days:
+            # If the user has been using the app for 3 days and "stat 7" is executed for example,
+            #     it would be quite natural to display how many times the tasks should be done in 7 days, rather than 3.
+            expected_times = task.times_per_week * days / 7
+
+        else:
+            expected_times = task.times_per_week * actual_days / 7
+
         completion_rate = round(execution_count / expected_times * 100)
-        statistics[index] = (task, execution_count, last_handled_utc, completion_rate)
+        statistics[index] = (task, execution_count, last_DONE_utc, completion_rate)
 
     # Sorting by completion_rate.
     statistics = sorted(statistics, key=lambda x: x[3], reverse=True)
 
-    console.print("Statistics:")
+    if days:
+        console.print(f"Past {days} days:")
 
-    for task, execution_count, last_handled_utc, completion_rate in statistics:
+    else:
+        console.print(f"Past {actual_days} days:")
+
+    # This could be checked a few blocks earlier,
+    #     but the statistics are unavailable only in the beginning.
+    if not statistics:
+        console.print("No data available.", indents=string.leveledIndents[1])
+        return
+
+    for task, execution_count, last_DONE_utc, completion_rate in statistics:
         past_time_string = ""
 
-        if last_handled_utc:
-            past_total_seconds = (dt.get_utc_now() - last_handled_utc).total_seconds()
+        if last_DONE_utc:
+            past_total_seconds = (dt.get_utc_now() - last_DONE_utc).total_seconds()
 
             if past_total_seconds < 60:
-                past_time_string = f", {past_total_seconds // 1} seconds ago"
+                # The // operator seems to leave the fraction part.
+                # math.ceil converts the value to an integer.
+                past_time_string = f", {math.ceil(past_total_seconds / 1)} seconds ago"
 
             elif past_total_seconds < 60 * 60:
-                past_time_string = f", {past_total_seconds // 60} minutes ago"
+                past_time_string = f", {math.ceil(past_total_seconds / 60)} minutes ago"
 
             elif past_total_seconds < 24 * 60 * 60:
-                past_time_string = f", {past_total_seconds // (60 * 60)} hours ago"
+                past_time_string = f", {math.ceil(past_total_seconds / (60 * 60))} hours ago"
 
             else:
-                past_time_string = f", {past_total_seconds // (24 * 60 * 60)} days ago"
+                # If we round these values, we might get a number larger than "days" here.
+                past_time_string = f", {math.ceil(past_total_seconds / (24 * 60 * 60))} days ago"
 
         output_str = f"{task.content}, {completion_rate}%{past_time_string}"
 
@@ -458,8 +499,8 @@ try:
 
                 console.print("create <times_per_week> <content>", indents=string.leveledIndents[1])
                 console.print("all => Shows all tasks including inactive/hidden ones.", indents=string.leveledIndents[1])
-                console.print("done <task_number>", indents=string.leveledIndents[1])
-                console.print("later <task_number>", indents=string.leveledIndents[1])
+                console.print("done <task_number> => Means you have done it.", indents=string.leveledIndents[1])
+                console.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=string.leveledIndents[1])
                 console.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=string.leveledIndents[1])
                 console.print("activate <task_number>", indents=string.leveledIndents[1])
                 console.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=string.leveledIndents[1])
@@ -467,7 +508,7 @@ try:
                 console.print("content <task_number> <content>", indents=string.leveledIndents[1])
                 console.print("times <task_number> <times_per_week>", indents=string.leveledIndents[1])
                 console.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=string.leveledIndents[1])
-                console.print("stat <days>", indents=string.leveledIndents[1])
+                console.print("stat (<days>) => Uses all data if no number is provided.", indents=string.leveledIndents[1])
                 console.print("exit", indents=string.leveledIndents[1])
                 continue
 
@@ -497,7 +538,7 @@ try:
 
                     continue
 
-            elif string.equals_ignore_case(command, "later"):
+            elif string.equals_ignore_case(command, "check"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = False
@@ -505,7 +546,7 @@ try:
 
                     handled_task = copy.copy(task)
                     handled_task.handled_utc = dt.get_utc_now()
-                    handled_task.result = TaskResult.Postponed
+                    handled_task.result = TaskResult.Checked
                     handled_task_list.create_task(handled_task)
 
                     continue
@@ -571,6 +612,10 @@ try:
             elif string.equals_ignore_case(command, "stat"):
                 if validate_times_per_week(number): # Well, it just works. :P
                     show_statistics(handled_task_list, task_list, number)
+                    continue
+
+                elif number is None:
+                    show_statistics(handled_task_list, task_list, days=None)
                     continue
 
             elif string.equals_ignore_case(command, "exit"):
