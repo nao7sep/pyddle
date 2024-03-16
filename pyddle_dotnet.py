@@ -314,10 +314,9 @@ def find_referenced_project(solutions, referenced_project_name):
             if string.equals_ignore_case(project.name, referenced_project_name):
                 return project
 
-# We should be able to compare the object references, but just making sure.
 def is_referenced_project(project, referenced_projects):
     for referenced_project in referenced_projects:
-        if string.equals_ignore_case(project.name, referenced_project.name):
+        if project == referenced_project:
             return True
 
     return False

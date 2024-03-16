@@ -215,6 +215,19 @@ try:
             for project in solution.projects:
                     projects_to_build.append(project)
 
+    # Adding referenced projects too, making sure they are not built twice.
+
+    referenced_projects_to_build = []
+
+    for project in projects_to_build:
+        for referenced_project in project.referenced_projects:
+            if referenced_project not in referenced_projects_to_build:
+                referenced_projects_to_build.append(referenced_project)
+
+    for referenced_project in referenced_projects_to_build:
+        if referenced_project not in projects_to_build:
+            projects_to_build.append(referenced_project)
+
     if not projects_to_build:
         output.print_and_log("No projects to build.")
         sys.exit()
