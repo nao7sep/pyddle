@@ -4,42 +4,35 @@
 import pyddle_debugging as debugging
 import pyddle_string # as string
 
-def try_evaluate(code):
-    try:
-        print(f"{code} => {eval(code)}")
-
-    except Exception as exception:
-        print(f"{code} => {exception}")
-
 # ------------------------------------------------------------------------------
 #     equals_at
 # ------------------------------------------------------------------------------
 
 # Starting with obvious cases.
-try_evaluate('None.startswith("")')
-try_evaluate('"".startswith(None)')
+debugging.try_evaluate('None.startswith("")')
+debugging.try_evaluate('"".startswith(None)')
 
 # "" and "" are obviously equal.
 # Then, does "" technically start with ""?
-try_evaluate('"".startswith("")')
-try_evaluate('"a".startswith("")')
-try_evaluate('"".startswith("a")') # The substring is longer.
+debugging.try_evaluate('"".startswith("")')
+debugging.try_evaluate('"a".startswith("")')
+debugging.try_evaluate('"".startswith("a")') # The substring is longer.
 
 # equals_at must act like startswith as they are both partial equality checkers.
 # I dont think the error types need to be identical, but something must be raised in similar situations.
-try_evaluate('pyddle_string.equals_at(None, 0, "")')
-try_evaluate('pyddle_string.equals_at("", 0, None)')
-try_evaluate('pyddle_string.equals_at("", 0, "")') # Commented in the method's source code.
+debugging.try_evaluate('pyddle_string.equals_at(None, 0, "")')
+debugging.try_evaluate('pyddle_string.equals_at("", 0, None)')
+debugging.try_evaluate('pyddle_string.equals_at("", 0, "")') # Commented in the method's source code.
 
 # Bad index.
-try_evaluate('pyddle_string.equals_at("", None, "")')
-try_evaluate('pyddle_string.equals_at("", -1, "")')
-try_evaluate('pyddle_string.equals_at("", 1, "")')
+debugging.try_evaluate('pyddle_string.equals_at("", None, "")')
+debugging.try_evaluate('pyddle_string.equals_at("", -1, "")')
+debugging.try_evaluate('pyddle_string.equals_at("", 1, "")')
 
-try_evaluate('pyddle_string.equals_at("012", 1, "1")')
-try_evaluate('pyddle_string.equals_at("012", 1, "12")')
+debugging.try_evaluate('pyddle_string.equals_at("012", 1, "1")')
+debugging.try_evaluate('pyddle_string.equals_at("012", 1, "12")')
 # A substring given to startswith may be longer than the source string.
-try_evaluate('pyddle_string.equals_at("012", 1, "123")')
+debugging.try_evaluate('pyddle_string.equals_at("012", 1, "123")')
 
 # None.startswith("") => 'NoneType' object has no attribute 'startswith'
 # "".startswith(None) => startswith first arg must be str or a tuple of str, not NoneType
@@ -73,30 +66,30 @@ try_evaluate('pyddle_string.equals_at("012", 1, "123")')
 # I expect index_of to work like C#'s String.IndexOf, returning -1 when the substring is not found.
 # index_of_any must raise an error when index_of(each_substring) would.
 
-try_evaluate('None.find("")')
-try_evaluate('"".find(None)')
+debugging.try_evaluate('None.find("")')
+debugging.try_evaluate('"".find(None)')
 
-try_evaluate('"".find("")') # Finds "" and returns 0.
-try_evaluate('"a".find("")') # Again returns 0.
-try_evaluate('"".find("a")')
+debugging.try_evaluate('"".find("")') # Finds "" and returns 0.
+debugging.try_evaluate('"a".find("")') # Again returns 0.
+debugging.try_evaluate('"".find("a")')
 
-try_evaluate('pyddle_string.index_of_any(None, [""])') # Must go through len(str).
-try_evaluate('pyddle_string.index_of_any("", [None])') # Checked explicitly.
+debugging.try_evaluate('pyddle_string.index_of_any(None, [""])') # Must go through len(str).
+debugging.try_evaluate('pyddle_string.index_of_any("", [None])') # Checked explicitly.
 
-try_evaluate('pyddle_string.index_of_any("", [""])')
-try_evaluate('pyddle_string.index_of_any("a", [""])')
-try_evaluate('pyddle_string.index_of_any("", ["a"])')
+debugging.try_evaluate('pyddle_string.index_of_any("", [""])')
+debugging.try_evaluate('pyddle_string.index_of_any("a", [""])')
+debugging.try_evaluate('pyddle_string.index_of_any("", ["a"])')
 
 # Again the edge-of-cliff situation described in pyddle_string.py occurs and 1 is returned.
 # last_index_of_any too must explicitly return the length of the source string
 #     when at least one of the substrings is "".
 
-try_evaluate('"a".rfind("")')
-try_evaluate('pyddle_string.last_index_of_any("a", [""])')
+debugging.try_evaluate('"a".rfind("")')
+debugging.try_evaluate('pyddle_string.last_index_of_any("a", [""])')
 
 # Just making sure.
-try_evaluate('pyddle_string.last_index_of_any("012", ["1"])')
-try_evaluate('pyddle_string.last_index_of_any("012", ["3"])')
+debugging.try_evaluate('pyddle_string.last_index_of_any("012", ["1"])')
+debugging.try_evaluate('pyddle_string.last_index_of_any("012", ["3"])')
 
 # None.find("") => 'NoneType' object has no attribute 'find'
 # "".find(None) => must be str, not NoneType
