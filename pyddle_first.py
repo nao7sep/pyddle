@@ -3,6 +3,7 @@
 
 # DONT import anything from pyddle in this script.
 import os
+import pyddle_path # path is a too common name.
 
 # ------------------------------------------------------------------------------
 #     Main script file path
@@ -23,7 +24,7 @@ def set_main_script_file_path(file_path):
         raise RuntimeError(f"File not found: {file_path}")
 
     main_script_file_path = file_path
-    main_script_file_name = os.path.basename(file_path)
+    main_script_file_name = pyddle_path.basename(file_path)
     main_script_file_name_without_extension, main_script_file_extension = os.path.splitext(main_script_file_name)
 
 def get_main_script_file_path():

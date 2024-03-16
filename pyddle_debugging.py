@@ -2,10 +2,11 @@
 # This scripts contains debugging-related functions.
 
 import os
-import pyddle_string as string
+import pyddle_path # Required for test_path.py.
+import pyddle_string
 
 def is_debugging():
-    return string.equals_ignore_case(os.getenv('TERM_PROGRAM'), 'vscode') # Must be updated periodically.
+    return pyddle_string.equals_ignore_case(os.getenv('TERM_PROGRAM'), 'vscode') # Must be updated periodically.
 
 def try_evaluate(code):
     try:

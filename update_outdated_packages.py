@@ -5,6 +5,7 @@ import importlib.util
 import json
 import os
 import pyddle_debugging as debugging
+import pyddle_path # path is a too common name.
 import pyddle_string as string
 import subprocess
 import sys
@@ -13,7 +14,7 @@ import sys
 
 print("Python executable: ", sys.executable)
 
-directory_path = os.path.dirname(sys.executable)
+directory_path = pyddle_path.dirname(sys.executable)
 
 # Get the path to the pip executable.
 

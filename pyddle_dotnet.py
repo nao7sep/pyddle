@@ -4,6 +4,7 @@
 import json
 import os
 import pyddle_file_system as file_system
+import pyddle_path # path is a too common name.
 import pyddle_string as string
 import re
 import shutil
@@ -266,7 +267,7 @@ def extract_referenced_project_names_from_csproj_file(path):
 
                 if include:
                     # It's usually like: <ProjectReference Include="..\yyLib\yyLib.csproj" />
-                    file_name_without_extension, _ = os.path.splitext(os.path.basename(include))
+                    file_name_without_extension, _ = os.path.splitext(pyddle_path.basename(include))
                     referenced_project_names.append(file_name_without_extension)
 
             for reference in item_group.findall("Reference", namespaces=namespaces):
@@ -348,7 +349,7 @@ def sort_projects_to_build(projects):
 def archive_solution(solution, not_archived_directory_names=None, not_archived_file_names=None):
     messages = []
 
-    solution_archives_directory_path = os.path.dirname(solution.source_archive_file_path)
+    solution_archives_directory_path = pyddle_path.dirname(solution.source_archive_file_path)
     os.makedirs(solution_archives_directory_path, exist_ok=True)
 
     archived_file_count = file_system.zip_archive_directory(solution.directory_path, solution.source_archive_file_path, not_archived_directory_names, not_archived_file_names)
@@ -446,7 +447,7 @@ def build_and_archive_project(project, supported_runtimes, not_archived_director
         result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
         messages.extend(subprocess_result_into_messages(result))
 
-        solution_archives_directory_path = os.path.dirname(project.solution.source_archive_file_path)
+        solution_archives_directory_path = pyddle_path.dirname(project.solution.source_archive_file_path)
         os.makedirs(solution_archives_directory_path, exist_ok=True) # Negligible cost to be repeated.
 
         binaries_archive_file_name = f"{project.name}-v{project.version_string}-{supported_runtime}.zip"

@@ -2,7 +2,7 @@
 # A script to test pyddle_string.py and any string-related operations.
 
 import pyddle_debugging as debugging
-import pyddle_string # as string
+# pyddle_string must be imported in pyddle_debugging.
 
 # ------------------------------------------------------------------------------
 #     equals_at

@@ -6,8 +6,9 @@ import os
 import pyddle_datetime
 import pyddle_file_system as file_system
 import pyddle_first as first
+import pyddle_path # path is a too common name.
 
-logs_directory_path = os.path.join(os.path.dirname(__file__), "logs")
+logs_directory_path = os.path.join(pyddle_path.dirname(__file__), "logs")
 
 # Requires the developer to call pyddle_first.set_main_script_file_path() before using this module.
 # I think it's OK; it's quick, runs at negligible cost and certainly improves the usability of the log file.

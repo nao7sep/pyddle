@@ -2,11 +2,12 @@
 # This script contains file-system-related functions.
 
 import os
+import pyddle_path # path is a too common name.
 import pyddle_string as string
 import zipfile
 
 def create_parent_directory(path):
-    parent_directory_path = os.path.dirname(path)
+    parent_directory_path = pyddle_path.dirname(path)
 
     if parent_directory_path:
         os.makedirs(parent_directory_path, exist_ok=True)
@@ -14,7 +15,7 @@ def create_parent_directory(path):
 def make_and_move_to_output_subdirectory():
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
     # Supposing this module is in a subdirectory of the project's root directory.
-    output_directory_path = os.path.join(os.path.dirname(__file__), "output")
+    output_directory_path = os.path.join(pyddle_path.dirname(__file__), "output")
     os.makedirs(output_directory_path, exist_ok=True)
     os.chdir(output_directory_path)
 
@@ -179,7 +180,7 @@ def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
 # ------------------------------------------------------------------------------
 
 def zip_archive_directory(directory_path, archive_file_path, not_archived_directory_names=None, not_archived_file_names=None):
-    archive_directory_path = os.path.dirname(archive_file_path)
+    archive_directory_path = pyddle_path.dirname(archive_file_path)
     os.makedirs(archive_directory_path, exist_ok=True)
 
     # https://docs.python.org/3/library/zipfile.html
