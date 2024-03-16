@@ -20,4 +20,14 @@ debugging.try_evaluate(f'os.path.splitext(r"{windows_file_path}")')
 debugging.try_evaluate(f'os.path.splitext(r"{mac_file_path}")')
 debugging.try_evaluate(f'os.path.splitext(r"{file_name}")')
 
+# os.path.basename(r"C:\Users\username\Documents\file.txt") => C:\Users\username\Documents\file.txt
+# os.path.basename(r"/Users/username/Documents/file.txt") => file.txt
+# os.path.basename(r"file.txt") => file.txt
+# os.path.dirname(r"C:\Users\username\Documents\file.txt") =>
+# os.path.dirname(r"/Users/username/Documents/file.txt") => /Users/username/Documents
+# os.path.dirname(r"file.txt") == "" => True
+# os.path.splitext(r"C:\Users\username\Documents\file.txt") => ('C:\\Users\\username\\Documents\\file', '.txt')
+# os.path.splitext(r"/Users/username/Documents/file.txt") => ('/Users/username/Documents/file', '.txt')
+# os.path.splitext(r"file.txt") => ('file', '.txt')
+
 debugging.display_press_enter_key_to_continue_if_not_debugging()
