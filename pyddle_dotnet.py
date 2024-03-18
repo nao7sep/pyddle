@@ -442,6 +442,13 @@ def update_nuget_packages_in_project(project):
 def build_and_archive_project(project, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
     messages = []
 
+    # Added: 2024-03-18
+    # I usually run the "build" command repeatedly to test the apps and libraries before I run the "build and archive" command to finalize them.
+    # But when it was a minor change such as adding the UTF-8 BOM to some files,
+    #     I forgot to rebuild the projects and presumably archived some old binaries from the "Release" directories with newly built ones that were output to the "Publish" directories.
+    # It will take twice longer, but it's just safer to rebuild everything when we archive things, allowing us to forget about running the "build" command beforehand.
+    messages.extend(build_project(project, no_restore=False))
+
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
 
     for supported_runtime in supported_runtimes:
@@ -450,6 +457,7 @@ def build_and_archive_project(project, supported_runtimes, not_archived_director
         if os.path.isdir(runtime_specific_publish_directory_path):
             shutil.rmtree(runtime_specific_publish_directory_path)
 
+        # If we specify "--no-restore" here, the "Publish" directory will contain an incomplete set of binaries, which dont work.
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
         result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
         messages.extend(subprocess_result_into_messages(result))
