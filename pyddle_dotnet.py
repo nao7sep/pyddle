@@ -314,29 +314,37 @@ def find_referenced_project(solutions, referenced_project_name):
             if string.equals_ignore_case(project.name, referenced_project_name):
                 return project
 
-def is_referenced_project(project, referenced_projects):
-    for referenced_project in referenced_projects:
-        if project == referenced_project:
-            return True
+def get_all_referenced_projects(project):
+    referenced_projects = []
 
-    return False
+    for referenced_project in project.referenced_projects:
+        if referenced_project not in referenced_projects:
+            referenced_projects.append(referenced_project)
+
+        referenced_projects.extend(get_all_referenced_projects(referenced_project))
+
+    return referenced_projects
 
 def sort_projects_to_build(projects):
     # A simple algorithm that assumes there's no cross-referencing issues between the projects.
     # As long as the number of the projects is small, it should perform just fine.
+
+    # Extracts each project's referenced projects beforehand.
+    reference_table = { project: get_all_referenced_projects(project) for project in projects }
 
     sorted_projects = []
 
     for project in projects:
         is_referenced = False
 
-        for index in range(len(sorted_projects)):
-            if is_referenced_project(project, sorted_projects[index].referenced_projects):
+        for index, sorted_project in enumerate(sorted_projects):
+            # Comparing against the extracted list.
+            if project in reference_table[sorted_project]:
                 sorted_projects.insert(index, project)
                 is_referenced = True
                 break
 
-        if not is_referenced:
+        if is_referenced == False:
             sorted_projects.append(project)
 
     return sorted_projects
