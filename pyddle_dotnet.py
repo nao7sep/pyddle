@@ -384,7 +384,7 @@ def build_project(project, no_restore=False):
     if no_restore:
         args.append("--no-restore")
 
-    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
     return subprocess_result_into_messages(result)
 
 def update_nuget_packages_in_project(project):
@@ -393,11 +393,11 @@ def update_nuget_packages_in_project(project):
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-list-package
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "console" ] # Output for display.
-    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
     messages.extend(subprocess_result_into_messages(result))
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "json" ] # For parsing.
-    result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
 
     # When an old project contains "package.config", which isnt supported by the "dotnet" command, we get a string like the following set to "stderr":
     #     プロジェクト 'C:\Repositories\Nekote2018\Nekote2018\Nekote2018.csproj' では NuGet パッケージに package.config を使用しますが、コマンドはパッケージ参照プロジェクトでのみ動作します。
@@ -425,7 +425,7 @@ def update_nuget_packages_in_project(project):
                         # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package
 
                         args = [ "dotnet", "add", project.file_path, "package", id, "--version", latest_version ]
-                        result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+                        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
                         messages.extend(subprocess_result_into_messages(result))
 
     return messages
@@ -459,7 +459,7 @@ def build_and_archive_project(project, supported_runtimes, not_archived_director
 
         # If we specify "--no-restore" here, the "Publish" directory will contain an incomplete set of binaries, which dont work.
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
-        result = subprocess.run(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, cwd=project.directory_path)
+        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
         messages.extend(subprocess_result_into_messages(result))
 
         solution_archives_directory_path = pyddle_path.dirname(project.solution.source_archive_file_path)
