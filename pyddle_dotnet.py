@@ -149,8 +149,8 @@ class ProjectInfo:
     def update_nuget_packages(self):
         return update_nuget_packages_in_project(self)
 
-    def build_and_archive(self, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
-        return build_and_archive_project(self, supported_runtimes, not_archived_directory_names, not_archived_file_names)
+    def rebuild_and_archive(self, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
+        return rebuild_and_archive_project(self, supported_runtimes, not_archived_directory_names, not_archived_file_names)
 
 # ------------------------------------------------------------------------------
 #     Version strings
@@ -439,17 +439,38 @@ def update_nuget_packages_in_project(project):
 # Soon, AI will start refactoring large portions of code, changing the design completely.
 # Until then, although we cant say there's absolutely no merit in code analysis, it doesnt need to be a part of everyday development.
 
-def build_and_archive_project(project, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
+def rebuild_and_archive_project(project, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
     messages = []
 
-    # Added: 2024-03-18
-    # I usually run the "build" command repeatedly to test the apps and libraries before I run the "build and archive" command to finalize them.
-    # But when it was a minor change such as adding the UTF-8 BOM to some files,
-    #     I forgot to rebuild the projects and presumably archived some old binaries from the "Release" directories with newly built ones that were output to the "Publish" directories.
-    # It will take twice longer, but it's just safer to rebuild everything when we archive things, allowing us to forget about running the "build" command beforehand.
-    messages.extend(build_project(project, no_restore=False))
+    # For testing purposes only.
+    # When I wasnt sure what I was doing with "dotnet build --no-incremental" and "dotnet publish --no-build",
+    #     I had to make sure I wasnt just linking old binaries of class libraries to newly built apps.
 
+    vs_directory_path = os.path.join(project.solution.directory_path, ".vs")
+    # shutil.rmtree(vs_directory_path, ignore_errors=True)
+
+    bin_directory_path = os.path.join(project.directory_path, "bin")
+    # shutil.rmtree(bin_directory_path, ignore_errors=True)
+
+    obj_directory_path = os.path.join(project.directory_path, "obj")
+    # shutil.rmtree(obj_directory_path, ignore_errors=True)
+
+    # "dotnet publish" internally runs "dotnet build", which generates platform-agonistic binaries.
+    # When "dotnet publish" solves a ProjectReference to a class library project, it automatically converts the platform-agonistic binaries to platform-specific ones.
+    # The important thing is that it's not "dotnet build" that has to create platform-specific binaries.
+
+    # "dotnet clean" deletes files in the bin and obj directories that have been generated during the build process.
+    # As we are dealing with platform-agonistic binaries and things that were used for them during each cleanup process, we dont need to specify "--output" or "--runtime" to "dotnet clean".
+    # Then, we dont need to "dotnet build --no-incremental" or specifying "--output" or "--runtime" to it or combining that with "dotnet publish --no-build".
+    # We can just "dotnet clean" for all runtimes and then "dotnet publish" for each runtime.
+
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-clean
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
+
+    args = [ "dotnet", "clean", project.file_path, "--configuration", "Release" ]
+    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+    result.stdout = None # Redundant info.
+    messages.extend(subprocess_result_into_messages(result))
 
     for supported_runtime in supported_runtimes:
         runtime_specific_publish_directory_path = os.path.join(project.directory_path, "bin", "Publish", supported_runtime)
@@ -457,7 +478,6 @@ def build_and_archive_project(project, supported_runtimes, not_archived_director
         if os.path.isdir(runtime_specific_publish_directory_path):
             shutil.rmtree(runtime_specific_publish_directory_path)
 
-        # If we specify "--no-restore" here, the "Publish" directory will contain an incomplete set of binaries, which dont work.
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
         result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
         messages.extend(subprocess_result_into_messages(result))

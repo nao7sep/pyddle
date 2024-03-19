@@ -260,7 +260,7 @@ try:
 """Options:
     1) Build
     2) Update NuGet packages
-    3) Build and archive
+    3) Rebuild and archive
     4) Exclude a project
     5) Exit""")
 
@@ -291,14 +291,14 @@ try:
                         output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
 
             elif choice == "3":
-                output.print_and_log_important("Building and archiving...")
+                output.print_and_log_important("Rebuilding and archiving...")
 
                 archived_solutions = []
 
                 for project in projects_to_build:
                     try:
                         output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.build_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=string.leveledIndents[2]))
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=string.leveledIndents[2]))
 
                         # When we archive source code, usually, tests have been done and the projects can be built without issues.
                         # So, I wont be implementing one more loop to complicate the interaction.
