@@ -250,7 +250,7 @@ def version_digits_to_string(digits, minimum_digit_count=2):
 # Although .csproj files have been greatly simplified in .NET Core, we never know what will be added in the future.
 
 # The fundamental approach, then, is to read the default namespace if it's in the root tag, read whatever that could be a reference,
-#     loosely validate it, look for a referenced project matching the name and let it crush if the settings or the implementation require an update.
+#     loosely validate it, look for a referenced project matching the name and let it crash if the settings or the implementation require an update.
 
 def extract_referenced_project_names_from_csproj_file(path):
     """ Returns an empty list if no references are found. """
