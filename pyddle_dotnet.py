@@ -403,6 +403,11 @@ def update_nuget_packages_in_project(project):
     #     プロジェクト 'C:\Repositories\Nekote2018\Nekote2018\Nekote2018.csproj' では NuGet パッケージに package.config を使用しますが、コマンドはパッケージ参照プロジェクトでのみ動作します。
     # But the JSON output, regardless of whether there's been an error or not, seems to have the same structure, allowing us to simply look for the "frameworks" key.
 
+    # Added: 2024-03-20
+    # After attempting to use MSBuild, older versions of it, the NuGet CLI, etc to anyhow update the packages of old projects,
+    #     I ended up just migrating all the old projects from .NET Framework 4.8 to .NET 8 about a week ago.
+    # Now everything is built and archived automatically.
+
     # We need to look for "projects/frameworks/topLevelPackages", which should be an array of dictionaries.
     # In each dictionary, we get "id", "requestedVersion", "resolvedVersion", "latestVersion".
     # Maybe oneday, we might need to utilize other tools to check compatibility.
@@ -431,11 +436,14 @@ def update_nuget_packages_in_project(project):
     return messages
 
 # Originally planned to implement code analysis too, but I believe that would actually lower the productivity.
+
 # By adding <AnalysisMode>AllEnabledByDefault</AnalysisMode> to the .csproj file, we can observe a lot more warnings on Visual Studio.
 # The problem is that the analysis doesnt know what it's analyzing and so only coding-manner-related things come out.
 # Like, "Use the async version instead", "Consider making this read-only", "Dont embed a literal string", "There's a newer way of writing this", etc.
+
 # As far as I remember, the only (slightly) useful message I have ever got was a suggestion to use AsSpan instead of Substring.
 # But code analysis anyway wouldnt tell us to use IndexOf rather than a for/foreach loop when that could drastically improve the performance.
+
 # Soon, AI will start refactoring large portions of code, changing the design completely.
 # Until then, although we cant say there's absolutely no merit in code analysis, it doesnt need to be a part of everyday development.
 
@@ -443,8 +451,8 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
     messages = []
 
     # For testing purposes only.
-    # When I wasnt sure what I was doing with "dotnet build --no-incremental" and "dotnet publish --no-build",
-    #     I had to make sure I wasnt just linking old binaries of class libraries to newly built apps.
+    # When I wasnt sure what I was doing with "dotnet build --no-incremental" and "dotnet publish --no-build" due to the issues described below,
+    #     I had to make sure I wasnt unintentionally linking old binaries of class libraries to newly built apps.
 
     vs_directory_path = os.path.join(project.solution.directory_path, ".vs")
     # shutil.rmtree(vs_directory_path, ignore_errors=True)
@@ -455,22 +463,82 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
     obj_directory_path = os.path.join(project.directory_path, "obj")
     # shutil.rmtree(obj_directory_path, ignore_errors=True)
 
-    # "dotnet publish" internally runs "dotnet build", which generates platform-agonistic binaries.
-    # When "dotnet publish" solves a ProjectReference to a class library project, it automatically converts the platform-agonistic binaries to platform-specific ones.
-    # The important thing is that it's not "dotnet build" that has to create platform-specific binaries.
+    # "dotnet publish", when a runtime is specified by the "--runtime" option, internally runs "dotnet build --runtime",
+    #     which seems to generate platform-agonistic binaries (or something that can be turned into them)
+    #     somewhere in the obj directory and platform-specific ones in the bin directory.
+    # When I deleted the bin and obj directories of a project with no references and ran this script,
+    #     binaries were output ONLY to bin/Release/net8.0/win-x64 and NOT bin/Release or bin/Release/net8.0.
 
-    # "dotnet clean" deletes files in the bin and obj directories that have been generated during the build process.
-    # As we are dealing with platform-agonistic binaries and things that were used for them during each cleanup process, we dont need to specify "--output" or "--runtime" to "dotnet clean".
-    # Then, we dont need to "dotnet build --no-incremental" or specifying "--output" or "--runtime" to it or combining that with "dotnet publish --no-build".
-    # We can just "dotnet clean" for all runtimes and then "dotnet publish" for each runtime.
+    # When the files were messy and the code was unstable, my understanding was more like:
+    #     * "dotnet publish --runtime" internally calls "dotnet build" without a runtime specified
+    #     * Platform-agonistic binaries are generated to bin/Release/net8.0 by the runtime-unspecified "dotnet build"
+    #     * Platform-specific binaries are generated to bin/Release/net8.0/win-x64 by the runtime-specified "dotnet publish --runtime"
+
+    # Now I believe it's more like:
+    #     * "dotnet publish --runtime" internally calls "dotnet build --runtime" with a runtime specified
+    #     * Platform-agonistic binaries are generated somewhere in the obj directory by the runtime-specified "dotnet build --runtime"
+    #     * Platform-specific binaries are generated to bin/Release/net8.0/win-x64 by the runtime-specified "dotnet build --runtime"
+    #     * So, all the binaries are generated by the runtime-specified "dotnet build --runtime"
+    #     * "dotnet publish --runtime" just copies whatever needed, possibly updating metadata and adjusting the binaries for the runtime
+
+    # Currently, yyTodoMail references yyLib.
+    # When I rebuilt and archived them with this script, I got 2 archives.
+    # Let's call them yyTodoMail.zip and yyLib.zip here.
+
+    # What I wasnt expecting was:
+    #     * yyLib.dll in yyTodoMail.zip was different from yyLib.dll in yyLib.zip
+    #     * yyLib.dll in yyTodoMail.zip was the same as the platform-agonistic one in yyLib/bin/Release/net8.0
+    #     * yyLib.dll in yyLib.zip was the same as the platform-specific one in yyLib/bin/Release/net8.0/win-x64
+
+    # ChatGPT and other sources say that recent .NET binaries, especially those of class libraries, are generally platform-agonistic.
+    # People say different things most likely because .NET used to be a Windows-only thing and so much has changed since then.
+    # I believe now it's safe to say .NET has become like Java, where the binaries are platform-agonistic by default.
+    # Well, at least non-executable DLL files should be.
+
+    # For this reason, "dotnet publish --runtime" with a runtime specified selected the platform-agonistic binaries of yyLib for yyTodoMail,
+    #     NOT the platform-specific ones matching the runtime specified to the command, and archived them into yyTodoMail.zip.
+    # Then, this script, following its design, archived the platform-specific binaries of yyLib into yyLib.zip.
+
+    # Actually, there's not much point in distributing platform-specific binaries of class libraries
+    #     especially when their source code is available and they are easy to build.
+    # If yyLib was like a hundred times larger and more complicated to build,
+    #     distributing platform-specific binaries for all major platforms would be meaningful, though.
+
+    # Now about RE-building:
+    # "dotnet clean" deletes files in the bin and obj directories that have been generated by "dotnet build".
+    # ChatGPT said it's a platform-agnostic operation and, even when "dotnet publish --runtime" with a runtime specified had been run,
+    #     we didnt necessarily have to specify the runtime to "dotnet clean".
+    # That seemed incorrect.
+    # When I followed the advice, "dotnet publish --runtime" didnt update the binaries.
+    # In the archives, unless the source code had been changed, I always got old binaries with old timestamps.
+
+    # After some testing, I believe:
+    #     * "dotnet clean" too chooses what part of the project to clean based on the runtime specified
+    #     * If we want to rebuild a project for a specific platform, we need to run "dotnet clean --runtime" for that platform
+    #     * We need "dotnet clean" without a runtime specified ONLY if we want to rebuild the platform-agonistic binaries
+
+    # This script runs "dotnet build" without a runtime specified for "1) Build"
+    #     and "dotnet publish --runtime" with a runtime specified for "3) Rebuild and archive".
+    # #1 is for repeated testing and, therefore, should be fast by utilizing the incremental build feature.
+    # #3 is for releasing and, therefore, should rebuild everything and set the current timestamps to the binaries.
+
+    # Some say we should just delete the bin and obj directories considering that's the simplest way.
+    # I like it's simplicity, but I prefer not to do this because various runtime-generated test files too will be deleted.
+
+    # Some others say "dotnet build --no-incremental" followed by "dotnet publish --no-build" is the right way.
+    # As .NET's build system is complex, I prefer to avoid expecting the "--no-incremental" option to work perfectly
+    #     especially when a script like this attempts to build more than 10 projects at once.
+    # Sometimes, some outdated/redundant files may be left in the bin and obj directories.
+    # If there's a command that's supposed to clean things without affecting test files, let's simply use it. :)
+
+    # The algorithm in this script seems to properly sort the projects in a way that the referenced projects are built first
+    #     as long as there's no cross-referencing issues between the projects.
+    # The best practice so far is:
+    #     * "dotnet build" without a runtime specified or running "dotnet clean" beforehand for fast incremental builds to be tested
+    #     * "dotnet clean --runtime" followed by "dotnet publish --runtime" for platform-specific binaries to be distributed
 
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-clean
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
-
-    args = [ "dotnet", "clean", project.file_path, "--configuration", "Release" ]
-    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
-    result.stdout = None # Redundant info.
-    messages.extend(subprocess_result_into_messages(result))
 
     for supported_runtime in supported_runtimes:
         runtime_specific_publish_directory_path = os.path.join(project.directory_path, "bin", "Publish", supported_runtime)
@@ -478,12 +546,17 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
         if os.path.isdir(runtime_specific_publish_directory_path):
             shutil.rmtree(runtime_specific_publish_directory_path)
 
+        args = [ "dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime ]
+        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+        result.stdout = None # We dont need to see the list of files deleted.
+        messages.extend(subprocess_result_into_messages(result))
+
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
         result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
         messages.extend(subprocess_result_into_messages(result))
 
         solution_archives_directory_path = pyddle_path.dirname(project.solution.source_archive_file_path)
-        os.makedirs(solution_archives_directory_path, exist_ok=True) # Negligible cost to be repeated.
+        os.makedirs(solution_archives_directory_path, exist_ok=True)
 
         binaries_archive_file_name = f"{project.name}-v{project.version_string}-{supported_runtime}.zip"
         binaries_archive_file_path = os.path.join(solution_archives_directory_path, binaries_archive_file_name)
