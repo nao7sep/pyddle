@@ -149,6 +149,9 @@ class ProjectInfo:
     def update_nuget_packages(self):
         return update_nuget_packages_in_project(self)
 
+    def clean(self, supported_runtimes, delete_obj_directory):
+        return clean(self, supported_runtimes, delete_obj_directory)
+
     def rebuild_and_archive(self, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
         return rebuild_and_archive_project(self, supported_runtimes, not_archived_directory_names, not_archived_file_names)
 
@@ -447,6 +450,36 @@ def update_nuget_packages_in_project(project):
 # Soon, AI will start refactoring large portions of code, changing the design completely.
 # Until then, although we cant say there's absolutely no merit in code analysis, it doesnt need to be a part of everyday development.
 
+def clean(project, supported_runtimes, delete_obj_directory):
+    messages = []
+
+    # A lot of comments regarding "dotnet clean" are in rebuild_and_archive_project, where they would be more relevant.
+
+    # "dotnet clean" might "fail to build" the project if it hasnt been built (for the specified runtime) yet.
+    # I believe it only means there's no preprocessed data, which, in a normal situation, could be used for incremental builds.
+    # The command clearly uses the term "error" in a context where it's trying to "build" the project,
+    #     but I will just display whatever the command says.
+    # As long as the next loop seems successful, we can ignore the messages from "dotnet clean".
+
+    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-clean
+
+    if not delete_obj_directory:
+        args = [ "dotnet", "clean", project.file_path, "--configuration", "Release" ]
+        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+        messages.extend(subprocess_result_into_messages(result))
+
+        for supported_runtime in supported_runtimes:
+            args = [ "dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime ]
+            result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+            messages.extend(subprocess_result_into_messages(result))
+
+    else:
+        obj_directory_path = os.path.join(project.directory_path, "obj")
+        shutil.rmtree(obj_directory_path, ignore_errors=True)
+        messages.append(f"Directory deleted: {obj_directory_path}")
+
+    return messages
+
 def rebuild_and_archive_project(project, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
     messages = []
 
@@ -631,19 +664,42 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
     #         the merits of deleting the obj directories still dont seem to outweigh the potential demerits
     #     * "dotnet clean --runtime" followed by "dotnet publish --runtime" should be the best practice for releasing
 
-    # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-clean
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
+
+    # Added again: 2024-03-21
+    # While testing this script one more time, I encountered a situation where some projects didnt get rebuilt due to target-framework-related issues.
+    # In particular, Nekote2018 was built for "net8.0-windows" and runAll and tk2Text were built for "net8.0".
+    # I fixed this minor issue wondering how it was working before.
+
+    # Then, I got another error message saying that the variant of Magick.NET used in Nekote2018 and the one used in tk2Text didnt match.
+    # That too was a minor issue.
+    # I fixed it by changing the variant of Magick.NET used in tk2Text to the one used in Nekote2018.
+    # After that, the "Build" command of this script successfully built all the projects, leaving me still wondering how it was working before.
+
+    # After some other work, when I ran the "Rebuild and archive" command of this script, in the archive of yyTodoMail, I found a 2 hour old yyLib.dll... :-|
+
+    # So, my observation described above was only partially correct.
+
+    # I then made 2 modifications to the implementation of this script:
+    #     1. Now all projects are cleaned in a separate loop before any of them is built
+    #     2. For each project, cleaning with the runtimes specified and cleaning without one are executed
+
+    # If I just did #1, old binaries would still appear in new archives.
+    # But considering the complexity of the .NET build system, #2 might not be the sole cause of the issues I encountered.
+    # If I'm anyway rebuilding all the projects with their source code archives missing, a separate loop for cleaning shouldnt hurt.
+
+    # #2 is almost certainly legit.
+    # "dotnet clean", executed twice with different parameters, output different paths in the logs,
+    #     indicating we clearly need to run the command for 1) Platform-agonistic binaries and 2) Platform-specific binaries for EACH platform.
+
+    # I also implemented the stupid final weapon code that would delete all the obj directories, but I dont seem to be needing it... yet.
+    # If one old binary ever appears in a new archive, it'll be time for the stupidity. :P
 
     for supported_runtime in supported_runtimes:
         runtime_specific_publish_directory_path = os.path.join(project.directory_path, "bin", "Publish", supported_runtime)
 
         if os.path.isdir(runtime_specific_publish_directory_path):
             shutil.rmtree(runtime_specific_publish_directory_path)
-
-        args = [ "dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime ]
-        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
-        result.stdout = None # We dont need to see the list of files deleted.
-        messages.extend(subprocess_result_into_messages(result))
 
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
         result = subprocess.run(args, capture_output=True, cwd=project.directory_path)

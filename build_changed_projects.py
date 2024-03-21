@@ -297,7 +297,15 @@ try:
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
+                        output.print_and_log(f"Cleaning {project.name}:", indents=string.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory=False), indents=string.leveledIndents[2]))
+
+                    except Exception as exception:
+                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+
+                for project in projects_to_build:
+                    try:
+                        output.print_and_log(f"Rebuilding and archiving {project.name}:", indents=string.leveledIndents[1])
                         output.print_and_log(dotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=string.leveledIndents[2]))
 
                         # When we archive source code, usually, tests have been done and the projects can be built without issues.
