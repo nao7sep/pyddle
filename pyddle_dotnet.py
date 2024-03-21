@@ -497,7 +497,10 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
 
     # For this reason, "dotnet publish --runtime" with a runtime specified selected the platform-agonistic binaries of yyLib for yyTodoMail,
     #     NOT the platform-specific ones matching the runtime specified to the command, and archived them into yyTodoMail.zip.
-    # Then, this script, following its design, archived the platform-specific binaries of yyLib into yyLib.zip.
+    # During this process of building yyTodoMail, it is highly likely that the "dotnet publish" command for building yyTodoMail
+    #     was the one that prepared the platform-agonistic binaries of yyLib in yyLib/bin/Release/net8.0.
+    # Then, this script, following its design, archived the platform-specific binaries of each project into their archives.
+    # That is how yyTodoMail.zip had the platform-agonistic yyLib.dll and yyLib.zip had the platform-specific one.
 
     # Actually, there's not much point in distributing platform-specific binaries of class libraries
     #     especially when their source code is available and they are easy to build.
@@ -515,7 +518,7 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
     # After some testing, I believe:
     #     * "dotnet clean" too chooses what part of the project to clean based on the runtime specified
     #     * If we want to rebuild a project for a specific platform, we need to run "dotnet clean --runtime" for that platform
-    #     * We need "dotnet clean" without a runtime specified ONLY if we want to rebuild the platform-agonistic binaries
+    #     * We may use "dotnet clean" without a runtime specified if we want to rebuild the platform-agonistic binaries
 
     # This script runs "dotnet build" without a runtime specified for "1) Build"
     #     and "dotnet publish --runtime" with a runtime specified for "3) Rebuild and archive".
@@ -533,9 +536,100 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
 
     # The algorithm in this script seems to properly sort the projects in a way that the referenced projects are built first
     #     as long as there's no cross-referencing issues between the projects.
+
     # The best practice so far is:
     #     * "dotnet build" without a runtime specified or running "dotnet clean" beforehand for fast incremental builds to be tested
     #     * "dotnet clean --runtime" followed by "dotnet publish --runtime" for platform-specific binaries to be distributed
+
+    # Added: 2024-03-21
+    # Just making sure.
+
+    # If I delete the bin and obj directories and run this script, I get:
+    #     Platform-agonistic binaries:
+    #         * yyLib/obj/Release/net8.0/yyLib.dll <= obj
+    #         * yyLib/bin/Release/net8.0/yyLib.dll
+    #         * yyTodoMail/bin/Release/net8.0/win-x64/yyLib.dll
+    #         * yyTodoMail/bin/Publish/win-x64/yyLib.dll <= no "net8.0"
+    #     Platform-specific binaries:
+    #         * yyLib/obj/Release/net8.0/win-x64/yyLib.dll <= obj
+    #         * yyLib/bin/Release/net8.0/win-x64/yyLib.dll
+    #         * yyLib/bin/Publish/win-x64/yylLib.dll <= no "net8.0"
+
+    # The following directories are (nearly) empty:
+    #     * yyTodoMail/obj/Release/net8.0 => because "dotnet publish --runtime" had the runtime specified
+    #     * yyTodoMail/bin/Release/net8.0 => for the same reason
+
+    # And, unexpectedly:
+    #     * yyTodoMail/obj/Release/net8.0/win-x64 did NOT contain yyLib.dll
+    # It means the obj directories are not where binaries from other projects are gathered, which is reasonable.
+
+    # In this situation, if I run only "dotnet clean --runtime",
+
+    # yyLib would look like:
+
+    # bin/ => no files at all
+    #     Publish/
+    #     Release/
+    #         net8.0/
+    #             win-x64/
+    # obj/ => no .dll files at all
+    #     Release/
+    #         net8.0/
+    #             ref/
+    #             refint/
+    #             win-x64/
+    #                 ref/
+    #                 refint/
+    #                 .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+    #                 PublishOutputs.59eec15ad9.txt
+    #                 yyLib.GlobalUsings.g.cs
+    #                 yyLib.assets.cache
+    #                 yyLib.csproj.FileListAbsolute.txt
+    #             .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+    #             yyLib.GlobalUsings.g.cs
+    #             yyLib.assets.cache
+    #             yyLib.csproj.FileListAbsolute.txt
+    #     project.assets.json
+    #     project.nuget.cache
+    #     yyLib.csproj.nuget.dgspec.json
+    #     yyLib.csproj.nuget.g.props
+    #     yyLib.csproj.nuget.g.targets
+
+    # And, yyTodoMail would look like:
+
+    # bin/ => no files at all
+    #     Publish/
+    #     Release/
+    #         net8.0/
+    #             win-x64/
+    # obj/ => no .dll files at all
+    #     Release/
+    #         net8.0/
+    #             win-x64/
+    #                 Avalonia/
+    #                 ref/
+    #                 refint/
+    #                 .NETCoreApp,Version=v8.0.AssemblyAttributes.cs
+    #                 PublishOutputs.42cbedc838.txt
+    #                 apphost.exe
+    #                 yyTodoMail.assets.cache
+    #                 yyTodoMail.csproj.FileListAbsolute.txt
+    #             yyTodoMail.csproj.FileListAbsolute.txt
+    #     project.assets.json
+    #     project.nuget.cache
+    #     yyTodoMail.csproj.nuget.dgspec.json
+    #     yyTodoMail.csproj.nuget.g.props
+    #     yyTodoMail.csproj.nuget.g.targets
+
+    # Based on this observation, I'm temporarily concluding:
+    #     * "dotnet clean" may be a platform-agnostic operation, as ChatGPT says,
+    #         and, for it to work with "dotnet publish --runtime", it must be called only with each runtime specified
+    #     * For now, a situation that additionally requires "dotnet clean" without a runtime specified hasnt been observed
+    #     * As the obj directories cache things,
+    #         some of which are seemingly related to NuGet packages, some of which might be relatively costly to restore,
+    #         as long as the binaries contained in the archives are correct,
+    #         the merits of deleting the obj directories still dont seem to outweigh the potential demerits
+    #     * "dotnet clean --runtime" followed by "dotnet publish --runtime" should be the best practice for releasing
 
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-clean
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-publish
