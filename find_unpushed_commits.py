@@ -22,6 +22,7 @@ class RepositoryInfo:
         self.__untracked_files = None
         self.__conflicted_files = None
         self.__modified_files = None
+        self.__deleted_files = None
         self.__staged_files = None
         self.__stashed_files = None
         self.__unpulled_commits = None
@@ -63,10 +64,11 @@ class RepositoryInfo:
 
         return self.__local_branch_name
 
-    def __set_untracked_conflicted_modified_and_staged_files(self):
+    def __set_untracked_conflicted_modified_deleted_and_staged_files(self):
         untracked_files = []
         conflicted_files = []
         modified_files = []
+        deleted_files = []
         staged_files = []
 
         os.chdir(self.directory_path)
@@ -123,42 +125,67 @@ class RepositoryInfo:
             elif index_status_code == "D" and worktree_status_code == "D":
                 conflicted_files.append(file_name)
 
-            elif worktree_status_code == "M":
+            # Added: 2024-03-21
+            # These 4 cases CAN be considered as modifications:
+
+            # M = modified
+            # T = file type changed (regular file, symbolic link or submodule)
+            # R = renamed
+            # C = copied (if config option status.renames is set to "copies")
+
+            # It appears some people prefer to see renamed files unmerged as pairs of deleted and "copied" files.
+            # If the latter appear as "added" files, some may mistakenly recheck their contents although they havent been changed.
+
+            # We generally dont need to know if "modified" files displayed by this script are actually "file type changed" or "renamed" or "copied" files
+            #     as long as we get to know there's something in that repository to attend to.
+
+            elif worktree_status_code in ["M", "T", "R", "C"]:
                 modified_files.append(file_name)
 
-            elif index_status_code in ["M", "T", "A", "D", "R", "C" ]:
+            elif worktree_status_code == "D":
+                deleted_files.append(file_name)
+
+            elif index_status_code in ["M", "T", "A", "D", "R", "C"]:
                 staged_files.append(file_name)
 
         self.__untracked_files = untracked_files
         self.__conflicted_files = conflicted_files
         self.__modified_files = modified_files
+        self.__deleted_files = deleted_files
         self.__staged_files = staged_files
 
     @property
     def untracked_files(self):
         if self.__untracked_files is None:
-            self.__set_untracked_conflicted_modified_and_staged_files()
+            self.__set_untracked_conflicted_modified_deleted_and_staged_files()
 
         return self.__untracked_files
 
     @property
     def conflicted_files(self):
         if self.__conflicted_files is None:
-            self.__set_untracked_conflicted_modified_and_staged_files()
+            self.__set_untracked_conflicted_modified_deleted_and_staged_files()
 
         return self.__conflicted_files
 
     @property
     def modified_files(self):
         if self.__modified_files is None:
-            self.__set_untracked_conflicted_modified_and_staged_files()
+            self.__set_untracked_conflicted_modified_deleted_and_staged_files()
 
         return self.__modified_files
 
     @property
+    def deleted_files(self):
+        if self.__deleted_files is None:
+            self.__set_untracked_conflicted_modified_deleted_and_staged_files()
+
+        return self.__deleted_files
+
+    @property
     def staged_files(self):
         if self.__staged_files is None:
-            self.__set_untracked_conflicted_modified_and_staged_files()
+            self.__set_untracked_conflicted_modified_deleted_and_staged_files()
 
         return self.__staged_files
 
@@ -313,6 +340,12 @@ try:
                     console.print("Modified files:", indents=string.leveledIndents[1])
 
                     for file in repository.modified_files:
+                        console.print_important(file, indents=string.leveledIndents[2])
+
+                if repository.deleted_files:
+                    console.print("Deleted files:", indents=string.leveledIndents[1])
+
+                    for file in repository.deleted_files:
                         console.print_important(file, indents=string.leveledIndents[2])
 
                 if repository.staged_files:
