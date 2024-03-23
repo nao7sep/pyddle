@@ -11,5 +11,7 @@
     "low_priority_queue/handled_tasks_file_path": "C:\\Repositories\\pyddle\\data\\handled_tasks.json",
     "low_priority_queue/backups_task_lists": true,
 
-    "find_unpushed_commits/repositories_directory_path": "C:\\Repositories"
+    "find_unpushed_commits/repositories_directory_path": "C:\\Repositories",
+
+    "episodic_trash/episodes_directory_path": "C:\\Repositories\\Resources\\Episodes"
 }

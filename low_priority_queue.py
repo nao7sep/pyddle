@@ -24,6 +24,7 @@ import uuid
 # ------------------------------------------------------------------------------
 
 class TaskResult(enum.Enum):
+    # Should have been all capital letters.
     Done = 1,
     Checked = 2
 
