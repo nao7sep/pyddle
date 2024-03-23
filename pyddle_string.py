@@ -14,6 +14,15 @@ leveledIndents = [
     "                                    " # Index: 9
 ] # Length: 10
 
+def to_visible_str(str):
+    if str == None:
+        return "(None)"
+
+    if str == "":
+        return "(Empty)"
+
+    return str
+
 # ------------------------------------------------------------------------------
 #     Equality
 # ------------------------------------------------------------------------------
