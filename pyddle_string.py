@@ -322,3 +322,63 @@ def last_index_of_any_casefold(str, substrings):
                 return index
 
     return -1
+
+# ------------------------------------------------------------------------------
+#     Multiline strings
+# ------------------------------------------------------------------------------
+
+def splitlines(str, trim_line_start=False, trim_line_end=True, remove_empty_lines_at_start=True, remove_empty_lines_at_end=True, remove_redundant_empty_lines=True):
+    ''' Does more than Python's splitlines by default. '''
+    raw_lines = str.splitlines()
+
+    if trim_line_start:
+        if trim_line_end:
+            stripped_lines = [raw_line.strip() for raw_line in raw_lines]
+
+        else:
+            stripped_lines = [raw_line.lstrip() for raw_line in raw_lines]
+
+    else:
+        if trim_line_end:
+            stripped_lines = [raw_line.rstrip() for raw_line in raw_lines]
+
+        else:
+            stripped_lines = raw_lines
+
+    lines = []
+
+    has_detected_visible_line = False # Whether at least one visible line has ever been detected.
+    detected_continuous_empty_line_count = 0
+
+    for stripped_line in stripped_lines:
+        if not stripped_line:
+            # Empty lines are added when a visible line is detected or at the end.
+            detected_continuous_empty_line_count += 1
+
+        else:
+            if has_detected_visible_line == False: # Start part.
+                has_detected_visible_line = True
+
+                if remove_empty_lines_at_start == False:
+                    for _ in range(detected_continuous_empty_line_count):
+                        lines.append("")
+
+            else: # Middle part.
+                if detected_continuous_empty_line_count > 0:
+                    if remove_redundant_empty_lines:
+                        lines.append("")
+
+                    else:
+                        for _ in range(detected_continuous_empty_line_count):
+                            lines.append("")
+
+            detected_continuous_empty_line_count = 0
+            lines.append(stripped_line)
+
+    # End part.
+    if detected_continuous_empty_line_count > 0:
+        if remove_empty_lines_at_end == False:
+            for _ in range(detected_continuous_empty_line_count):
+                lines.append("")
+
+    return lines
