@@ -10,12 +10,14 @@ import pyddle_datetime as dt
 import pyddle_debugging as debugging
 import pyddle_file_system as file_system
 import pyddle_json_based_kvs as kvs
-import pyddle_string as string
+import pyddle_string # as string
+import random
+import string
 import traceback
 import uuid
 
 # ------------------------------------------------------------------------------
-#     Classes
+#     Classes and functions
 # ------------------------------------------------------------------------------
 
 class ParentType(enum.Enum):
@@ -78,7 +80,7 @@ def serialize_episode(episode):
             "guid": str(episode.guid),
             "creation_utc": dt.utc_to_roundtrip_string(episode.creation_utc),
             # "parent" and "parent_type" will be restored based on the JSON file's structure.
-            "content": string.splitlines(episode.content)
+            "content": pyddle_string.splitlines(episode.content)
         }
 
         if episode.notes:
@@ -148,6 +150,16 @@ class NoteInfo(EntryInfo):
     def save(self):
         # Calls the parent's save method recursively until it reaches the episode.
         self.parent.save()
+
+def generate_code():
+    return (random.choice(string.ascii_uppercase) +
+            random.choice(string.ascii_uppercase) +
+            random.choice(string.digits) +
+            random.choice(string.digits))
+
+def generate_file_name(code, title):
+    # I initially thought about validating the characters in the title, but nobody else would use this script and I would always know what characters to avoid. :)
+    return f"{code} {title}.json"
 
 # ------------------------------------------------------------------------------
 #     Application
