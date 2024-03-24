@@ -93,7 +93,7 @@ class TaskList:
                 self.tasks = [deserialize_task(task_data) for task_data in data_from_json]
 
     def save(self):
-        json_string = json.dumps(self.tasks, indent=4, default=serialize_task)
+        json_string = json.dumps(self.tasks, ensure_ascii=False, indent=4, default=serialize_task)
 
         file_system.create_parent_directory(self.file_path)
         file_system.write_all_text_to_file(self.file_path, json_string)

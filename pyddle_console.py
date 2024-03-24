@@ -44,38 +44,50 @@ class CommandInfo:
         self.command = command
         self.args = args
 
+    def get_arg(self, index):
+        return self.args[index]
+
+    def get_arg_or_default(self, index, default):
+        if index < len(self.args):
+            return self.args[index]
+
+        return default
+
     def get_arg_as_int(self, index):
         return int(self.args[index])
 
     def get_arg_as_int_or_default(self, index, default):
-        return type.str_to_int_or_default(self.args[index], default)
+        if index < len(self.args):
+            return type.str_to_int_or_default(self.args[index], default)
+
+        return default
 
     def get_arg_as_float(self, index):
         return float(self.args[index])
 
     def get_arg_as_float_or_default(self, index, default):
-        return type.str_to_float_or_default(self.args[index], default)
+        if index < len(self.args):
+            return type.str_to_float_or_default(self.args[index], default)
+
+        return default
 
     def get_arg_as_complex(self, index):
         return complex(self.args[index])
 
     def get_arg_as_complex_or_default(self, index, default):
-        return type.str_to_complex_or_default(self.args[index], default)
+        if index < len(self.args):
+            return type.str_to_complex_or_default(self.args[index], default)
+
+        return default
 
     def get_arg_as_bool(self, index):
         return type.str_to_bool(self.args[index])
 
     def get_arg_as_bool_or_default(self, index, default):
-        return type.str_to_bool_or_default(self.args[index], default)
+        if index < len(self.args):
+            return type.str_to_bool_or_default(self.args[index], default)
 
-    # Should be useful when parsing options.
-    # We dont need to check if the next argument exists before retrieving it.
-    def get_arg_next_of(self, index):
-        ''' Returns None if the next argument doesnt exist. '''
-        if index + 1 < len(self.args):
-            return self.args[index + 1]
-
-        return None
+        return default
 
     # last_index may be confusing because we dont know if it's inclusive or exclusive.
     # But I dont want to use names like exclusive_end_index too much.

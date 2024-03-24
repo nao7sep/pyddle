@@ -95,7 +95,7 @@ def delete_from_second_kvs_data(key):
 # ------------------------------------------------------------------------------
 
 def save_kvs_data_to_file(path, data):
-    json_string = json.dumps(data, indent=4)
+    json_string = json.dumps(data, ensure_ascii=False, indent=4)
     file_system.write_all_text_to_file(path, json_string)
 
     root, _ = os.path.splitext(path)
