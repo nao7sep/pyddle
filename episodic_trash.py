@@ -1,5 +1,5 @@
-﻿# Created:
-#
+﻿# Created: 2024-03-24
+# A personal tool to manage "episodic comments" moved from source code.
 
 from abc import ABC, abstractmethod
 import enum
@@ -74,7 +74,7 @@ def serialize_episode(episode):
         }
 
         if episode.notes:
-            data["notes"] = [serialize_episode(note) for note in episode.notes]
+            data["notes"] = [serialize_episode(note) for note in sorted(episode.notes, key=lambda note: note.creation_utc)]
 
         return data
 
@@ -88,7 +88,7 @@ def serialize_episode(episode):
         }
 
         if episode.notes:
-            data["notes"] = [serialize_episode(note) for note in episode.notes]
+            data["notes"] = [serialize_episode(note) for note in sorted(episode.notes, key=lambda note: note.creation_utc)]
 
         return data
 
@@ -116,6 +116,7 @@ def deserialize_notes(parent, notes_of_parent, note_data):
 
         if "notes" in note_data_item:
             deserialize_notes(note, note.notes, note_data_item["notes"])
+            note.notes.sort(key=lambda note: note.creation_utc)
 
         notes_of_parent.append(note)
 
@@ -137,6 +138,7 @@ class EpisodeInfo(EntryInfo):
 
                 if "notes" in data_from_json:
                     deserialize_notes(self, self.notes, data_from_json["notes"])
+                    self.notes.sort(key=lambda note: note.creation_utc)
 
     def save(self):
         json_string = json.dumps(self, ensure_ascii=False, indent=4, default=serialize_episode)
@@ -258,6 +260,9 @@ def episodes_open_command(episodes, command):
         episode = get_episode(episodes, code)
 
         if episode:
+            if episode.notes:
+                notes_list_command(episode.notes, depth=0)
+
             while True:
                 command = console.input_command(f"Episode {episode.code}: ")
 
@@ -381,6 +386,7 @@ def episodes_open_command(episodes, command):
 
                                         try:
                                             parent_note.create_note(note)
+                                            parent_note.notes.sort(key=lambda note: note.creation_utc)
                                             old_parent.delete_note(note)
 
                                         except Exception:
@@ -464,7 +470,7 @@ def episodes_open_command(episodes, command):
                                     note.parent.delete_note(note)
 
                                 except Exception:
-                                    console.print_error(f"Failed to delete note: {note.code}")
+                                    console.print_error(f"Failed to delete note.")
                                     continue
 
                                 console.print("Note deleted.")
@@ -549,7 +555,7 @@ try:
                         episode.save()
 
                     except Exception:
-                        console.print_error(f"Failed to create episode: {title}")
+                        console.print_error(f"Failed to create episode.")
                         continue
 
                     episodes.append(episode)
@@ -601,7 +607,7 @@ try:
                                 episode.file_path = old_file_path
                                 # The old file should still exist.
 
-                                console.print_error(f"Failed to update title: {title}")
+                                console.print_error(f"Failed to update title.")
 
                                 continue
 
@@ -627,7 +633,7 @@ try:
                             os.remove(episode.file_path)
 
                         except Exception:
-                            console.print_error(f"Failed to delete episode: {episode.title}")
+                            console.print_error(f"Failed to delete episode.")
                             continue
 
                         episodes.remove(episode)
