@@ -1,6 +1,8 @@
 ﻿# Created: 2024-03-05
 # This script contains string-related functions.
 
+import re
+
 leveledIndents = [
     "",
     "    ",
@@ -327,8 +329,20 @@ def last_index_of_any_casefold(str, substrings):
 #     Multiline strings
 # ------------------------------------------------------------------------------
 
-def splitlines(str, trim_line_start=False, trim_line_end=True, remove_empty_lines_at_start=True, remove_empty_lines_at_end=True, remove_redundant_empty_lines=True):
+# Methods for conversion/transformation should generally deal with None and "" nicely, not raising errors.
+# They are casually called to make things a little better if there's any room for improvement.
+
+# Those for equality/comparison, on the other hand, MAY raise errors if None is provided
+#     because there's a high chance that the developer is doing something wrong.
+# Like, startswith(None, "a") is most likely not an intended operation.
+
+def splitlines(str, trim_line_start=False, trim_line_end=True,
+               remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
     ''' Does more than Python's splitlines by default. '''
+    if not str:
+        # "".splitlines() returns an empty list.
+        return []
+
     raw_lines = str.splitlines()
 
     if trim_line_start:
@@ -382,3 +396,39 @@ def splitlines(str, trim_line_start=False, trim_line_end=True, remove_empty_line
                 lines.append("")
 
     return lines
+
+def normalize_multiline_str(str, trim_line_start=False, trim_line_end=True,
+                            remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
+    if not str:
+        return str
+
+    return "\n".join(splitlines(str, trim_line_start, trim_line_end,
+                                remove_empty_lines_at_start, remove_redundant_empty_lines, remove_empty_lines_at_end))
+
+# ------------------------------------------------------------------------------
+#     Normalization of single line strings
+# ------------------------------------------------------------------------------
+
+def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
+    if not str:
+        return str
+
+    if trim_start:
+        if trim_end:
+            new_str = str.strip()
+
+        else:
+            new_str = str.lstrip()
+
+    else:
+        if trim_end:
+            new_str = str.rstrip()
+
+        else:
+            new_str = str
+
+    if remove_redundant_whitespace_chars:
+        return re.sub(r"\s+", " ", new_str)
+
+    else:
+        return new_str

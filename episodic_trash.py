@@ -238,6 +238,10 @@ def notes_help_command():
 def episodes_list_command(episodes):
     console.print("Episodes:")
 
+    if not episodes:
+        console.print("No episodes found.", indents=pyddle_string.leveledIndents[1])
+        return
+
     # Sorted like a directory's file list.
     for episode in sorted(episodes, key=lambda episode: episode.title.lower()):
         console.print(f"{episode.code} {episode.title}", indents=pyddle_string.leveledIndents[1])
@@ -245,6 +249,10 @@ def episodes_list_command(episodes):
 def notes_list_command(notes, depth):
     if depth == 0:
         console.print("Notes:")
+
+        if not notes:
+            console.print("No notes found.", indents=pyddle_string.leveledIndents[1])
+            return
 
     for note in notes:
         partial_content = pyddle_string.splitlines(note.content)[0] # For a start, experimentally.
@@ -260,10 +268,12 @@ def episodes_open_command(episodes, command):
         episode = get_episode(episodes, code)
 
         if episode:
-            if episode.notes:
-                notes_list_command(episode.notes, depth=0)
+            if not episode.notes:
+                notes_help_command()
 
             while True:
+                notes_list_command(episode.notes, depth=0)
+
                 command = console.input_command(f"Episode {episode.code}: ")
 
                 if command:
@@ -271,11 +281,11 @@ def episodes_open_command(episodes, command):
                         notes_help_command()
 
                     elif pyddle_string.equals_ignore_case(command.command, "create"):
-                        content = command.get_remaining_args_as_str(0)
+                        content = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(0))
 
                         if pyddle_string.equals_ignore_case(content, "copy"):
                             try:
-                                content = pyperclip.paste()
+                                content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
                             except Exception:
                                 console.print_error("Failed to copy content.")
@@ -309,11 +319,11 @@ def episodes_open_command(episodes, command):
                             parent_note = get_note(episode.notes, parent_code)
 
                             if parent_note:
-                                content = command.get_remaining_args_as_str(1)
+                                content = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(1))
 
                                 if pyddle_string.equals_ignore_case(content, "copy"):
                                     try:
-                                        content = pyperclip.paste()
+                                        content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
                                     except Exception:
                                         console.print_error("Failed to copy content.")
@@ -426,11 +436,11 @@ def episodes_open_command(episodes, command):
                             note = get_note(episode.notes, code)
 
                             if note:
-                                content = command.get_remaining_args_as_str(1)
+                                content = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(1))
 
                                 if pyddle_string.equals_ignore_case(content, "copy"):
                                     try:
-                                        content = pyperclip.paste()
+                                        content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
                                     except Exception:
                                         console.print_error("Failed to copy content.")
@@ -522,14 +532,12 @@ try:
                 except Exception as exception:
                     console.print_error(f"Invalid episode file: {episode_file_name}")
 
-    if episodes:
-        episodes_list_command(episodes)
-
-    else:
-        console.print("No episodes found.")
+    if not episodes:
         episodes_help_command()
 
     while True:
+        episodes_list_command(episodes)
+
         command = console.input_command("Command: ")
 
         if command:
@@ -537,7 +545,7 @@ try:
                 episodes_help_command()
 
             elif pyddle_string.equals_ignore_case(command.command, "create"):
-                title = command.get_remaining_args_as_str(0)
+                title = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(0))
 
                 if title:
                     if path.contains_invalid_file_name_chars(title):
@@ -549,7 +557,7 @@ try:
                     episode.creation_utc = dt.get_utc_now()
                     episode.code = generate_random_code(episodes)
                     episode.title = title
-                    episode.file_path = os.path.join(episodes_directory_path, generate_file_name(code, title))
+                    episode.file_path = os.path.join(episodes_directory_path, generate_file_name(episode.code, title))
 
                     try:
                         episode.save()
@@ -578,7 +586,7 @@ try:
                     episode = get_episode(episodes, code)
 
                     if episode:
-                        title = command.get_remaining_args_as_str(1)
+                        title = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(1))
 
                         if title:
                             if path.contains_invalid_file_name_chars(title):
