@@ -295,6 +295,8 @@ try:
 
                 archived_solutions = []
 
+                # BR08 dotnet Commands.json contains (excessively) detailed comments.
+
                 for project in projects_to_build:
                     try:
                         output.print_and_log(f"Cleaning {project.name}:", indents=string.leveledIndents[1])

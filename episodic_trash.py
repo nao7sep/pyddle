@@ -513,19 +513,19 @@ def episodes_open_command(episodes, command):
 try:
     kvs_key_prefix = "episodic_trash/"
 
-    episodes_directory_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}episodes_directory_path")
-    console.print(f"episodes_directory_path: {episodes_directory_path}")
+    episodic_directory_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}episodic_directory_path")
+    console.print(f"episodic_directory_path: {episodic_directory_path}")
 
     episodes = []
 
-    if os.path.isdir(episodes_directory_path):
-        for episode_file_name in os.listdir(episodes_directory_path):
+    if os.path.isdir(episodic_directory_path):
+        for episode_file_name in os.listdir(episodic_directory_path):
             _, extension = os.path.splitext(episode_file_name)
 
             if pyddle_string.equals_ignore_case(extension, ".json"):
                 try:
                     episode = EpisodeInfo()
-                    episode.file_path = os.path.join(episodes_directory_path, episode_file_name)
+                    episode.file_path = os.path.join(episodic_directory_path, episode_file_name)
                     episode.load()
                     episodes.append(episode)
 
@@ -557,7 +557,7 @@ try:
                     episode.creation_utc = dt.get_utc_now()
                     episode.code = generate_random_code(episodes)
                     episode.title = title
-                    episode.file_path = os.path.join(episodes_directory_path, generate_file_name(episode.code, title))
+                    episode.file_path = os.path.join(episodic_directory_path, generate_file_name(episode.code, title))
 
                     try:
                         episode.save()
@@ -597,7 +597,7 @@ try:
                             episode.title = title
 
                             old_file_path = episode.file_path
-                            episode.file_path = os.path.join(episodes_directory_path, generate_file_name(episode.code, title))
+                            episode.file_path = os.path.join(episodic_directory_path, generate_file_name(episode.code, title))
 
                             try:
                                 episode.save()
