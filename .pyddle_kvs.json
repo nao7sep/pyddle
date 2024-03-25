@@ -13,5 +13,15 @@
 
     "find_unpushed_commits/repositories_directory_path": "C:\\Repositories",
 
-    "episodic_trash/episodic_directory_path": "C:\\Repositories\\Resources\\Episodic"
+    "episodic_trash/episodic_directory_path": "C:\\Repositories\\Resources\\Episodic",
+
+    "pyddle_openai/api_key": "",
+    "pyddle_openai/organization_id": "",
+    "pyddle_openai/audio_speech_endpoint": "https://api.openai.com/v1/audio/speech",
+    "pyddle_openai/audio_transcriptions_endpoint": "https://api.openai.com/v1/audio/transcriptions",
+    "pyddle_openai/audio_translations_endpoint": "https://api.openai.com/v1/audio/translations",
+    "pyddle_openai/chat_completions_endpoint": "https://api.openai.com/v1/chat/completions",
+    "pyddle_openai/images_generations_endpoint": "https://api.openai.com/v1/images/generations",
+    "pyddle_openai/images_edits_endpoint": "https://api.openai.com/v1/images/edits",
+    "pyddle_openai/images_variations_endpoint": "https://api.openai.com/v1/images/variations"
 }
