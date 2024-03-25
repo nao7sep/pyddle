@@ -1,15 +1,18 @@
 ﻿# Created:
 #
 
+import enum
 import openai
 import os
 import pyddle_json_based_kvs as kvs
-
-# https://platform.openai.com/docs/guides/production-best-practices
+import tiktoken
 
 # ------------------------------------------------------------------------------
 #     Settings
 # ------------------------------------------------------------------------------
+
+# https://platform.openai.com/docs/api-reference
+# https://platform.openai.com/docs/guides/production-best-practices
 
 class OpenAiSettings:
     def __init__(self, data_source):
@@ -102,3 +105,59 @@ class OpenAiSettings:
         return self.__images_variations_endpoint
 
 openai_settings = OpenAiSettings(data_source=kvs.merged_kvs_data)
+
+# ------------------------------------------------------------------------------
+#     Models
+# ------------------------------------------------------------------------------
+
+# https://platform.openai.com/docs/models
+
+class OpenAiModels(enum.Enum):
+    TTS_1 = "tts-1"
+    TTS_1_HD = "tts-1-hd"
+    WHISPER_1 = "whisper-1"
+    GPT_3_5_TURBO = "gpt-3.5-turbo"
+    GPT_4 = "gpt-4"
+    GPT_4_TURBO = "gpt-4-turbo-preview"
+    GPT_4_VISION = "gpt-4-vision-preview"
+    DALL_E_2 = "dall-e-2"
+    DALL_E_3 = "dall-e-3"
+
+# ------------------------------------------------------------------------------
+#     tiktoken
+# ------------------------------------------------------------------------------
+
+# https://github.com/openai/tiktoken
+# https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
+
+# In production code, we always need to count tokens to ensure we dont exceed the limit.
+# It shouldnt hurt to have to have tiktoken installed in all production environments.
+
+class OpenAiTokenCounter:
+    def __init__(self, model: OpenAiModels):
+        self.model = model
+        self.__encoding = None
+
+    @property
+    def encoding(self):
+        if self.__encoding is None:
+            self.__encoding = tiktoken.encoding_for_model(self.model.value)
+
+        return self.__encoding
+
+    def encode(self, str):
+        ''' Returns a list of tokens as integers. '''
+        return self.encoding.encode(str)
+
+    def encode_to_strs(self, str):
+        ''' Returns a list of tokens as strings. '''
+        return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str)]
+
+# I'm not sure if we need an instance for Vision.
+# tiktoken.encoding_for_model doesnt raise an error and returns cl100k_base for Vision.
+# The instance anyway initializes itself only when it's used.
+
+gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_3_5_TURBO)
+gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_4)
+gpt_4_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_4_TURBO)
+gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_4_VISION)
