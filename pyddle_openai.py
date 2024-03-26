@@ -3,9 +3,16 @@
 
 import enum
 import openai
+import os
 import pyddle_collections as collections
 import pyddle_json_based_kvs as kvs
+import pyddle_file_system as file_system
+import pyddle_path # as path
+import requests
 import tiktoken
+
+# This script contains some one-liners.
+# I will keep their names simple and stupid because I might want to add more later.
 
 # ------------------------------------------------------------------------------
 #     Settings
@@ -206,6 +213,7 @@ def openai_audio_speech_create_and_stream_to_file(
     args.may_contain("speed", speed)
 
     with openai_client.audio.speech.with_streaming_response.create(**args.args) as response:
+        file_system.create_parent_directory(file_path)
         response.stream_to_file(file_path)
 
 # ------------------------------------------------------------------------------
@@ -276,3 +284,100 @@ def openai_audio_translations_create(
         args.may_contain("temperature", temperature)
 
         return openai_client.audio.translations.create(**args.args)
+
+# ------------------------------------------------------------------------------
+#     Create image
+# ------------------------------------------------------------------------------
+
+# https://platform.openai.com/docs/guides/images
+# https://platform.openai.com/docs/api-reference/images/create
+# https://github.com/openai/openai-python/blob/main/src/openai/resources/images.py
+
+class OpenAiImageQuality(enum.Enum):
+    HD = "hd"
+    STANDARD = "standard"
+
+class OpenAiImageSize(enum.Enum):
+    _256X256 = "256x256"
+    _512X512 = "512x512"
+    _1024X1024 = "1024x1024"
+    _1792X1024 = "1792x1024"
+    _1024X1792 = "1024x1792"
+
+class OpenAiImageStyle(enum.Enum):
+    NATURAL = "natural"
+    VIVID = "vivid"
+
+# Used internally.
+# It's more like how the image is returned, but I like the simplicity of the name.
+class OpenAiImageFormat(enum.Enum):
+    B64_JSON = "b64_json"
+    URL = "url"
+
+def openai_images_generate_and_write(
+    # Output:
+    file_path,
+
+    # Parameters:
+    model: OpenAiModel,
+    prompt,
+
+    # Optional parameters:
+    n=None,
+    quality: OpenAiImageQuality=None,
+    size: OpenAiImageSize=None,
+    style: OpenAiImageStyle=None,
+    user=None):
+    ''' Returns a list of file paths. '''
+
+    file_paths = []
+
+    dirname = pyddle_path.dirname(file_path)
+    basename = pyddle_path.basename(file_path)
+    root, extension = os.path.splitext(basename)
+
+    # Checked: all, order, named, falsy
+
+    args = collections.PotentiallyFalsyArgs()
+    args.must_contain_enum_value("model", model)
+    args.must_contain("prompt", prompt)
+    args.may_contain("n", n)
+    args.may_contain_enum_value("quality", quality)
+    args.may_contain_enum_value("size", size)
+    args.may_contain_enum_value("style", style)
+    args.may_contain("user", user)
+
+    # This is a one-liner.
+    # It takes care of saving the images as well.
+    args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
+
+    response = openai_client.images.generate(**args.args)
+
+    # https://github.com/openai/openai-python/blob/main/src/openai/types/images_response.py
+    # https://github.com/openai/openai-python/blob/main/src/openai/types/image.py
+
+    for index, image in enumerate(response.data):
+        if index == 0:
+            new_file_path = file_path
+
+        else:
+            new_file_path = os.path.join(dirname, f"{root}-{index}{extension}")
+
+        with requests.get(image.url, stream=True) as downloader:
+            # If it fails with the second image, the user might leave the first one on the disk.
+            # I will not take care of that for 2 reasons:
+            #     1. If the first one was saved, the rest should usually be saved as well
+            #     2. DALL-E-3 can generate only 1 image at a time
+            downloader.raise_for_status()
+
+            file_system.create_parent_directory(new_file_path)
+
+            with open(new_file_path, "wb") as file:
+                # I've seen 8192 in a lot of places.
+                # https://stackoverflow.com/questions/2811006/what-is-a-good-buffer-size-for-socket-programming
+                for chunk in downloader.iter_content(chunk_size=8192):
+                    file.write(chunk)
+
+        file_paths.append(new_file_path)
+
+    return file_paths
