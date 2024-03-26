@@ -1,11 +1,32 @@
-﻿# Created:
+# Created:
 #
 
 import enum
 import openai
-import os
 import pyddle_json_based_kvs as kvs
 import tiktoken
+
+# ------------------------------------------------------------------------------
+#     Falsy to None
+# ------------------------------------------------------------------------------
+
+# https://github.com/openai/openai-python/blob/main/src/openai/_types.py
+
+# OpenAI's official module uses the "NotGiven" class internally for arguments' default values.
+# I've tried importing and using it as default values to call the API's methods and encountered errors.
+# For now, I'll just send None and see what happens.
+
+def falsy_to_none(value):
+    if not value:
+        return None
+
+    return value
+
+def falsy_enum_to_none(value):
+    if not value:
+        return None
+
+    return value.value
 
 # ------------------------------------------------------------------------------
 #     Settings
@@ -14,56 +35,47 @@ import tiktoken
 # https://platform.openai.com/docs/api-reference
 # https://platform.openai.com/docs/guides/production-best-practices
 
-# OpenAI's official module reads environment variables associated with keys including
-#     "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL".
-# Currently, pyddle_openai wouldnt be much more than a sugar-coated wrapper
-#     and situations where it must coexist with code that uses the official module must be expected.
-# So, we will read environment variables with different keys and,
-#     if they are not found, fallback to a JSON-based KVS data source for now.
-
 class OpenAiSettings:
-    def __init__(self, data_source):
-        self.data_source = data_source
+    def __init__(self, kvs_data=None, kvs_key_prefix=None):
+        self.kvs_data = kvs_data
+        self.kvs_key_prefix = kvs_key_prefix
+
         self.__api_key = None
         self.__organization = None
         self.__base_url = None
 
     def get_value(self, key):
-        ''' Attempts to get the value from the environment variables before the data source. '''
-        # Returns None if the key is not found.
-        value = os.environ.get(key)
+        if self.kvs_data:
+            return self.kvs_data.get(f"{self.kvs_key_prefix}{key}")
 
-        if value:
-            return value
+        # We can add data sources here.
 
-        if isinstance(self.data_source, dict):
-            return self.data_source.get(key)
-
-        else:
-            raise RuntimeError("Unsupported data source type.")
+        return None
 
     @property
     def api_key(self):
         if self.__api_key is None:
-            self.__api_key = self.get_value("pyddle_openai/api_key")
+            self.__api_key = self.get_value("api_key")
 
         return self.__api_key
 
     @property
     def organization(self):
         if self.__organization is None:
-            self.__organization = self.get_value("pyddle_openai/organization")
+            self.__organization = self.get_value("organization")
 
         return self.__organization
 
     @property
     def base_url(self):
         if self.__base_url is None:
-            self.__base_url = self.get_value("pyddle_openai/base_url")
+            self.__base_url = self.get_value("base_url")
 
         return self.__base_url
 
-openai_settings = OpenAiSettings(data_source=kvs.merged_kvs_data)
+openai_settings = OpenAiSettings(
+    kvs_data=kvs.merged_kvs_data,
+    kvs_key_prefix="pyddle_openai/")
 
 # ------------------------------------------------------------------------------
 #     Models
@@ -71,7 +83,7 @@ openai_settings = OpenAiSettings(data_source=kvs.merged_kvs_data)
 
 # https://platform.openai.com/docs/models
 
-class OpenAiModels(enum.Enum):
+class OpenAiModel(enum.Enum):
     TTS_1 = "tts-1"
     TTS_1_HD = "tts-1-hd"
     WHISPER_1 = "whisper-1"
@@ -89,12 +101,9 @@ class OpenAiModels(enum.Enum):
 # https://github.com/openai/tiktoken
 # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
 
-# In production code, we would always need to count tokens to ensure we dont exceed the limit.
-# It shouldnt hurt to have to have tiktoken installed in all production environments.
-
 class OpenAiTokenCounter:
-    def __init__(self, model: OpenAiModels):
-        self.model = model
+    def __init__(self, model: OpenAiModel):
+        self.model: OpenAiModel = model
         self.__encoding = None
 
     @property
@@ -106,20 +115,21 @@ class OpenAiTokenCounter:
 
     def encode(self, str):
         ''' Returns a list of tokens as integers. '''
+
         return self.encoding.encode(str)
 
     def encode_to_strs(self, str):
-        ''' Returns a list of tokens as strings. '''
+        ''' Returns a list of tokens as decoded strings. OFTEN fails to decode CJK strings. '''
+
+        # If we specify "ignore" or "replace" as the "errors" argument, we can avoid the UnicodeDecodeError,
+        #     but the fundamental problem is that the string representation as UTF-8-decoded byte arrays are then cut into tokens with no consideration of the character boundaries,
+        #     and therefore there's not much point in just making the method work when half the CJK characters anyway disappear.
         return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str)]
 
-# I'm not sure if we need an instance for Vision.
-# tiktoken.encoding_for_model doesnt raise an error and returns cl100k_base for Vision.
-# The instance anyway initializes itself only when it's used.
-
-gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_3_5_TURBO)
-gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_4)
-gpt_4_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_4_TURBO)
-gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_4_VISION)
+gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_3_5_TURBO)
+gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4)
+gpt_4_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_TURBO)
+gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_VISION) # May be unnecessary.
 
 # ------------------------------------------------------------------------------
 #     Clients
@@ -127,13 +137,9 @@ gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModels.GPT_4_VISION)
 
 # https://github.com/openai/openai-python/blob/main/src/openai/_client.py
 
-# If the arguments are not provided, the function will attempt to read them from environment variables
-#     using keys different from those the official module uses for reasons explained above
-#     and then falls back to the JSON-based KVS data source.
-# If they are still falsy, the OpenAI class's constructor will try reading
-#     "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL".
-
 def create_openai_client(api_key=None, organization=None, base_url=None):
+    ''' If the arguments are falsy and cant be retrieved from "openai_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
+
     if not api_key:
         api_key = openai_settings.api_key
 
@@ -143,7 +149,10 @@ def create_openai_client(api_key=None, organization=None, base_url=None):
     if not base_url:
         base_url = openai_settings.base_url
 
-    return openai.OpenAI(api_key=api_key, organization=organization, base_url=base_url)
+    return openai.OpenAI(
+        api_key=falsy_to_none(api_key),
+        organization=falsy_to_none(organization),
+        base_url=falsy_to_none(base_url))
 
 openai_client = create_openai_client()
 
@@ -156,7 +165,7 @@ openai_client = create_openai_client()
 # https://github.com/openai/openai-python/blob/main/examples/audio.py
 # https://github.com/openai/openai-python/blob/main/src/openai/resources/audio/speech.py
 
-class OpenAiVoices(enum.Enum):
+class OpenAiVoice(enum.Enum):
     ALLOY = "alloy"
     ECHO = "echo"
     FABLE = "fable"
@@ -164,7 +173,7 @@ class OpenAiVoices(enum.Enum):
     ONYX = "onyx"
     SHIMMER = "shimmer"
 
-class OpenAiAudioFormats(enum.Enum):
+class OpenAiAudioFormat(enum.Enum):
     AAC = "aac"
     FLAC = "flac"
     MP3 = "mp3"
@@ -172,27 +181,25 @@ class OpenAiAudioFormats(enum.Enum):
     PCM = "pcm"
     WAV = "wav"
 
-# Without "with_streaming_response", "create" returns HttpxBinaryResponseContent.
-# Its "stream_to_file" is deprecated with the following message:
-#     Due to a bug, this method doesn't actually stream the response content, `.with_streaming_response.method()` should be used instead
-# https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
+# All I want is a one-liner that does just one thing: write the response content to a file with OR without streaming.
 
-# With "with_streaming_response", "create" returns StreamedBinaryAPIResponse.
-# I havent done much research on this, but the code looks a lot newer.
+# Without "with_streaming_response", "create" returns HttpxBinaryResponseContent, whose "stream_to_file" is deprecated with a message:
+#     Due to a bug, this method doesn't actually stream the response content, `.with_streaming_response.method()` should be used instead
+# And the code is in: https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
+
+# With "with_streaming_response", "create" returns StreamedBinaryAPIResponse, which seems newer.
 # https://github.com/openai/openai-python/blob/main/src/openai/_response.py
 
-# I dont expect this one-liner to really stream the response content.
-# Most probably, I will anyway use it in a synchronous manner and wait for the method to finish.
-# There are better ways to stream audio, one of which is introduced on the page linked above.
+# With "with_streaming_response", "stream_to_file" is still a synchronous method.
+# I initially assumed it would be an asynchronous method that returns something like C#'s Task.
+# The method only "streams" the content, meaning it's appended to the file little by little rather than all at once.
 
-# The default value for "response_format" in the API is "mp3".
-# As the format affects the file extension, I dont think it needs to default to anything.
-
-def openai_audio_speech_stream_to_file(
-    model: OpenAiModels,
-    voice: OpenAiVoices,
+def openai_audio_speech_create_and_stream_to_file(
+    model: OpenAiModel,
+    voice: OpenAiVoice,
     input,
-    response_format: OpenAiAudioFormats,
+    response_format: OpenAiAudioFormat, # Defaults to "mp3" in the API, but the user should specify one.
+    # Based on the audio format, the user also has to choose the right file extension.
     file_path):
 
     with openai_client.audio.speech.with_streaming_response.create(
@@ -213,56 +220,43 @@ def openai_audio_speech_stream_to_file(
 # https://github.com/openai/openai-python/blob/main/src/openai/resources/audio/transcriptions.py
 # https://github.com/openai/openai-python/blob/main/src/openai/resources/audio/translations.py
 
-class OpenAiTranscriptFormats(enum.Enum):
+class OpenAiTranscriptFormat(enum.Enum):
     JSON = "json"
     SRT = "srt"
     TEXT = "text"
     VERBOSE_JSON = "verbose_json"
     VTT = "vtt"
 
-# Unlike openai_audio_speech_stream_to_file, there's nothing to do after "create".
 def openai_audio_transcriptions_create(
-    model: OpenAiModels,
+    model: OpenAiModel,
     file_path,
+    response_format: OpenAiTranscriptFormat,
     language=None,
     prompt=None,
-    response_format: OpenAiTranscriptFormats = None,
     temperature=None,
     timestamp_granularities=None):
-
-    if response_format:
-        response_format_str = response_format.value
-
-    else:
-        response_format_str = None
 
     with open(file_path, "rb") as file:
         return openai_client.audio.transcriptions.create(
             model=model.value,
             file=file,
-            language=language,
-            prompt=prompt,
-            response_format=response_format_str,
-            temperature=temperature,
-            timestamp_granularities=timestamp_granularities)
+            response_format=falsy_enum_to_none(response_format),
+            language=falsy_to_none(language),
+            prompt=falsy_to_none(prompt),
+            temperature=falsy_to_none(temperature),
+            timestamp_granularities=falsy_to_none(timestamp_granularities))
 
 def openai_audio_translations_create(
-    model: OpenAiModels,
+    model: OpenAiModel,
     file_path,
+    response_format: OpenAiTranscriptFormat,
     prompt=None,
-    response_format: OpenAiTranscriptFormats = None,
     temperature=None):
-
-    if response_format:
-        response_format_str = response_format.value
-
-    else:
-        response_format_str = None
 
     with open(file_path, "rb") as file:
         return openai_client.audio.translations.create(
             model=model.value,
             file=file,
-            prompt=prompt,
-            response_format=response_format_str,
-            temperature=temperature)
+            response_format=falsy_enum_to_none(response_format),
+            prompt=falsy_to_none(prompt),
+            temperature=falsy_to_none(temperature))

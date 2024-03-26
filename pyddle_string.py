@@ -339,6 +339,7 @@ def last_index_of_any_casefold(str, substrings):
 def splitlines(str, trim_line_start=False, trim_line_end=True,
                remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
     ''' Does more than Python's splitlines by default. '''
+
     if not str:
         # "".splitlines() returns an empty list.
         return []

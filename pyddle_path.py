@@ -100,6 +100,7 @@ def is_valid_file_name(file_name):
         Too long file names and potentially harmful partial strings such as ".." are not checked for reasons explained in XY44 File Name Validation.json.
         You can also call contains_invalid_file_name_chars, violates_file_name_rules or is_windows_reserved_file_name individually.
     '''
+
     # The comments have been moved to: XY44 File Name Validation.json
     # I believe some parts were useful, but they, as a whole, were highly disoriented.
 

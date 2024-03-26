@@ -29,6 +29,7 @@ def print_error(str, indents="", end="\n"):
 
 def print_numbered_options(options, indents="", end="\n"):
     ''' Space-pads the indices. '''
+
     digit_count = len(str(len(options))) # Wont be a negative number.
 
     for index, option in enumerate(options):
@@ -37,6 +38,7 @@ def print_numbered_options(options, indents="", end="\n"):
 
 def input_number(prompt, indents=""):
     ''' Returns None if the input is not a number. '''
+
     return type.str_to_int_or_default(input(f"{indents}{prompt}"), None)
 
 class CommandInfo:
@@ -106,6 +108,7 @@ class CommandInfo:
 
     def to_string(self, indents=""):
         ''' For debugging purposes. '''
+
         lines = []
 
         lines.append(f"{indents}Command: {self.command}")
@@ -123,7 +126,9 @@ class CommandInfo:
 
 def parse_command_str(str):
     ''' Returns None if the command string is empty. '''
+
     # A smart function that recognizes a chain of any whitespace chars as one separator by default.
+
     parts = str.split()
 
     if len(parts) > 0:

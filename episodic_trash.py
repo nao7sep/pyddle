@@ -39,12 +39,14 @@ class EntryInfo(ABC):
 
     def create_note(self, note):
         ''' Returns the created note. '''
+
         self.notes.append(note)
         self.save()
         return note
 
     def update_note(self, note):
         ''' Raises an exception if the note is not found. '''
+
         for index, existing_note in enumerate(self.notes):
             if existing_note.guid == note.guid:
                 self.notes[index] = note
@@ -55,6 +57,7 @@ class EntryInfo(ABC):
 
     def delete_note(self, note):
         ''' Raises an exception if the note is not found. '''
+
         for index, existing_note in enumerate(self.notes):
             if existing_note.guid == note.guid:
                 del self.notes[index]
