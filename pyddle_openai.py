@@ -1,7 +1,10 @@
 ﻿# Created: 2024-03-26
 # Sugar-coating classes and methods for OpenAI's API.
 
+import base64
 import enum
+import json
+import mimetypes
 import openai
 import os
 import pyddle_collections as collections
@@ -273,6 +276,142 @@ def openai_audio_translations_create(
         args.may_contain("temperature", temperature)
 
         return openai_client.audio.translations.create(**args.args)
+
+# ------------------------------------------------------------------------------
+#     Chat
+# ------------------------------------------------------------------------------
+
+# https://platform.openai.com/docs/guides/chat
+# https://platform.openai.com/docs/api-reference/chat
+# https://github.com/openai/openai-python/blob/main/src/openai/resources/chat/completions.py
+
+# I wont be supporting tools or anything related to them for now.
+# Just like assistants, they must be useful in certain situations, but I currently dont need them.
+# https://platform.openai.com/docs/api-reference/assistants
+
+class OpenAiRole(enum.Enum):
+    ASSISTANT = "assistant"
+    SYSTEM = "system"
+    USER = "user"
+
+class OpenAiChatFormat(enum.Enum):
+    JSON_OBJECT = "json_object"
+    TEXT = "text"
+
+def openai_chat_completions_create(
+    # Parameters:
+    model: OpenAiModel,
+    messages,
+
+    # Optional parameters:
+    # In order of appearance in the API reference.
+    frequency_penalty=None,
+    logit_bias=None,
+    logprobs=None,
+    top_logprobs=None,
+    max_tokens=None,
+    n=None,
+    presence_penalty=None,
+    response_format: OpenAiChatFormat=None,
+    seed=None,
+    stop=None,
+    stream=None,
+    temperature=None,
+    top_p=None,
+    user=None):
+
+    # Checked: all, order, named, falsy
+
+    args = collections.PotentiallyFalsyArgs()
+    args.must_contain_enum_value("model", model)
+    args.must_contain("messages", messages)
+    args.may_contain("frequency_penalty", frequency_penalty)
+    args.may_contain("logit_bias", logit_bias)
+    args.may_contain("logprobs", logprobs)
+    args.may_contain("top_logprobs", top_logprobs)
+    args.may_contain("max_tokens", max_tokens)
+    args.may_contain("n", n)
+    args.may_contain("presence_penalty", presence_penalty)
+    args.may_contain_enum_value("response_format", response_format)
+    args.may_contain("seed", seed)
+    args.may_contain("stop", stop)
+    args.may_contain("stream", stream)
+    args.may_contain("temperature", temperature)
+    args.may_contain("top_p", top_p)
+    args.may_contain("user", user)
+
+    return openai_client.chat.completions.create(**args.args)
+
+def openai_build_messages(user_message, system_message=None):
+    messages = []
+
+    if system_message:
+        messages.append({
+            "role": OpenAiRole.SYSTEM.value,
+            "content": system_message
+        })
+
+    messages.append({
+        "role": OpenAiRole.USER.value,
+        "content": user_message
+    })
+
+    return messages
+
+# ------------------------------------------------------------------------------
+#     Vision
+# ------------------------------------------------------------------------------
+
+# https://platform.openai.com/docs/guides/vision
+
+class OpenAiVisionDetail(enum.Enum):
+    AUTO = "auto"
+    HIGH = "high"
+    LOW = "low"
+
+def openai_build_messages_for_vision(image_file_paths, user_message,
+                                     detail: OpenAiVisionDetail=None,
+                                     system_message=None):
+    messages = []
+
+    if system_message:
+        messages.append({
+            "role": OpenAiRole.SYSTEM.value,
+            "content": system_message
+        })
+
+    content = []
+
+    content.append({
+        "type": "text",
+        "text": user_message
+    })
+
+    for image_file_path in image_file_paths:
+        with open(image_file_path, "rb") as image_file:
+            # https://docs.python.org/3/library/mimetypes.html
+            mimetype = mimetypes.guess_type(image_file_path)[0]
+            # https://docs.python.org/3/library/base64.html
+            base64_str = base64.b64encode(image_file.read()).decode("ascii")
+
+            image_url = {}
+
+            image_url["url"] = f"data:{mimetype};base64,{base64_str}"
+
+            if detail:
+                image_url["detail"] = detail.value
+
+            content.append({
+                "type": "image_url",
+                "image_url": image_url
+            })
+
+    messages.append({
+        "role": OpenAiRole.USER.value,
+        "content": content
+    })
+
+    return messages
 
 # ------------------------------------------------------------------------------
 #     Create image
