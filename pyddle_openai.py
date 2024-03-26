@@ -1,5 +1,5 @@
-﻿# Created:
-#
+﻿# Created: 2024-03-26
+# Sugar-coating classes and methods for OpenAI's API.
 
 import enum
 import openai
@@ -169,20 +169,7 @@ class OpenAiAudioFormat(enum.Enum):
     PCM = "pcm"
     WAV = "wav"
 
-# All I want is a one-liner that does just one thing: write the response content to a file with OR without streaming.
-
-# Without "with_streaming_response", "create" returns HttpxBinaryResponseContent, whose "stream_to_file" is deprecated with a message:
-#     Due to a bug, this method doesn't actually stream the response content, `.with_streaming_response.method()` should be used instead
-# And the code is in: https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-
-# With "with_streaming_response", "create" returns StreamedBinaryAPIResponse, which seems newer.
-# https://github.com/openai/openai-python/blob/main/src/openai/_response.py
-
-# With "with_streaming_response", "stream_to_file" is still a synchronous method.
-# I initially assumed it would be an asynchronous method that returns something like C#'s Task.
-# The method only "streams" the content, meaning it's appended to the file little by little rather than all at once.
-
-def openai_audio_speech_create_and_stream_to_file(
+def openai_audio_speech_create_and_write_to_file(
     # Output:
     file_path,
 
@@ -212,9 +199,11 @@ def openai_audio_speech_create_and_stream_to_file(
     args.must_contain_enum_value("response_format", response_format)
     args.may_contain("speed", speed)
 
-    with openai_client.audio.speech.with_streaming_response.create(**args.args) as response:
+    # "create" returns HttpxBinaryResponseContent.
+    # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
+    with openai_client.audio.speech.create(**args.args) as response:
         file_system.create_parent_directory(file_path)
-        response.stream_to_file(file_path)
+        response.write_to_file(file_path)
 
 # ------------------------------------------------------------------------------
 #     Speech to text
@@ -314,20 +303,7 @@ class OpenAiImageFormat(enum.Enum):
     B64_JSON = "b64_json"
     URL = "url"
 
-def openai_images_generate_and_write(
-    # Output:
-    file_path,
-
-    # Parameters:
-    model: OpenAiModel,
-    prompt,
-
-    # Optional parameters:
-    n=None,
-    quality: OpenAiImageQuality=None,
-    size: OpenAiImageSize=None,
-    style: OpenAiImageStyle=None,
-    user=None):
+def openai_save_images(response, file_path):
     ''' Returns a list of file paths. '''
 
     file_paths = []
@@ -335,23 +311,6 @@ def openai_images_generate_and_write(
     dirname = pyddle_path.dirname(file_path)
     basename = pyddle_path.basename(file_path)
     root, extension = os.path.splitext(basename)
-
-    # Checked: all, order, named, falsy
-
-    args = collections.PotentiallyFalsyArgs()
-    args.must_contain_enum_value("model", model)
-    args.must_contain("prompt", prompt)
-    args.may_contain("n", n)
-    args.may_contain_enum_value("quality", quality)
-    args.may_contain_enum_value("size", size)
-    args.may_contain_enum_value("style", style)
-    args.may_contain("user", user)
-
-    # This is a one-liner.
-    # It takes care of saving the images as well.
-    args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
-
-    response = openai_client.images.generate(**args.args)
 
     # https://github.com/openai/openai-python/blob/main/src/openai/types/images_response.py
     # https://github.com/openai/openai-python/blob/main/src/openai/types/image.py
@@ -381,3 +340,126 @@ def openai_images_generate_and_write(
         file_paths.append(new_file_path)
 
     return file_paths
+
+def openai_images_generate_and_write(
+    # Output:
+    file_path,
+
+    # Parameters:
+    model: OpenAiModel,
+    prompt,
+
+    # Optional parameters:
+    n=None,
+    quality: OpenAiImageQuality=None,
+    size: OpenAiImageSize=None,
+    style: OpenAiImageStyle=None,
+    user=None):
+    ''' Returns a list of file paths. '''
+
+    file_paths = []
+
+    # Checked: all, order, named, falsy
+
+    args = collections.PotentiallyFalsyArgs()
+    args.must_contain_enum_value("model", model)
+    args.must_contain("prompt", prompt)
+    args.may_contain("n", n)
+    args.may_contain_enum_value("quality", quality)
+    args.may_contain_enum_value("size", size)
+    args.may_contain_enum_value("style", style)
+    args.may_contain("user", user)
+
+    # This is a one-liner.
+    # It takes care of saving the images as well.
+    args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
+
+    response = openai_client.images.generate(**args.args)
+
+    return openai_save_images(response, file_path)
+
+# ------------------------------------------------------------------------------
+#     Create image edit
+# ------------------------------------------------------------------------------
+
+# https://platform.openai.com/docs/api-reference/images/createEdit
+
+def openai_images_edit_and_write(
+    # Output:
+    output_file_path,
+
+    # Input:
+    input_file_path,
+
+    # Parameters:
+    model: OpenAiModel,
+    prompt,
+
+    # Optional parameters:
+    mask_file_path=None,
+    n=None,
+    size: OpenAiImageSize=None,
+    user=None):
+    ''' Returns a list of file paths. '''
+
+    with open(input_file_path, "rb") as input_file:
+        # Checked: all, order, named, falsy
+
+        args = collections.PotentiallyFalsyArgs()
+        args.must_contain("image", input_file)
+        args.must_contain_enum_value("model", model)
+        args.must_contain("prompt", prompt)
+        args.may_contain("n", n)
+        args.may_contain_enum_value("size", size)
+        args.may_contain("user", user)
+
+        args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
+
+        if mask_file_path:
+            with open(mask_file_path, "rb") as mask_file:
+                args.must_contain("mask", mask_file)
+
+                response = openai_client.images.edit(**args.args)
+
+        else:
+            response = openai_client.images.edit(**args.args)
+
+    return openai_save_images(response, output_file_path)
+
+# ------------------------------------------------------------------------------
+#     Create image variation
+# ------------------------------------------------------------------------------
+
+# https://platform.openai.com/docs/api-reference/images/createVariation
+
+def openai_images_create_variation_and_write(
+    # Output:
+    output_file_path,
+
+    # Input:
+    input_file_path,
+
+    # Parameters:
+    model: OpenAiModel,
+
+    # Optional parameters:
+    n=None,
+    size: OpenAiImageSize=None,
+    user=None):
+    ''' Returns a list of file paths. '''
+
+    with open(input_file_path, "rb") as input_file:
+        # Checked: all, order, named, falsy
+
+        args = collections.PotentiallyFalsyArgs()
+        args.must_contain("image", input_file)
+        args.must_contain_enum_value("model", model)
+        args.may_contain("n", n)
+        args.may_contain_enum_value("size", size)
+        args.may_contain("user", user)
+
+        args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
+
+        response = openai_client.images.create_variation(**args.args)
+
+    return openai_save_images(response, output_file_path)
