@@ -1,32 +1,11 @@
-# Created:
+﻿# Created:
 #
 
 import enum
 import openai
+import pyddle_collections as collections
 import pyddle_json_based_kvs as kvs
 import tiktoken
-
-# ------------------------------------------------------------------------------
-#     Falsy to None
-# ------------------------------------------------------------------------------
-
-# https://github.com/openai/openai-python/blob/main/src/openai/_types.py
-
-# OpenAI's official module uses the "NotGiven" class internally for arguments' default values.
-# I've tried importing and using it as default values to call the API's methods and encountered errors.
-# For now, I'll just send None and see what happens.
-
-def falsy_to_none(value):
-    if not value:
-        return None
-
-    return value
-
-def falsy_enum_to_none(value):
-    if not value:
-        return None
-
-    return value.value
 
 # ------------------------------------------------------------------------------
 #     Settings
@@ -149,10 +128,12 @@ def create_openai_client(api_key=None, organization=None, base_url=None):
     if not base_url:
         base_url = openai_settings.base_url
 
-    return openai.OpenAI(
-        api_key=falsy_to_none(api_key),
-        organization=falsy_to_none(organization),
-        base_url=falsy_to_none(base_url))
+    args = collections.PotentiallyFalsyArgs()
+    args.may_contain("api_key", api_key)
+    args.may_contain("organization", organization)
+    args.may_contain("base_url", base_url)
+
+    return openai.OpenAI(**args.args)
 
 openai_client = create_openai_client()
 
@@ -195,19 +176,36 @@ class OpenAiAudioFormat(enum.Enum):
 # The method only "streams" the content, meaning it's appended to the file little by little rather than all at once.
 
 def openai_audio_speech_create_and_stream_to_file(
+    # Output:
+    file_path,
+
+    # Input:
+    input,
+
+    # Parameters:
     model: OpenAiModel,
     voice: OpenAiVoice,
-    input,
     response_format: OpenAiAudioFormat, # Defaults to "mp3" in the API, but the user should specify one.
     # Based on the audio format, the user also has to choose the right file extension.
-    file_path):
 
-    with openai_client.audio.speech.with_streaming_response.create(
-        model=model.value,
-        voice=voice.value,
-        input=input,
-        response_format=response_format.value) as response:
+    # Optional parameters:
+    speed=None):
 
+    # Checked: all, order, named, falsy
+    # Meaning: all parameters in the API reference are supported, their order is natural,
+    #     the parameters are specified with their names and potentially falsy values are converted to None.
+
+    # The API offers more parameters like: extra_headers, extra_query, extra_body and timeout.
+    # We wont support them because, in a situation where we need to specify them, we wont use one-liners.
+
+    args = collections.PotentiallyFalsyArgs()
+    args.must_contain("input", input)
+    args.must_contain_enum_value("model", model)
+    args.must_contain_enum_value("voice", voice)
+    args.must_contain_enum_value("response_format", response_format)
+    args.may_contain("speed", speed)
+
+    with openai_client.audio.speech.with_streaming_response.create(**args.args) as response:
         response.stream_to_file(file_path)
 
 # ------------------------------------------------------------------------------
@@ -228,35 +226,53 @@ class OpenAiTranscriptFormat(enum.Enum):
     VTT = "vtt"
 
 def openai_audio_transcriptions_create(
-    model: OpenAiModel,
+    # Input:
     file_path,
+
+    # Parameters:
+    model: OpenAiModel,
     response_format: OpenAiTranscriptFormat,
+
+    # Optional parameters:
     language=None,
     prompt=None,
     temperature=None,
     timestamp_granularities=None):
 
     with open(file_path, "rb") as file:
-        return openai_client.audio.transcriptions.create(
-            model=model.value,
-            file=file,
-            response_format=falsy_enum_to_none(response_format),
-            language=falsy_to_none(language),
-            prompt=falsy_to_none(prompt),
-            temperature=falsy_to_none(temperature),
-            timestamp_granularities=falsy_to_none(timestamp_granularities))
+        # Checked: all, order, named, falsy
+
+        args = collections.PotentiallyFalsyArgs()
+        args.must_contain("file", file)
+        args.must_contain_enum_value("model", model)
+        args.must_contain_enum_value("response_format", response_format)
+        args.may_contain("language", language)
+        args.may_contain("prompt", prompt)
+        args.may_contain("temperature", temperature)
+        args.may_contain("timestamp_granularities", timestamp_granularities)
+
+        return openai_client.audio.transcriptions.create(**args.args)
 
 def openai_audio_translations_create(
-    model: OpenAiModel,
+    # Input:
     file_path,
+
+    # Parameters:
+    model: OpenAiModel,
     response_format: OpenAiTranscriptFormat,
+
+    # Optional parameters:
     prompt=None,
     temperature=None):
 
     with open(file_path, "rb") as file:
-        return openai_client.audio.translations.create(
-            model=model.value,
-            file=file,
-            response_format=falsy_enum_to_none(response_format),
-            prompt=falsy_to_none(prompt),
-            temperature=falsy_to_none(temperature))
+        # Checked: all, order, named, falsy
+
+        args = collections.PotentiallyFalsyArgs()
+        args.must_contain("file", file)
+        args.must_contain_enum_value("model", model)
+        args.must_contain_enum_value("response_format", response_format)
+        args.may_contain("prompt", prompt)
+        args.may_contain("temperature", temperature)
+
+        return openai_client.audio.translations.create(**args.args)
