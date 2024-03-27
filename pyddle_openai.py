@@ -172,10 +172,7 @@ class OpenAiAudioFormat(enum.Enum):
     PCM = "pcm"
     WAV = "wav"
 
-def openai_audio_speech_create_and_write_to_file(
-    # Output:
-    file_path,
-
+def openai_audio_speech_create(
     # Input:
     input,
 
@@ -204,9 +201,11 @@ def openai_audio_speech_create_and_write_to_file(
 
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    with openai_client.audio.speech.create(**args.args) as response:
-        file_system.create_parent_directory(file_path)
-        response.write_to_file(file_path)
+    return openai_client.audio.speech.create(**args.args)
+
+def openai_save_audio(file_path, response):
+    file_system.create_parent_directory(file_path)
+    response.write_to_file(file_path)
 
 # ------------------------------------------------------------------------------
 #     Speech to text
@@ -259,6 +258,8 @@ def openai_audio_translations_create(
 
     # Parameters:
     model: OpenAiModel,
+    # Using the same enum type.
+    # Audio translation is basically transcription + translation.
     response_format: OpenAiTranscriptFormat,
 
     # Optional parameters:
@@ -357,6 +358,12 @@ def openai_build_messages(user_message, system_message=None):
     })
 
     return messages
+
+def openai_extract_messages(response):
+    return [message.content for message in response.choices]
+
+def openai_extract_first_message(response):
+    return response.choices[0].message.content
 
 # ------------------------------------------------------------------------------
 #     Vision
@@ -494,6 +501,7 @@ def openai_images_generate_and_write(
     size: OpenAiImageSize=None,
     style: OpenAiImageStyle=None,
     user=None):
+
     ''' Returns a list of file paths. '''
 
     file_paths = []
@@ -539,6 +547,7 @@ def openai_images_edit_and_write(
     n=None,
     size: OpenAiImageSize=None,
     user=None):
+
     ''' Returns a list of file paths. '''
 
     with open(input_file_path, "rb") as input_file:
@@ -585,6 +594,7 @@ def openai_images_create_variation_and_write(
     n=None,
     size: OpenAiImageSize=None,
     user=None):
+
     ''' Returns a list of file paths. '''
 
     with open(input_file_path, "rb") as input_file:
