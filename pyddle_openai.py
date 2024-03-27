@@ -343,24 +343,36 @@ def openai_chat_completions_create(
 
     return openai_client.chat.completions.create(**args.args)
 
-def openai_build_messages(user_message, system_message=None):
-    messages = []
+def openai_add_system_message(messages, system_message):
+    messages.append({
+        "role": OpenAiRole.SYSTEM.value,
+        "content": system_message
+    })
 
-    if system_message:
-        messages.append({
-            "role": OpenAiRole.SYSTEM.value,
-            "content": system_message
-        })
-
+def openai_add_user_message(messages, user_message):
     messages.append({
         "role": OpenAiRole.USER.value,
         "content": user_message
     })
 
+def openai_add_assistant_message(messages, assistant_message):
+    messages.append({
+        "role": OpenAiRole.ASSISTANT.value,
+        "content": assistant_message
+    })
+
+def openai_build_messages(user_message, system_message=None):
+    messages = []
+
+    if system_message:
+        openai_add_system_message(messages, system_message)
+
+    openai_add_user_message(messages, user_message)
+
     return messages
 
 def openai_extract_messages(response):
-    return [message.content for message in response.choices]
+    return [choice.message.content for choice in response.choices]
 
 def openai_extract_first_message(response):
     return response.choices[0].message.content

@@ -24,6 +24,9 @@ log_file_path = os.path.join(logs_directory_path, f"log-{pyddle_datetime.utc_to_
 logs = []
 
 def log(str, indents="", end="\n", flush=False):
+    if not str:
+        indents = ""
+
     logs.append(f"{indents}{str}{end}")
 
     if flush:
