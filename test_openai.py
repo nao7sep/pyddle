@@ -1,18 +1,21 @@
 ﻿# Created: 2024-03-27
 # Test/sample code for pyddle_openai.py.
 
+import json
 import pyddle_debugging as debugging
 import pyddle_file_system as file_system
 import pyddle_openai as openai
 
 file_system.make_and_move_to_output_subdirectory()
 
+# GitHub Copilot automatically generated this and I liked it. :)
+english_text_for_audio = "Hello, my name is Pyddle. I am a Python library for creating games and applications. I am a work in progress, but I am getting better every day. I am excited to see what you will create with me. Have fun and happy coding!"
+
 def test_audio():
     # Makes audio.
 
     audio_response = openai.openai_audio_speech_create(
-        # GitHub Copilot automatically generated this and I liked it. :)
-        input="Hello, my name is Pyddle. I am a Python library for creating games and applications. I am a work in progress, but I am getting better every day. I am excited to see what you will create with me. Have fun and happy coding!",
+        input=english_text_for_audio,
         model=openai.OpenAiModel.TTS_1_HD,
         voice=openai.OpenAiVoice.NOVA,
         response_format=openai.OpenAiAudioFormat.MP3)
@@ -59,13 +62,13 @@ def test_audio():
 
     # Displays the translated transcription.
 
-    translated_transcription_str = openai.openai_extract_first_message(translated_transcription_response)
-    print(f"Japanese translation by Chat: {translated_transcription_str}")
+    translated_transcription_text = openai.openai_extract_first_message(translated_transcription_response)
+    print(f"Japanese translation by Chat: {translated_transcription_text}")
 
     # Makes new audio from the translated transcription.
 
     translated_audio_response = openai.openai_audio_speech_create(
-        input=translated_transcription_str,
+        input=translated_transcription_text,
         model=openai.OpenAiModel.TTS_1_HD,
         voice=openai.OpenAiVoice.ALLOY,
         response_format=openai.OpenAiAudioFormat.MP3)
@@ -92,10 +95,36 @@ def test_audio():
 
     # Displays the translation.
 
+    print(f"English translation: {translation.text}")
+
+def compare_original_and_translated_texts():
+    translation_file_name = "test_openai_english_translation.json"
+    translation_json = file_system.read_all_text_from_file(translation_file_name)
+    translation_text = json.loads(translation_json)["text"]
+
+    # Compare the text:
+
+    comparison_response = openai.openai_chat_completions_create(
+        model=openai.OpenAiModel.GPT_4_TURBO,
+        messages=openai.openai_build_messages(f"Compare the following texts:\n\n{english_text_for_audio}\n\n {translation_text}"))
+
+    # Saves the comparison results to a file.
+
+    comparison_file_name = "test_openai_text_comparison.json"
+    comparison_json = comparison_response.model_dump_json(indent=4)
+    file_system.write_all_text_to_file(comparison_file_name, comparison_json)
+    print(f"Text comparison results saved to: {comparison_file_name}")
+
+    # Displays the comparison results.
+
+    comparison_text = openai.openai_extract_first_message(comparison_response)
+    print(f"Text comparison results: {comparison_text}")
+
 # ------------------------------------------------------------------------------
 #     Tests
 # ------------------------------------------------------------------------------
 
 test_audio()
+compare_original_and_translated_texts()
 
 debugging.display_press_enter_key_to_continue_if_not_debugging()
