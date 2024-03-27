@@ -1,0 +1,25 @@
+﻿{
+    "id": "chatcmpl-97CqQHjP7UNHLEGV1mS16hij4VaxF",
+    "choices": [
+        {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+                "content": "こんにちは、私の名前はPytelです。ゲームやアプリケーションを作成するためのPythonライブラリです。私は進行中の作業ですが、毎日より良くなっています。あなたが私と一緒に何を作るか見るのが楽しみです。楽しんで、ハッピーコーディングを。",
+                "role": "assistant",
+                "function_call": null,
+                "tool_calls": null
+            }
+        }
+    ],
+    "created": 1711504698,
+    "model": "gpt-4-0125-preview",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_a7daf7c51e",
+    "usage": {
+        "completion_tokens": 109,
+        "prompt_tokens": 66,
+        "total_tokens": 175
+    }
+}

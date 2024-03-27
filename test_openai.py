@@ -124,6 +124,9 @@ def compare_original_and_translated_texts():
 #     Tests
 # ------------------------------------------------------------------------------
 
+# Some of the results are saved in: AY04 Testing pyddle_openai.py.json
+# You will find the file in the Resources repository's Episodic directory.
+
 test_audio()
 compare_original_and_translated_texts()
 
