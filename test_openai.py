@@ -179,6 +179,8 @@ def test_chat():
             model=openai.OpenAiModel.GPT_4_TURBO,
             messages=messages,
             max_tokens=100)) # Limited length.
+            # As a result, the summaries will be incomplete.
+            # "finish_reason" will be set to "length".
 
         summarization_answers.append(openai.openai_extract_first_message(summarization_responses[index]))
         messages.pop()

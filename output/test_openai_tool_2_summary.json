@@ -1,0 +1,25 @@
+﻿{
+    "id": "chatcmpl-97NcD8itUdOeipkHxJtdQ3VzzQmGB",
+    "choices": [
+        {
+            "finish_reason": "length",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+                "content": "The rotary tool is a handheld device essential for various household, crafting, and DIY projects, featuring a rapidly spinning motor that supports a wide range of functions such as cutting, grinding, sanding, carving, and polishing through various attachable accessories. With a motor capable of reaching up to 35,000 RPM, it offers unparalleled versatility and precision, ideal for detailed tasks that bigger power tools cannot accomplish. Its design allows for adjustable speed settings to match the task's requirements, whether it be high-speed",
+                "role": "assistant",
+                "function_call": null,
+                "tool_calls": null
+            }
+        }
+    ],
+    "created": 1711546101,
+    "model": "gpt-4-0125-preview",
+    "object": "chat.completion",
+    "system_fingerprint": "fp_a7daf7c51e",
+    "usage": {
+        "completion_tokens": 100,
+        "prompt_tokens": 525,
+        "total_tokens": 625
+    }
+}
