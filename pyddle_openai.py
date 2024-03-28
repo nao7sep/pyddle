@@ -461,7 +461,7 @@ class OpenAiImageFormat(enum.Enum):
     B64_JSON = "b64_json"
     URL = "url"
 
-def openai_save_images(response, file_path):
+def openai_save_images(file_path, response):
     ''' Returns a list of file paths. '''
 
     file_paths = []
@@ -499,10 +499,7 @@ def openai_save_images(response, file_path):
 
     return file_paths
 
-def openai_images_generate_and_write(
-    # Output:
-    file_path,
-
+def openai_images_generate(
     # Parameters:
     model: OpenAiModel,
     prompt,
@@ -533,9 +530,7 @@ def openai_images_generate_and_write(
     # It takes care of saving the images as well.
     args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-    response = openai_client.images.generate(**args.args)
-
-    return openai_save_images(response, file_path)
+    return openai_client.images.generate(**args.args)
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -543,10 +538,7 @@ def openai_images_generate_and_write(
 
 # https://platform.openai.com/docs/api-reference/images/createEdit
 
-def openai_images_edit_and_write(
-    # Output:
-    output_file_path,
-
+def openai_images_edit(
     # Input:
     input_file_path,
 
@@ -579,12 +571,10 @@ def openai_images_edit_and_write(
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                response = openai_client.images.edit(**args.args)
+                return openai_client.images.edit(**args.args)
 
         else:
-            response = openai_client.images.edit(**args.args)
-
-    return openai_save_images(response, output_file_path)
+            return openai_client.images.edit(**args.args)
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -592,10 +582,7 @@ def openai_images_edit_and_write(
 
 # https://platform.openai.com/docs/api-reference/images/createVariation
 
-def openai_images_create_variation_and_write(
-    # Output:
-    output_file_path,
-
+def openai_images_create_variation(
     # Input:
     input_file_path,
 
@@ -621,6 +608,4 @@ def openai_images_create_variation_and_write(
 
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-        response = openai_client.images.create_variation(**args.args)
-
-    return openai_save_images(response, output_file_path)
+        return openai_client.images.create_variation(**args.args)
