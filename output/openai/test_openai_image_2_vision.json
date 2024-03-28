@@ -1,0 +1,25 @@
+﻿{
+    "id": "chatcmpl-97any4TC7Qq5jpQaj99umNaFf1hNn",
+    "choices": [
+        {
+            "finish_reason": "stop",
+            "index": 0,
+            "logprobs": null,
+            "message": {
+                "content": "This is a dramatic and detailed fantasy illustration. The scene portrays a chaotic and fiery landscape with multiple dragons. These dragons are highly stylized and menacing, with sharp features, spiky scales, and glowing eyes. They appear to be engaged in some kind of battle or display of power, as indicated by their aggressive postures and the presence of what seems to be warriors or figures on the ground. The environment is equally fantastical, with structures reminiscent of castle spires and the ground cracked open, emitting rivers of lava. The sky is tumultuous, with swirling clouds and a hint of a starry night sky visible through the darkness. There is a strong sense of movement and energy in the composition, with the dragons' wings and tails emphasizing a sense of motion. The color palette is dominated by oranges, reds, and dark hues, contributing to the infernal and dramatic atmosphere.",
+                "role": "assistant",
+                "function_call": null,
+                "tool_calls": null
+            }
+        }
+    ],
+    "created": 1711596802,
+    "model": "gpt-4-1106-vision-preview",
+    "object": "chat.completion",
+    "system_fingerprint": null,
+    "usage": {
+        "completion_tokens": 178,
+        "prompt_tokens": 780,
+        "total_tokens": 958
+    }
+}
