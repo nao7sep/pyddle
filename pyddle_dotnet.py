@@ -161,6 +161,7 @@ class ProjectInfo:
 
 def extract_version_string_from_csproj_file(path):
     """ Returns None if the version string is not found. """
+
     with file_system.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # Project
@@ -179,11 +180,13 @@ def extract_version_string_from_csproj_file(path):
 
 def extract_default_namespace_from_root_tag(tag):
     """ Returns None if the default namespace is not found. """
+
     if tag.startswith("{"):
         return { "": tag[1 : tag.index("}")] }
 
 def extract_version_string_from_app_manifest_file(path):
     """ Returns None if the version string is not found. """
+
     with file_system.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # assembly
@@ -203,6 +206,7 @@ def extract_version_string_from_assembly_info_file(path):
         As this method uses a regex, if a version string is extracted, it should be valid.
         There's no point in loosening the regex to match invalid version strings.
     """
+
     with file_system.open_file_and_detect_utf_encoding(path) as file:
         for line in file:
             if line.lstrip().startswith("//"):
@@ -218,6 +222,7 @@ def parse_version_string(str):
         Returns a list of 4 integers.
         Raises a ValueError if the string is not a valid version string.
     """
+
     # https://learn.microsoft.com/en-us/dotnet/api/system.version.parse
 
     digits = [0, 0, 0, 0]
@@ -235,6 +240,7 @@ def version_digits_to_string(digits, minimum_digit_count=2):
         Can be used to normalize a version string.
         Takes a list of 4 integers.
     """
+
     # "range" generates from 3 to 0.
     # Even if "digits" are all 0, "index" doesnt seem to be -1.
     for index in range(len(digits) - 1, -1, -1):
@@ -257,6 +263,7 @@ def version_digits_to_string(digits, minimum_digit_count=2):
 
 def extract_referenced_project_names_from_csproj_file(path):
     """ Returns an empty list if no references are found. """
+
     with file_system.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # Project

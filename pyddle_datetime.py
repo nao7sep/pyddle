@@ -8,6 +8,7 @@ def get_utc_now():
 
 def utc_to_roundtrip_string(utc):
     """ Returns something like "2024-03-14T03:58:10.292580+00:00". """
+
     return utc.isoformat()
 
 def roundtrip_string_to_utc(str):
@@ -22,4 +23,5 @@ roundtrip_file_name_string_format = '%Y%m%dT%H%M%S-%fZ'
 
 def utc_to_roundtrip_file_name_string(utc):
     """ Returns something like "20240307T075556-212728Z". """
+
     return utc.strftime(roundtrip_file_name_string_format)

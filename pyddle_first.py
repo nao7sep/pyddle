@@ -29,6 +29,7 @@ def set_main_script_file_path(file_path):
 
 def get_main_script_file_path():
     """ Raises a RuntimeError if the main script file path is not set. """
+
     if not main_script_file_path:
         raise RuntimeError("Main script file path not set.")
 
@@ -36,6 +37,7 @@ def get_main_script_file_path():
 
 def get_main_script_file_name():
     """ Raises a RuntimeError if the main script file name is not set. """
+
     if not main_script_file_name:
         raise RuntimeError("Main script file name not set.")
 
@@ -43,6 +45,7 @@ def get_main_script_file_name():
 
 def get_main_script_file_name_without_extension():
     """ Raises a RuntimeError if the main script file name without extension is not set. """
+
     if not main_script_file_name_without_extension:
         raise RuntimeError("Main script file name without extension not set.")
 
@@ -50,6 +53,7 @@ def get_main_script_file_name_without_extension():
 
 def get_main_script_file_extension():
     """ Raises a RuntimeError if the main script file extension is not set. """
+
     if not main_script_file_extension:
         raise RuntimeError("Main script file extension not set.")
 

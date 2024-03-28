@@ -12,12 +12,17 @@ def create_parent_directory(path):
     if parent_directory_path:
         os.makedirs(parent_directory_path, exist_ok=True)
 
-def make_and_move_to_output_subdirectory():
+def make_and_move_to_output_subdirectory(subdirectory=None):
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
+
     # Supposing this module is in a subdirectory of the project's root directory.
-    output_directory_path = os.path.join(pyddle_path.dirname(__file__), "output")
-    os.makedirs(output_directory_path, exist_ok=True)
-    os.chdir(output_directory_path)
+    directory_path = os.path.join(pyddle_path.dirname(__file__), "output")
+
+    if subdirectory:
+        directory_path = os.path.join(directory_path, subdirectory)
+
+    os.makedirs(directory_path, exist_ok=True)
+    os.chdir(directory_path)
 
 # ------------------------------------------------------------------------------
 #     UTF encodings
@@ -40,6 +45,7 @@ utf_encodings_and_boms = {
 
 def get_utf_encoding_bom(encoding):
     """ Returns None if the encoding is not supported. """
+
     uppercase_encoding = encoding.upper()
 
     for encoding, bom in utf_encodings_and_boms:
@@ -48,6 +54,7 @@ def get_utf_encoding_bom(encoding):
 
 def write_utf_encoding_bom_to_file(file, encoding):
     """ Writes the BOM only if the encoding is supported. """
+
     bom = get_utf_encoding_bom(encoding)
 
     if bom:
@@ -55,6 +62,7 @@ def write_utf_encoding_bom_to_file(file, encoding):
 
 def detect_utf_encoding(bytes):
     """ Returns (None, None) if the encoding is not detected. """
+
     for encoding, bom in utf_encodings_and_boms:
         if bytes.startswith(bom):
             return encoding, bom
@@ -66,6 +74,7 @@ def detect_utf_encoding_of_file(file):
         The position will be right after the detected BOM.
         Returns (None, None) if the encoding is not detected.
     """
+
     position = file.tell()
     bytes = file.read(4)
     encoding, bom = detect_utf_encoding(bytes)
@@ -84,6 +93,7 @@ def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append=False):
         Raises a RuntimeError if the encoding is not supported.
         If 'append' is True and the file already has content without a BOM, the BOM will NOT be written.
     """
+
     bom = get_utf_encoding_bom(encoding)
 
     if not bom:
@@ -105,6 +115,7 @@ def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append=False):
 
 def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
     """ The position will be right after the detected BOM (if there's one). """
+
     file = open(path, "r", encoding="UTF-8") # The strongly encouraged default encoding.
     encoding, bom = detect_utf_encoding_of_file(file.buffer)
 
@@ -167,6 +178,7 @@ def append_all_bytes_to_file(path, bytes):
 
 def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
     """ If the file already has content without a BOM, the BOM will NOT be written. """
+
     if write_bom:
         with open_file_and_write_utf_encoding_bom(path, encoding, append=True) as file:
             file.write(text)
