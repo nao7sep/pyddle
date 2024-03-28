@@ -343,6 +343,48 @@ def openai_chat_completions_create(
 
     return openai_client.chat.completions.create(**args.args)
 
+class OpenAiChatSettings:
+    def __init__(self, model: OpenAiModel = None):
+        self.model: OpenAiModel = model
+
+        # Optional:
+        self.frequency_penalty = None
+        self.logit_bias = None
+        self.logprobs = None
+        self.top_logprobs = None
+        self.max_tokens = None
+        self.n = None
+        self.presence_penalty = None
+        self.response_format: OpenAiChatFormat = None
+        self.seed = None
+        self.stop = None
+        self.stream = None
+        self.temperature = None
+        self.top_p = None
+        self.user = None
+
+def openai_chat_completions_create_with_settings(
+    settings: OpenAiChatSettings,
+    messages):
+
+    return openai_chat_completions_create(
+        model=settings.model,
+        messages=messages,
+        frequency_penalty=settings.frequency_penalty,
+        logit_bias=settings.logit_bias,
+        logprobs=settings.logprobs,
+        top_logprobs=settings.top_logprobs,
+        max_tokens=settings.max_tokens,
+        n=settings.n,
+        presence_penalty=settings.presence_penalty,
+        response_format=settings.response_format,
+        seed=settings.seed,
+        stop=settings.stop,
+        stream=settings.stream,
+        temperature=settings.temperature,
+        top_p=settings.top_p,
+        user=settings.user)
+
 def openai_add_system_message(messages, system_message):
     messages.append({
         "role": OpenAiRole.SYSTEM.value,
