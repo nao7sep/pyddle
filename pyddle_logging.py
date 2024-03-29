@@ -1,6 +1,7 @@
 ﻿# Created: 2024-03-07
 # This script contains the possibly simplest logging mechanism that should be just enough for a small, single-threaded app.
 
+# For logging:
 import pyddle_first as first
 first.set_main_script_file_path(__file__)
 

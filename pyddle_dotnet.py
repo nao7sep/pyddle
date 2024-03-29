@@ -214,7 +214,7 @@ def extract_version_string_from_assembly_info_file(path):
 
             # Regex not compiled.
             # Infrequent operation.
-            match = re.match(assembly_info_file_version_string_pattern, line)
+            match = re.match(assembly_info_file_version_string_pattern, line, flags=re.IGNORECASE)
 
             if match:
                 return match.group("version")

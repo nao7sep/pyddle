@@ -1,6 +1,10 @@
 ﻿# Created: 2024-03-07
 # This script aims to provide an unified way to output strings to the console and a log file.
 
+# For logging:
+import pyddle_first as first
+first.set_main_script_file_path(__file__)
+
 import pyddle_console as console
 import pyddle_logging as logging
 

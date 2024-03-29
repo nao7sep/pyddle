@@ -1,6 +1,7 @@
 ﻿# Created: 2024-03-11
 # This script builds and archives all changed projects in the specified repositories directory.
 
+# For logging:
 import pyddle_first as first
 first.set_main_script_file_path(__file__)
 

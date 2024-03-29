@@ -410,6 +410,7 @@ def normalize_multiline_str(str, trim_line_start=False, trim_line_end=True,
 #     Normalization of single line strings
 # ------------------------------------------------------------------------------
 
+# "\s" matches new lines as well.
 compiled_regex_for_normalize_singleline_str = re.compile(r"\s+")
 
 def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
