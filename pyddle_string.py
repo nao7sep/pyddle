@@ -450,7 +450,7 @@ def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_c
 compiled_regex_for_split_line_into_parts = re.compile(r"^(\s*)(.*?)(\s*)$")
 
 def split_line_into_parts(line: str):
-    ''' Returns a tuple of indents, visible content and trailing whitespace. '''
+    ''' Returns a tuple of indents, visible content and trailing whitespace. If "str" contains only whitespace, the entire string goes to the first part, effectively making the content part empty. '''
 
     if not line:
         return ("", "", "")
@@ -465,7 +465,15 @@ def split_line_into_parts(line: str):
 
 def add_indents_and_trailing_whitespace_to_parts(
         parts: tuple[str, str, str], indents: str="", trailing_whitespace: str=""):
-    return (parts[0] + indents, parts[1], trailing_whitespace + parts[2])
+    ''' If "str" is falsy, nothing is added to any part. '''
+
+    if parts[1]:
+        # Indents must indent the existing indents.
+        # Trailing whitespace must trail the existing trailing whitespace.
+        return (indents + parts[0], parts[1], parts[2] + trailing_whitespace)
+
+    else:
+        return parts
 
 # When "str" is falsy, pyddle_string.splitlines returns an empty list just like "".splitlines().
 # "build_multiline_parts" is designed to be consistent with that behavior.

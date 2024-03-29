@@ -9,6 +9,7 @@ import os
 import pyddle_datetime
 import pyddle_file_system as file_system
 import pyddle_path # path is a too common name.
+import pyddle_string as string
 
 logs_directory_path = os.path.join(pyddle_path.dirname(__file__), "logs")
 
@@ -25,11 +26,22 @@ log_file_path = os.path.join(logs_directory_path, f"log-{pyddle_datetime.utc_to_
 
 logs = []
 
-def log(str, indents="", end="\n", flush=False):
-    if not str:
-        indents = ""
+def log(str, multiline=False, indents="", end="\n", flush=False):
+    if multiline:
+        # Harmless normalization is applied to the string.
+        for parts in string.build_multiline_parts(str, indents=indents):
+            # If parts[1] is falsy, parts[0] will automatically be an empty string.
+            # As a result of normalization and adding no trailing whitespace, parts[2] is always falsy.
+            logs.append(f"{parts[0]}{parts[1]}{end}")
 
-    logs.append(f"{indents}{str}{end}")
+    else:
+        # Logs are in plain text.
+        # We dont need to split each line into parts.
+
+        # If "multiline" is False, we must also expect little-by-little output (like one portion is only ": " to separate a key and a value).
+        # So, unless "str" is falsy, we must output the whole content of it as-is.
+
+        logs.append(f"{indents if str else ''}{str}{end}")
 
     if flush:
         flush()
