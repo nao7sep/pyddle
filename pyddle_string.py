@@ -437,15 +437,20 @@ def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_c
         return new_str
 
 # ------------------------------------------------------------------------------
-#     Splitting line into parts
+#     Line parts
 # ------------------------------------------------------------------------------
+
+# The following methods consider that a line is composed of three parts:
+#     * Indents
+#     * Visible content
+#     * Trailing whitespace
 
 # The middle part is not greedy.
 # https://docs.python.org/3/library/re.html#regular-expression-syntax
 compiled_regex_for_split_line_into_parts = re.compile(r"^(\s*)(.*?)(\s*)$")
 
-def split_line_into_parts(line):
-    ''' Returns a tuple of indentation, content and trailing whitespace. '''
+def split_line_into_parts(line: str):
+    ''' Returns a tuple of indents, visible content and trailing whitespace. '''
 
     if not line:
         return ("", "", "")
@@ -457,3 +462,44 @@ def split_line_into_parts(line):
     # Here, every group should match something.
     # https://docs.python.org/3/library/re.html#re.Match.groups
     return match.groups()
+
+def add_indents_and_trailing_whitespace_to_parts(
+        parts: tuple[str, str, str], indents: str="", trailing_whitespace: str=""):
+    return (parts[0] + indents, parts[1], trailing_whitespace + parts[2])
+
+# When "str" is falsy, pyddle_string.splitlines returns an empty list just like "".splitlines().
+# "build_multiline_parts" is designed to be consistent with that behavior.
+
+# This method is often used to display something like:
+# Lines:
+#     Line 1
+#     Line 2
+
+# When there's no line, the code has to know it and omit the "Lines:" part as well,
+#     rather than expecting "build_multiline_parts" to return an empty line or a suitable message.
+# So, although the implementation doesnt explicitly raise an error when "str" is falsy,
+#     let's say the behavior in such a case is undefined.
+
+def build_multiline_parts(str, indents="", trailing_whitespace="", trim_line_start=False, trim_line_end=True,
+                          remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
+    ''' Takes a multiline string and returns a list of tuples. When "str" is falsy, the behavior is undefined. '''
+
+    new_lines = []
+
+    for line in splitlines(str, trim_line_start, trim_line_end,
+                           remove_empty_lines_at_start, remove_redundant_empty_lines, remove_empty_lines_at_end):
+        parts = split_line_into_parts(line)
+        new_parts = add_indents_and_trailing_whitespace_to_parts(parts, indents, trailing_whitespace)
+        new_lines.append(new_parts)
+
+    return new_lines
+
+def build_singleline_parts(str, indents="", trailing_whitespace="",
+                           trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
+    ''' Takes a singleline string and returns a tuple. '''
+
+    # If "str" is falsy, normalize_singleline_str returns it as-is and split_line_into_parts takes care of it.
+
+    normalized_str = normalize_singleline_str(str, trim_start, remove_redundant_whitespace_chars, trim_end)
+    parts = split_line_into_parts(normalized_str)
+    return add_indents_and_trailing_whitespace_to_parts(parts, indents, trailing_whitespace)
