@@ -212,6 +212,8 @@ def extract_version_string_from_assembly_info_file(path):
             if line.lstrip().startswith("//"):
                 continue
 
+            # Regex not compiled.
+            # Infrequent operation.
             match = re.match(assembly_info_file_version_string_pattern, line)
 
             if match:

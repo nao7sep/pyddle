@@ -1,11 +1,13 @@
 ﻿# Created: 2024-03-07
 # This script contains the possibly simplest logging mechanism that should be just enough for a small, single-threaded app.
 
+import pyddle_first as first
+first.set_main_script_file_path(__file__)
+
 import datetime
 import os
 import pyddle_datetime
 import pyddle_file_system as file_system
-import pyddle_first as first
 import pyddle_path # path is a too common name.
 
 logs_directory_path = os.path.join(pyddle_path.dirname(__file__), "logs")

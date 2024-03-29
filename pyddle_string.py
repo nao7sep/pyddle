@@ -410,6 +410,8 @@ def normalize_multiline_str(str, trim_line_start=False, trim_line_end=True,
 #     Normalization of single line strings
 # ------------------------------------------------------------------------------
 
+compiled_regex_for_normalize_singleline_str = re.compile(r"\s+")
+
 def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
     if not str:
         return str
@@ -429,7 +431,29 @@ def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_c
             new_str = str
 
     if remove_redundant_whitespace_chars:
-        return re.sub(r"\s+", " ", new_str)
+        return compiled_regex_for_normalize_singleline_str.sub(" ", new_str)
 
     else:
         return new_str
+
+# ------------------------------------------------------------------------------
+#     Splitting line into parts
+# ------------------------------------------------------------------------------
+
+# The middle part is not greedy.
+# https://docs.python.org/3/library/re.html#regular-expression-syntax
+compiled_regex_for_split_line_into_parts = re.compile(r"^(\s*)(.*?)(\s*)$")
+
+def split_line_into_parts(line):
+    ''' Returns a tuple of indentation, content and trailing whitespace. '''
+
+    if not line:
+        return ("", "", "")
+
+    # If the pattern contains ^ and $, is there a good reason to use fullmatch? :S
+    match = compiled_regex_for_split_line_into_parts.match(line)
+
+    # We could set "default" to the string we'd like any non-participating group of the match to be.
+    # Here, every group should match something.
+    # https://docs.python.org/3/library/re.html#re.Match.groups
+    return match.groups()

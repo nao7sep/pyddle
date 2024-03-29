@@ -100,6 +100,10 @@ class OpenAiBaseNode:
         self.content = content
 
         # Optional info:
+        # The | thing came out with Python 3.10, which was released in 2021.
+        # We should stick to Union just a little longer.
+        # https://docs.python.org/3/library/typing.html#typing.Union
+        # https://docs.python.org/3/library/stdtypes.html#union-type
         self.language: Union[OpenAiLanguage, str] = None
 
         # Attributes:

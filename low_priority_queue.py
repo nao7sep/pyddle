@@ -280,6 +280,8 @@ def select_shown_tasks(handled_task_list, task_list, shows_all):
     return shown_tasks, execution_counts
 
 def parse_command_str(command_str):
+    # Regex not compiled.
+    # Infrequent operation.
     match = re.match(r"^(?P<command>[a-z]+)(\s+(?P<number>[0-9]+)(\s+(?P<parameter>.+))?)?$", command_str, re.IGNORECASE)
 
     if match:
