@@ -103,19 +103,19 @@ try:
 
         if not solution_file_paths:
             if debugging.is_debugging():
-                output.print_and_log_warning(f"No solution files found in directory: {directory_name}")
+                output.print_and_log(f"No solution files found in directory: {directory_name}", colors=console.warning_colors)
 
             continue
 
         if len(solution_file_paths) > 1:
-            output.print_and_log_warning(f"Multiple solution files found in directory: {directory_name}")
+            output.print_and_log(f"Multiple solution files found in directory: {directory_name}", colors=console.warning_colors)
             continue
 
         is_obsolete_solution = string.contains_ignore_case(obsolete_solution_names, directory_name)
         solutions.append(dotnet.SolutionInfo(solutions, archives_directory_path, directory_name, possible_solution_directory_path, solution_file_paths[0], is_obsolete_solution))
 
     if not solutions:
-        output.print_and_log_warning(f"No solution directories found.")
+        output.print_and_log(f"No solution directories found.", colors=console.warning_colors)
         # "sys.exit" raises a "SystemExit" exception, which is NOT caught by the "except" block if a type is specified, allowing the script to execute the "finally" block.
         # "exit", on the other hand, is merely a helper for the interactive shell and should not be used in production code.
         sys.exit()
@@ -144,18 +144,18 @@ try:
 
             if not project_file_paths:
                 if debugging.is_debugging():
-                    output.print_and_log_warning(f"No project files found in directory: {solution.name}/{directory_name}")
+                    output.print_and_log(f"No project files found in directory: {solution.name}/{directory_name}", colors=console.warning_colors)
 
                 continue
 
             if len(project_file_paths) > 1:
-                output.print_and_log_warning(f"Multiple project files found in directory: {solution.name}/{directory_name}")
+                output.print_and_log(f"Multiple project files found in directory: {solution.name}/{directory_name}", colors=console.warning_colors)
                 continue
 
             project_directories.append(dotnet.ProjectInfo(solutions, solution, directory_name, possible_project_directory_path, project_file_paths[0]))
 
         if not project_directories:
-            output.print_and_log_warning(f"No project directories found in solution: {solution.name}")
+            output.print_and_log(f"No project directories found in solution: {solution.name}", colors=console.warning_colors)
             continue
 
         solution.projects = project_directories
@@ -171,7 +171,7 @@ try:
             output.print_and_log(f"{solution.name} v{solution.common_version_string}")
 
             if not os.path.isfile(solution.source_archive_file_path):
-                output.print_and_log_important(solution.source_archive_file_path, indents=string.leveledIndents[1])
+                output.print_and_log(solution.source_archive_file_path, indents=string.leveledIndents[1], colors=console.important_colors)
 
             for project in sorted(solution.projects, key=lambda x: x.name):
                 try:
@@ -189,19 +189,19 @@ try:
 
                     except Exception as exception:
                         # Looks prettier without the project name.
-                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
 
                 except Exception as exception:
-                    output.print_and_log_error(f"{project.name}: {exception}", indents=string.leveledIndents[1])
+                    output.print_and_log(f"{project.name}: {exception}", indents=string.leveledIndents[1], colors=console.error_colors)
 
         except Exception as exception:
-            output.print_and_log_error(f"{solution.name}: {exception}")
+            output.print_and_log(f"{solution.name}: {exception}", colors=console.error_colors)
 
     if valid_project_count:
         output.print_and_log(f"{valid_project_count} valid projects found.")
 
     else:
-        output.print_and_log_warning("No valid projects found.")
+        output.print_and_log("No valid projects found.", colors=console.warning_colors)
         sys.exit()
 
     # ------------------------------------------------------------------------------
@@ -268,7 +268,7 @@ try:
 
             if choice == "1":
                 # Marked as important for attention.
-                output.print_and_log_important("Building...")
+                output.print_and_log("Building...", colors=console.important_colors)
 
                 for project in projects_to_build:
                     try:
@@ -277,10 +277,10 @@ try:
                         output.print_and_log(dotnet.format_result_string_from_messages(project.build(no_restore), indents=string.leveledIndents[2]))
 
                     except Exception as exception:
-                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
 
             elif choice == "2":
-                output.print_and_log_important("Updating NuGet packages...")
+                output.print_and_log("Updating NuGet packages...", colors=console.important_colors)
 
                 for project in projects_to_build:
                     try:
@@ -288,10 +288,10 @@ try:
                         output.print_and_log(dotnet.format_result_string_from_messages(project.update_nuget_packages(), indents=string.leveledIndents[2]))
 
                     except Exception as exception:
-                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
 
             elif choice == "3":
-                output.print_and_log_important("Rebuilding and archiving...")
+                output.print_and_log("Rebuilding and archiving...", colors=console.important_colors)
 
                 archived_solutions = []
 
@@ -303,7 +303,7 @@ try:
                         output.print_and_log(dotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory=False), indents=string.leveledIndents[2]))
 
                     except Exception as exception:
-                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
 
                 for project in projects_to_build:
                     try:
@@ -318,7 +318,7 @@ try:
                             archived_solutions.append(project.solution)
 
                     except Exception as exception:
-                        output.print_and_log_error(f"{exception}", indents=string.leveledIndents[2])
+                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
 
             elif choice == "4":
                 print("Projects:")
@@ -334,16 +334,16 @@ try:
                         print(f"{project.name} excluded.")
 
                     else:
-                        console.print_warning("Invalid index.") # Not logged.
+                        console.print("Invalid index.", colors=console.warning_colors) # Not logged.
 
                 except Exception:
-                    console.print_warning("Invalid input.")
+                    console.print("Invalid input.", colors=console.warning_colors)
 
             elif choice == "5":
                 break
 
         except Exception:
-            output.print_and_log_error(traceback.format_exc())
+            output.print_and_log(traceback.format_exc(), colors=console.error_colors)
 
         # Within the loop, at the end of each iteration.
         logging.flush()
@@ -352,7 +352,7 @@ try:
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
 except Exception:
-    output.print_and_log_error(traceback.format_exc())
+    output.print_and_log(traceback.format_exc(), colors=console.error_colors)
 
 finally:
     logging.flush()

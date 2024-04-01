@@ -106,4 +106,26 @@ debugging.try_evaluate('pyddle_string.last_index_of_any("012", ["3"])')
 # pyddle_string.last_index_of_any("012", ["1"]) => 1
 # pyddle_string.last_index_of_any("012", ["3"]) => -1
 
+# ------------------------------------------------------------------------------
+#     Line parts
+# ------------------------------------------------------------------------------
+
+debugging.try_evaluate('pyddle_string.split_line_into_parts(None)')
+debugging.try_evaluate('pyddle_string.split_line_into_parts("")')
+debugging.try_evaluate('pyddle_string.split_line_into_parts(" ")')
+debugging.try_evaluate('pyddle_string.split_line_into_parts("a")')
+debugging.try_evaluate('pyddle_string.split_line_into_parts(" a")')
+debugging.try_evaluate('pyddle_string.split_line_into_parts("a ")')
+debugging.try_evaluate('pyddle_string.split_line_into_parts(" a ")')
+debugging.try_evaluate('pyddle_string.split_line_into_parts(" \\n ")')
+
+# pyddle_string.split_line_into_parts(None) => (None, None, None)
+# pyddle_string.split_line_into_parts("") => ('', '', '')
+# pyddle_string.split_line_into_parts(" ") => (' ', '', '')
+# pyddle_string.split_line_into_parts("a") => ('', 'a', '')
+# pyddle_string.split_line_into_parts(" a") => (' ', 'a', '')
+# pyddle_string.split_line_into_parts("a ") => ('', 'a', ' ')
+# pyddle_string.split_line_into_parts(" a ") => (' ', 'a', ' ')
+# pyddle_string.split_line_into_parts(" \n ") => (' \n ', '', '')
+
 debugging.display_press_enter_key_to_continue_if_not_debugging()

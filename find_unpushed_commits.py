@@ -316,64 +316,64 @@ try:
                     console.print(f"Remote: {repository.remote_branch_name}", indents=string.leveledIndents[1])
 
                 else:
-                    console.print_important(f"Remote: {repository.remote_branch_name}", indents=string.leveledIndents[1])
+                    console.print(f"Remote: {repository.remote_branch_name}", indents=string.leveledIndents[1], colors=console.important_colors)
 
                 if is_good_local_branch_name(repository.local_branch_name):
                     console.print(f"Local: {repository.local_branch_name}", indents=string.leveledIndents[1])
 
                 else:
-                    console.print_important(f"Local: {repository.local_branch_name}", indents=string.leveledIndents[1])
+                    console.print(f"Local: {repository.local_branch_name}", indents=string.leveledIndents[1], colors=console.important_colors)
 
                 if repository.untracked_files:
                     console.print("Untracked files:", indents=string.leveledIndents[1])
 
                     for file in repository.untracked_files:
-                        console.print_important(file, indents=string.leveledIndents[2])
+                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
 
                 if repository.conflicted_files:
                     console.print("Conflicted files:", indents=string.leveledIndents[1])
 
                     for file in repository.conflicted_files:
-                        console.print_important(file, indents=string.leveledIndents[2])
+                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
 
                 if repository.modified_files:
                     console.print("Modified files:", indents=string.leveledIndents[1])
 
                     for file in repository.modified_files:
-                        console.print_important(file, indents=string.leveledIndents[2])
+                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
 
                 if repository.deleted_files:
                     console.print("Deleted files:", indents=string.leveledIndents[1])
 
                     for file in repository.deleted_files:
-                        console.print_important(file, indents=string.leveledIndents[2])
+                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
 
                 if repository.staged_files:
                     console.print("Staged files:", indents=string.leveledIndents[1])
 
                     for file in repository.staged_files:
-                        console.print_important(file, indents=string.leveledIndents[2])
+                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
 
                 if repository.stashed_files:
                     console.print("Stashed files:", indents=string.leveledIndents[1])
 
                     for file in repository.stashed_files:
-                        console.print_important(file, indents=string.leveledIndents[2])
+                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
 
                 if repository.unpulled_commits:
                     console.print("Unpulled commits:", indents=string.leveledIndents[1])
 
                     for commit in repository.unpulled_commits:
-                        console.print_important(commit, indents=string.leveledIndents[2])
+                        console.print(commit, indents=string.leveledIndents[2], colors=console.important_colors)
 
                 if repository.unpushed_commits:
                     console.print("Unpushed commits:", indents=string.leveledIndents[1])
 
                     for commit in repository.unpushed_commits:
-                        console.print_important(commit, indents=string.leveledIndents[2])
+                        console.print(commit, indents=string.leveledIndents[2], colors=console.important_colors)
 
 except Exception:
-    console.print_error(traceback.format_exc())
+    console.print(traceback.format_exc(), colors=console.error_colors)
 
 finally:
     debugging.display_press_enter_key_to_continue_if_not_debugging()

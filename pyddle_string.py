@@ -1,6 +1,7 @@
 ﻿# Created: 2024-03-05
 # This script contains string-related functions.
 
+import pyddle_debugging as debugging
 import re
 
 leveledIndents = [
@@ -98,6 +99,9 @@ def startswith_ignore_case(str, prefix):
 
 def startswith_casefold(str, prefix):
     return str.casefold().startswith(prefix.casefold())
+
+# I wont implement startswith_any because we usually have something to do for each substring;
+#     it would be better design to call startswith for each substring.
 
 def equals_at(str, index, substring):
     str_length = len(str)
@@ -263,6 +267,9 @@ def index_of_any_casefold(str, substrings):
 
     return -1
 
+# I thought about implementing contains_any, but we generally shouldnt implement methods
+#     that just call other methods and (partially) discard the results.
+
 def last_index_of(str, substring):
     return str.rfind(substring)
 
@@ -338,7 +345,7 @@ def last_index_of_any_casefold(str, substrings):
 
 def splitlines(str, trim_line_start=False, trim_line_end=True,
                remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
-    ''' Does more than Python's splitlines by default. '''
+    ''' A virtually harmless operation for a string that must be considered as an array of 0 or more lines. '''
 
     if not str:
         # "".splitlines() returns an empty list.
@@ -400,6 +407,8 @@ def splitlines(str, trim_line_start=False, trim_line_end=True,
 
 def normalize_multiline_str(str, trim_line_start=False, trim_line_end=True,
                             remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
+    ''' If you need to for-loop the lines, consider calling "splitlines" instead. '''
+
     if not str:
         return str
 
@@ -413,7 +422,45 @@ def normalize_multiline_str(str, trim_line_start=False, trim_line_end=True,
 # "\s" matches new lines as well.
 compiled_regex_for_normalize_singleline_str = re.compile(r"\s+")
 
+# This method is often an overkill.
+# It may be useful in a situation where the input string can NEVER contain a line break
+#     or any Unicode whitespace other than the ASCII space.
+
+# In the implementation, what "\s" matches should be identical or very similar to what str.strip would remove.
+# https://docs.python.org/3/library/stdtypes.html#str.strip
+# https://docs.python.org/3/library/stdtypes.html#str.isspace
+# https://docs.python.org/3/library/re.html#regular-expression-syntax
+
+# Although the method removes a lot of Unicode whitespace,
+#     there are characters that are essentially not very different from whitespace and are NOT removed,
+#     one of which would be the right-to-left mark.
+# I've seen situations where they were treated as whitespace, undefined characters, etc.
+# Theoretically, RTL marks should be harmless when left within strings.
+# https://en.wikipedia.org/wiki/Right-to-left_mark
+
+# The application of this method is highly limited:
+
+# One example would be when we parse a string in a certain format
+#     and we dont want to care about line breaks, toggling some internal modes on and off.
+
+# Also, when we take a title or a file name on an open system with a lot of anonymous users,
+#     even though some endusers might not be comfortable with the system removing redundant whitespace,
+#     doing so might help other users distinguish entries where only the KINDS of the whitespace characters differ.
+
+# "abc  xyz.txt" and "abc　xyz.txt" for example should look very similar.
+# The former contains a pair of ASCII space and the latter contains one ideographic space (U+3000),
+#     which is a very frequently used space char in CJK workplaces.
+
+# In many cases, especially when the users are all known and the system is closed,
+#     this method would be an overkill.
+# Some endusers just prefer to use ideographic space chars because:
+#     1) They are more visible and/or 2) Their width is consistent with CJK characters surrounding them.
+
+# Use this method only in cases where normalizing mid-string whitespace increases security significantly.
+
 def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
+    ''' Call me only if you really need me. Otherwise, call "strip" instead. '''
+
     if not str:
         return str
 
@@ -441,74 +488,33 @@ def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_c
 #     Line parts
 # ------------------------------------------------------------------------------
 
-# The following methods consider that a line is composed of three parts:
-#     * Indents
-#     * Visible content
-#     * Trailing whitespace
+# Here, a line is considered to be a tuple of 1) Indents, 2) Visible content, 3) Trailing whitespace.
 
-# The middle part is not greedy.
-# https://docs.python.org/3/library/re.html#regular-expression-syntax
-compiled_regex_for_split_line_into_parts = re.compile(r"^(\s*)(.*?)(\s*)$")
+# If the line is None or empty, a tuple with the same value set to each component is returned (to avoid the "not extracted" error).
 
-def split_line_into_parts(line: str):
-    ''' Returns a tuple of indents, visible content and trailing whitespace. If "str" contains only whitespace, the entire string goes to the first part, effectively making the content part empty. '''
+# If the line contains only whitespace, as the (non-greedy) middle part and the last part of the regex have no reason to take the characters, everything goes to the first part.
+# I would say "an empty visible content having all the leading whitespace characters as indents" is a natural perception.
 
-    if not line:
-        return ("", "", "")
+# If the line contains line breaks, re.DOTALL lets "." match them and the matching should still succeed.
+# At first, I checked is_debugging and raised an error, but that was overreacting, which only complicated the caller side's code.
+# Calling this method on a line is technically inappropriate, but it is often harmless
+#     while injecting a multiline string into a place where a singleline is expected may not be challenging.
 
-    # If the pattern contains ^ and $, is there a good reason to use fullmatch? :S
-    match = compiled_regex_for_split_line_into_parts.match(line)
+# On the caller side, the best practice would be considering #1 and #3 to be empty if #2 is falsy.
+# In many cases, a line only with invisible indents and trailing whitespace doesnt need to be processed.
+# Then, if the visible content shouldnt contain a line break, make sure to check it.
 
-    # We could set "default" to the string we'd like any non-participating group of the match to be.
-    # Here, every group should match something.
-    # https://docs.python.org/3/library/re.html#re.Match.groups
+compiled_regex_for_split_line_into_parts = re.compile(r"^(\s*)(.*?)(\s*)$", flags=re.DOTALL)
+
+def split_line_into_parts(str):
+    if not str:
+        return (str, str, str)
+
+    match = compiled_regex_for_split_line_into_parts.match(str)
+
+    if debugging.is_debugging():
+        if not match:
+            # Unless the "re" module is implemented incorrectly, the number of groups should always be 3.
+            raise RuntimeError(f"Line parts could not be extracted from \"{str}\".")
+
     return match.groups()
-
-def add_indents_and_trailing_whitespace_to_parts(
-        parts: tuple[str, str, str], indents: str="", trailing_whitespace: str=""):
-    ''' If "str" is falsy, nothing is added to any part. '''
-
-    if parts[1]:
-        # Indents must indent the existing indents.
-        # Trailing whitespace must trail the existing trailing whitespace.
-        return (indents + parts[0], parts[1], parts[2] + trailing_whitespace)
-
-    else:
-        return parts
-
-# When "str" is falsy, pyddle_string.splitlines returns an empty list just like "".splitlines().
-# "build_multiline_parts" is designed to be consistent with that behavior.
-
-# This method is often used to display something like:
-# Lines:
-#     Line 1
-#     Line 2
-
-# When there's no line, the code has to know it and omit the "Lines:" part as well,
-#     rather than expecting "build_multiline_parts" to return an empty line or a suitable message.
-# So, although the implementation doesnt explicitly raise an error when "str" is falsy,
-#     let's say the behavior in such a case is undefined.
-
-def build_multiline_parts(str, indents="", trailing_whitespace="", trim_line_start=False, trim_line_end=True,
-                          remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
-    ''' Takes a multiline string and returns a list of tuples. When "str" is falsy, the behavior is undefined. '''
-
-    new_lines = []
-
-    for line in splitlines(str, trim_line_start, trim_line_end,
-                           remove_empty_lines_at_start, remove_redundant_empty_lines, remove_empty_lines_at_end):
-        parts = split_line_into_parts(line)
-        new_parts = add_indents_and_trailing_whitespace_to_parts(parts, indents, trailing_whitespace)
-        new_lines.append(new_parts)
-
-    return new_lines
-
-def build_singleline_parts(str, indents="", trailing_whitespace="",
-                           trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
-    ''' Takes a singleline string and returns a tuple. '''
-
-    # If "str" is falsy, normalize_singleline_str returns it as-is and split_line_into_parts takes care of it.
-
-    normalized_str = normalize_singleline_str(str, trim_start, remove_redundant_whitespace_chars, trim_end)
-    parts = split_line_into_parts(normalized_str)
-    return add_indents_and_trailing_whitespace_to_parts(parts, indents, trailing_whitespace)

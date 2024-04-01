@@ -3,7 +3,6 @@
 
 import base64
 import enum
-import json
 import mimetypes
 import openai
 import os

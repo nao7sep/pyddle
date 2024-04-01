@@ -46,14 +46,14 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
 
         if debugging.is_debugging():
             if any(separator in value for separator in other_separators):
-                console.print_warning("Contains another separator.") # Worth investigating.
+                console.print("Contains another separator.", colors=console.warning_colors) # Worth investigating.
 
         if separated_values:
             for separated_value in separated_values:
                 file.write(f"{separated_value}\n")
 
                 if is_path and not os.path.isdir(separated_value):
-                    console.print_warning(separated_value) # Missing directory.
+                    console.print(separated_value, colors=console.warning_colors) # Missing directory.
                     # We could also look for duplicates,
                     #     but on Windows for example, each user's environment variables are merged with the system's,
                     #     and we wouldnt always know which ones must be preserved.
@@ -63,6 +63,6 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
 
         else:
             file.write("(Empty)\n")
-            console.print_warning("(Empty)") # Not necessary an error.
+            console.print("(Empty)", colors=console.warning_colors) # Not necessary an error.
 
 debugging.display_press_enter_key_to_continue_if_not_debugging()

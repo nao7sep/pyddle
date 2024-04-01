@@ -291,7 +291,7 @@ def episodes_open_command(episodes, command):
                                 content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
                             except Exception:
-                                console.print_error("Failed to copy content.")
+                                console.print("Failed to copy content.", colors=console.error_colors)
                                 continue
 
                         if content:
@@ -307,13 +307,13 @@ def episodes_open_command(episodes, command):
                                 episode.create_note(note)
 
                             except Exception:
-                                console.print_error("Failed to create note.")
+                                console.print("Failed to create note.", colors=console.error_colors)
                                 continue
 
                             console.print("Note created.")
 
                         else:
-                            console.print_error("Content is required.")
+                            console.print("Content is required.", colors=console.error_colors)
 
                     elif pyddle_string.equals_ignore_case(command.command, "child"):
                         parent_code = command.get_arg_or_default(0, None)
@@ -329,7 +329,7 @@ def episodes_open_command(episodes, command):
                                         content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
                                     except Exception:
-                                        console.print_error("Failed to copy content.")
+                                        console.print("Failed to copy content.", colors=console.error_colors)
                                         continue
 
                                 if content:
@@ -345,19 +345,19 @@ def episodes_open_command(episodes, command):
                                         parent_note.create_note(note)
 
                                     except Exception:
-                                        console.print_error("Failed to create note.")
+                                        console.print("Failed to create note.", colors=console.error_colors)
                                         continue
 
                                     console.print("Note created.")
 
                                 else:
-                                    console.print_error("Content is required.")
+                                    console.print("Content is required.", colors=console.error_colors)
 
                             else:
-                                console.print_error("Parent note not found.")
+                                console.print("Parent note not found.", colors=console.error_colors)
 
                         else:
-                            console.print_error("Parent code is required.")
+                            console.print("Parent code is required.", colors=console.error_colors)
 
                     elif pyddle_string.equals_ignore_case(command.command, "list"):
                         notes_list_command(episode.notes, depth=0)
@@ -370,13 +370,15 @@ def episodes_open_command(episodes, command):
 
                             if note:
                                 console.print("Content:")
-                                console.print(note.content, indents=pyddle_string.leveledIndents[1])
+
+                                for line in pyddle_string.splitlines(note.content):
+                                    console.print(line, indents=pyddle_string.leveledIndents[1])
 
                             else:
-                                console.print_error("Note not found.")
+                                console.print("Note not found.", colors=console.error_colors)
 
                         else:
-                            console.print_error("Code is required.")
+                            console.print("Code is required.", colors=console.error_colors)
 
                     elif pyddle_string.equals_ignore_case(command.command, "parent"):
                         code = command.get_arg_or_default(0, None)
@@ -414,23 +416,23 @@ def episodes_open_command(episodes, command):
                                             note.parent_type = old_parent_type
                                             # The old parent should still contain the note.
 
-                                            console.print_error("Failed to update parent.")
+                                            console.print("Failed to update parent.", colors=console.error_colors)
 
                                             continue
 
                                         console.print("Parent updated.")
 
                                     else:
-                                        console.print_error("Parent note not found.")
+                                        console.print("Parent note not found.", colors=console.error_colors)
 
                                 else:
-                                    console.print_error("Parent code is required.")
+                                    console.print("Parent code is required.", colors=console.error_colors)
 
                             else:
-                                console.print_error("Note not found.")
+                                console.print("Note not found.", colors=console.error_colors)
 
                         else:
-                            console.print_error("Code is required.")
+                            console.print("Code is required.", colors=console.error_colors)
 
                     elif pyddle_string.equals_ignore_case(command.command, "content"):
                         code = command.get_arg_or_default(0, None)
@@ -446,7 +448,7 @@ def episodes_open_command(episodes, command):
                                         content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
                                     except Exception:
-                                        console.print_error("Failed to copy content.")
+                                        console.print("Failed to copy content.", colors=console.error_colors)
                                         continue
 
                                 if content:
@@ -458,19 +460,19 @@ def episodes_open_command(episodes, command):
 
                                     except Exception:
                                         note.content = old_content
-                                        console.print_error("Failed to update content.")
+                                        console.print("Failed to update content.", colors=console.error_colors)
                                         continue
 
                                     console.print("Content updated.")
 
                                 else:
-                                    console.print_error("Content is required.")
+                                    console.print("Content is required.", colors=console.error_colors)
 
                             else:
-                                console.print_error("Note not found.")
+                                console.print("Note not found.", colors=console.error_colors)
 
                         else:
-                            console.print_error("Code is required.")
+                            console.print("Code is required.", colors=console.error_colors)
 
                     elif pyddle_string.equals_ignore_case(command.command, "delete"):
                         code = command.get_arg_or_default(0, None)
@@ -483,31 +485,31 @@ def episodes_open_command(episodes, command):
                                     note.parent.delete_note(note)
 
                                 except Exception:
-                                    console.print_error(f"Failed to delete note.")
+                                    console.print(f"Failed to delete note.", colors=console.error_colors)
                                     continue
 
                                 console.print("Note deleted.")
 
                             else:
-                                console.print_error("Note not found.")
+                                console.print("Note not found.", colors=console.error_colors)
 
                         else:
-                            console.print_error("Code is required.")
+                            console.print("Code is required.", colors=console.error_colors)
 
                     elif pyddle_string.equals_ignore_case(command.command, "close"):
                         break
 
                     else:
-                        console.print_error("Invalid command.")
+                        console.print("Invalid command.", colors=console.error_colors)
 
                 else:
-                    console.print_error("Command is required.")
+                    console.print("Command is required.", colors=console.error_colors)
 
         else:
-            console.print_error("Episode not found.")
+            console.print("Episode not found.", colors=console.error_colors)
 
     else:
-        console.print_error("Code is required.")
+        console.print("Code is required.", colors=console.error_colors)
 
 # ------------------------------------------------------------------------------
 #     Application
@@ -533,7 +535,7 @@ try:
                     episodes.append(episode)
 
                 except Exception as exception:
-                    console.print_error(f"Invalid episode file: {episode_file_name}")
+                    console.print(f"Invalid episode file: {episode_file_name}", colors=console.error_colors)
 
     if not episodes:
         episodes_help_command()
@@ -552,7 +554,7 @@ try:
 
                 if title:
                     if path.contains_invalid_file_name_chars(title):
-                        console.print_error("Title contains invalid characters.")
+                        console.print("Title contains invalid characters.", colors=console.error_colors)
                         continue
 
                     episode = EpisodeInfo()
@@ -566,7 +568,7 @@ try:
                         episode.save()
 
                     except Exception:
-                        console.print_error(f"Failed to create episode.")
+                        console.print(f"Failed to create episode.", colors=console.error_colors)
                         continue
 
                     episodes.append(episode)
@@ -574,7 +576,7 @@ try:
                     console.print("Episode created.")
 
                 else:
-                    console.print_error("Title is required.")
+                    console.print("Title is required.", colors=console.error_colors)
 
             elif pyddle_string.equals_ignore_case(command.command, "list"):
                 episodes_list_command(episodes)
@@ -593,7 +595,7 @@ try:
 
                         if title:
                             if path.contains_invalid_file_name_chars(title):
-                                console.print_error("Title contains invalid characters.")
+                                console.print("Title contains invalid characters.", colors=console.error_colors)
                                 continue
 
                             old_title = episode.title
@@ -618,20 +620,20 @@ try:
                                 episode.file_path = old_file_path
                                 # The old file should still exist.
 
-                                console.print_error(f"Failed to update title.")
+                                console.print(f"Failed to update title.", colors=console.error_colors)
 
                                 continue
 
                             console.print("Title updated.")
 
                         else:
-                            console.print_error("Title is required.")
+                            console.print("Title is required.", colors=console.error_colors)
 
                     else:
-                        console.print_error("Episode not found.")
+                        console.print("Episode not found.", colors=console.error_colors)
 
                 else:
-                    console.print_error("Code is required.")
+                    console.print("Code is required.", colors=console.error_colors)
 
             elif pyddle_string.equals_ignore_case(command.command, "delete"):
                 code = command.get_arg_or_default(0, None)
@@ -644,7 +646,7 @@ try:
                             os.remove(episode.file_path)
 
                         except Exception:
-                            console.print_error(f"Failed to delete episode.")
+                            console.print(f"Failed to delete episode.", colors=console.error_colors)
                             continue
 
                         episodes.remove(episode)
@@ -652,22 +654,22 @@ try:
                         console.print("Episode deleted.")
 
                     else:
-                        console.print_error("Episode not found.")
+                        console.print("Episode not found.", colors=console.error_colors)
 
                 else:
-                    console.print_error("Code is required.")
+                    console.print("Code is required.", colors=console.error_colors)
 
             elif pyddle_string.equals_ignore_case(command.command, "exit"):
                 break
 
             else:
-                console.print_error("Invalid command.")
+                console.print("Invalid command.", colors=console.error_colors)
 
         else:
-            console.print_error("Command is required.")
+            console.print("Command is required.", colors=console.error_colors)
 
 except Exception:
-    console.print_error(traceback.format_exc())
+    console.print(traceback.format_exc(), colors=console.error_colors)
 
 finally:
     debugging.display_press_enter_key_to_continue_if_not_debugging()

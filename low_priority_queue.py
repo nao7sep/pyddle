@@ -383,10 +383,12 @@ def show_statistics(handled_task_list, task_list, days):
             #     it would be quite natural to display how many times the tasks should be done in 7 days, rather than 3.
             expected_times = task.times_per_week * days / 7
             # Tested.
+            # Old code preserved as-is.
             # console.print_important(f"{task.content}: {execution_count}/{expected_times} times in {days} days")
 
         else:
             expected_times = task.times_per_week * actual_days / 7
+            # Old code preserved as-is.
             # console.print_important(f"{task.content}: {execution_count}/{expected_times} times in {actual_days} days")
 
         completion_rate = round(execution_count / expected_times * 100) # expected_times is guaranteed to be non-zero.
@@ -436,10 +438,10 @@ def show_statistics(handled_task_list, task_list, days):
             console.print(output_str, indents=string.leveledIndents[1])
 
         elif completion_rate >= (100 / 3):
-            console.print_warning(output_str, indents=string.leveledIndents[1])
+            console.print(output_str, indents=string.leveledIndents[1], colors=console.warning_colors)
 
         else:
-            console.print_error(output_str, indents=string.leveledIndents[1])
+            console.print(output_str, indents=string.leveledIndents[1], colors=console.error_colors)
 
 # ------------------------------------------------------------------------------
 #     Application
@@ -496,7 +498,7 @@ try:
 
             shows_all_next_time = False
 
-            console.print_important("Command", end="")
+            console.print("Command", colors=console.important_colors, end="")
             command_str = input(": ")
 
             command, number, parameter = parse_command_str(command_str)
@@ -615,8 +617,8 @@ try:
                         task_list.delete_task(task)
 
                     else:
-                        console.print_warning("Destructive operation.")
-                        console.print_warning("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.")
+                        console.print("Destructive operation.", colors=console.warning_colors)
+                        console.print("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.", colors=console.warning_colors)
 
                     continue
 
@@ -638,13 +640,13 @@ try:
             # Now, without changing the regex and still disallowing negative numbers, anything other than "" must be a valid command string.
 
             if command_str:
-               console.print_error("Invalid command string.")
+               console.print("Invalid command string.", colors=console.error_colors)
 
         except Exception:
-            console.print_error(traceback.format_exc())
+            console.print(traceback.format_exc(), colors=console.error_colors)
 
 except Exception:
-    console.print_error(traceback.format_exc())
+    console.print(traceback.format_exc(), colors=console.error_colors)
 
 finally:
     debugging.display_press_enter_key_to_continue_if_not_debugging()

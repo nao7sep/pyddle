@@ -9,44 +9,41 @@ import pyddle_type as type
 # Specified colors appear differently depending on the platform.
 # These should be an acceptable starting point.
 
-def print_with_prefix_and_suffix(str, prefix, suffix, multiline=False, indents="", end="\n"):
-    if multiline:
-        for parts in string.build_multiline_parts(str, indents=indents):
-            # If parts[1] is falsy, parts[0] will automatically be an empty string.
-            # As a result of normalization and adding no trailing whitespace, parts[2] is always falsy.
-            builtin_print(f"{parts[0]}{prefix if parts[1] else ''}{parts[1]}{suffix if parts[1] else ''}", end=end)
+important_colors = [colorama.Back.BLUE, colorama.Fore.WHITE]
+warning_colors = [colorama.Back.YELLOW, colorama.Fore.BLACK]
+error_colors = [colorama.Back.RED, colorama.Fore.WHITE]
+
+def print(str, indents="", colors: list[str]=None, end="\n"):
+    if str:
+        if colors:
+            builtin_print(f"{indents}{"".join(colors)}{str}{colorama.Style.RESET_ALL}", end=end)
+
+        else:
+            builtin_print(f"{indents}{str}", end=end)
 
     else:
-        # If "multiline" is False, we must also expect little-by-little output (like one portion is only ": " to separate a key and a value).
-        # So, unless "str" is falsy, we must output the whole content of it as-is.
+        builtin_print("", end=end)
 
-        # Added: If "str" is empty, only "end" is printed, which is an ideal behavior.
-        # If "str" contains only whitespace characters, it goes to the first part,
-        #     effectively printing the invisible string, often as a padding or a separator.
+def print_lines(str: list[str], indents="", colors: list[str]=None, trailing="", end="\n"):
+    if str:
+        if colors:
+            colors_string = "".join(colors)
 
-        parts = string.build_singleline_parts(str, indents=indents, trim_start=False, remove_redundant_whitespace_chars=False, trim_end=False)
-        builtin_print(f"{parts[0]}{prefix if parts[1] else ''}{parts[1]}{suffix if parts[1] else ''}{parts[2]}", end=end)
+        else:
+            colors_string = None
 
-def print(str, multiline=False, indents="", end="\n"):
-    print_with_prefix_and_suffix(str, "", "", multiline=multiline, indents=indents, end=end)
+        for line in str:
+            parts = string.split_line_into_parts(line)
 
-prefix_for_print_important = colorama.Back.BLUE + colorama.Fore.WHITE
-suffix_for_print_important = colorama.Style.RESET_ALL
+            if parts[1]:
+                if colors_string:
+                    builtin_print(f"{indents}{parts[0]}{colors_string}{parts[1]}{colorama.Style.RESET_ALL}{parts[2]}{trailing}", end=end)
 
-def print_important(str, multiline=False, indents="", end="\n"):
-    print_with_prefix_and_suffix(str, prefix_for_print_important, suffix_for_print_important, multiline=multiline, indents=indents, end=end)
+                else:
+                    builtin_print(f"{indents}{line}{trailing}", end=end)
 
-prefix_for_print_warning = colorama.Back.YELLOW + colorama.Fore.BLACK
-suffix_for_print_warning = colorama.Style.RESET_ALL
-
-def print_warning(str, multiline=False, indents="", end="\n"):
-    print_with_prefix_and_suffix(str, prefix_for_print_warning, suffix_for_print_warning, multiline=multiline, indents=indents, end=end)
-
-prefix_for_print_error = colorama.Back.RED + colorama.Fore.WHITE
-suffix_for_print_error = colorama.Style.RESET_ALL
-
-def print_error(str, multiline=False, indents="", end="\n"):
-    print_with_prefix_and_suffix(str, prefix_for_print_error, suffix_for_print_error, multiline=multiline, indents=indents, end=end)
+            else:
+                builtin_print("", end=end)
 
 # ------------------------------------------------------------------------------
 #     Typical output/input operations

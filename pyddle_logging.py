@@ -1,21 +1,18 @@
 ﻿# Created: 2024-03-07
 # This script contains the possibly simplest logging mechanism that should be just enough for a small, single-threaded app.
 
-# For logging:
-import pyddle_first as first
-first.set_main_script_file_path(__file__)
-
 import datetime
 import os
 import pyddle_datetime
 import pyddle_file_system as file_system
+import pyddle_first as first
 import pyddle_path # path is a too common name.
 import pyddle_string as string
 
-logs_directory_path = os.path.join(pyddle_path.dirname(__file__), "logs")
-
 # Requires the developer to call pyddle_first.set_main_script_file_path() before using this module.
 # I think it's OK; it's quick, runs at negligible cost and certainly improves the usability of the log file.
+
+logs_directory_path = os.path.join(first.get_main_script_directory_path(), "logs")
 
 # Hyphens, rather than underscores, are used to separate the elements following Google's recommendation.
 # https://developers.google.com/search/docs/crawling-indexing/url-structure
@@ -27,22 +24,27 @@ log_file_path = os.path.join(logs_directory_path, f"log-{pyddle_datetime.utc_to_
 
 logs = []
 
-def log(str, multiline=False, indents="", end="\n", flush=False):
-    if multiline:
-        # Harmless normalization is applied to the string.
-        for parts in string.build_multiline_parts(str, indents=indents):
-            # If parts[1] is falsy, parts[0] will automatically be an empty string.
-            # As a result of normalization and adding no trailing whitespace, parts[2] is always falsy.
-            logs.append(f"{parts[0]}{parts[1]}{end}")
+def log(str, indents="", end="\n", flush=False):
+    if str:
+        logs.append(f"{indents}{str}{end}")
 
     else:
-        # Logs are in plain text.
-        # We dont need to split each line into parts.
+        logs.append(end)
 
-        # If "multiline" is False, we must also expect little-by-little output (like one portion is only ": " to separate a key and a value).
-        # So, unless "str" is falsy, we must output the whole content of it as-is.
+    if flush:
+        flush()
 
-        logs.append(f"{indents if str else ''}{str}{end}")
+def log_lines(str: list[str], indents="", trailing="", end="\n", flush=False):
+    if str:
+        for line in str:
+            parts = string.split_line_into_parts(line)
+
+            if parts[1]:
+                # Using the original string of the line.
+                logs.append(f"{indents}{line}{trailing}{end}")
+
+            else:
+                logs.append(end)
 
     if flush:
         flush()

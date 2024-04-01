@@ -8,6 +8,12 @@ import pyddle_string
 def is_debugging():
     return pyddle_string.equals_ignore_case(os.getenv('TERM_PROGRAM'), 'vscode') # Must be updated periodically.
 
+# The comments of "exec", which is like a sibling of "eval", contain:
+#     In all cases, if the optional parts are omitted, the code is executed in the current scope.
+
+# https://docs.python.org/3/library/functions.html#eval
+# https://docs.python.org/3/library/functions.html#exec
+
 def try_evaluate(code):
     try:
         print(f"{code} => {eval(code)}")
