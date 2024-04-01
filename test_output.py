@@ -1,8 +1,8 @@
 ﻿# Created: 2024-04-01
 # Tests the pyddle_output module.
 
-import pyddle_first as first
-first.set_main_script_file_path(__file__)
+import pyddle_global as global
+global.set_main_script_file_path(__file__)
 
 import pyddle_debugging as debugging
 import pyddle_logging as logging

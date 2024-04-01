@@ -2,7 +2,7 @@
 # This script contains file-system-related functions.
 
 import os
-import pyddle_first as first
+import pyddle_global as global
 import pyddle_path # path is a too common name.
 import pyddle_string as string
 import zipfile
@@ -17,7 +17,7 @@ def make_and_move_to_output_subdirectory(subdirectory=None):
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
 
     # Supposing this module is in a subdirectory of the project's root directory.
-    directory_path = os.path.join(first.get_main_script_directory_path(), "output")
+    directory_path = os.path.join(global.get_main_script_directory_path(), "output")
 
     if subdirectory:
         directory_path = os.path.join(directory_path, subdirectory)
