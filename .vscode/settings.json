@@ -1,5 +1,6 @@
 {
     "cSpell.words": [
+        "pcollections",
         "pconsole",
         "pdatetime",
         "pdebugging",
@@ -9,6 +10,7 @@
         "plogging",
         "poutput",
         "ppath",
-        "pstring"
+        "pstring",
+        "pweb"
     ]
 }

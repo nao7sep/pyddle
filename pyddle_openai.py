@@ -1,17 +1,20 @@
-﻿# Created: 2024-03-26
+# Created: 2024-03-26
 # Sugar-coating classes and methods for OpenAI's API.
 
 import base64
 import enum
 import mimetypes
-import openai
 import os
+import requests
+import tiktoken
+
+import openai
+
 import pyddle_collections as pcollections
 import pyddle_json_based_kvs as pkvs
 import pyddle_file_system as pfs
 import pyddle_path as ppath
-import requests
-import tiktoken
+import pyddle_web as pweb
 
 # This script contains some one-liners.
 # I will keep their names simple and stupid because I might want to add more later.
@@ -24,9 +27,9 @@ import tiktoken
 # https://platform.openai.com/docs/guides/production-best-practices
 
 class OpenAiSettings:
-    def __init__(self, kvs_data=None, KVS_KEY_PREFIX=None):
+    def __init__(self, kvs_data=None, kvs_key_prefix=None):
         self.kvs_data = kvs_data
-        self.KVS_KEY_PREFIX = KVS_KEY_PREFIX
+        self.kvs_key_prefix = kvs_key_prefix
 
         self.__api_key = None
         self.__organization = None
@@ -34,7 +37,7 @@ class OpenAiSettings:
 
     def get_value(self, key):
         if self.kvs_data:
-            return self.kvs_data.get(f"{self.KVS_KEY_PREFIX}{key}")
+            return self.kvs_data.get(f"{self.kvs_key_prefix}{key}")
 
         # We can add data sources here.
 
@@ -63,7 +66,7 @@ class OpenAiSettings:
 
 openai_settings = OpenAiSettings(
     kvs_data=pkvs.merged_kvs_data,
-    KVS_KEY_PREFIX="pyddle_openai/")
+    kvs_key_prefix="pyddle_openai/")
 
 # ------------------------------------------------------------------------------
 #     Models
@@ -101,18 +104,18 @@ class OpenAiTokenCounter:
 
         return self.__encoding
 
-    def encode(self, str):
+    def encode(self, _str):
         ''' Returns a list of tokens as integers. '''
 
-        return self.encoding.encode(str)
+        return self.encoding.encode(_str)
 
-    def encode_to_strs(self, str):
+    def encode_to_strs(self, _str):
         ''' Returns a list of tokens as decoded strings. OFTEN fails to decode CJK strings. '''
 
         # If we specify "ignore" or "replace" as the "errors" argument, we can avoid the UnicodeDecodeError,
         #     but the fundamental problem is that the string representation as UTF-8-decoded byte arrays are then cut into tokens with no consideration of the character boundaries,
         #     and therefore there's not much point in just making the method work when half the CJK characters anyway disappear.
-        return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str)]
+        return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(_str)]
 
 gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_3_5_TURBO)
 gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4)
@@ -137,7 +140,7 @@ def create_openai_client(api_key=None, organization=None, base_url=None):
     if not base_url:
         base_url = openai_settings.base_url
 
-    args = collections.PotentiallyFalsyArgs()
+    args = pcollections.PotentiallyFalsyArgs()
     args.may_contain("api_key", api_key)
     args.may_contain("organization", organization)
     args.may_contain("base_url", base_url)
@@ -173,7 +176,7 @@ class OpenAiAudioFormat(enum.Enum):
 
 def openai_audio_speech_create(
     # Input:
-    input,
+    _input,
 
     # Parameters:
     model: OpenAiModel,
@@ -191,8 +194,8 @@ def openai_audio_speech_create(
     # The API offers more parameters like: extra_headers, extra_query, extra_body and timeout.
     # We wont support them because, in a situation where we need to specify them, we wont use one-liners.
 
-    args = collections.PotentiallyFalsyArgs()
-    args.must_contain("input", input)
+    args = pcollections.PotentiallyFalsyArgs()
+    args.must_contain("input", _input)
     args.must_contain_enum_value("model", model)
     args.must_contain_enum_value("voice", voice)
     args.must_contain_enum_value("response_format", response_format)
@@ -200,7 +203,7 @@ def openai_audio_speech_create(
 
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    return openai_client.audio.speech.create(**args.args)
+    return openai_client.audio.speech.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_save_audio(file_path, response):
     pfs.create_parent_directory(file_path)
@@ -240,7 +243,7 @@ def openai_audio_transcriptions_create(
     with open(file_path, "rb") as file:
         # Checked: all, order, named, falsy
 
-        args = collections.PotentiallyFalsyArgs()
+        args = pcollections.PotentiallyFalsyArgs()
         args.must_contain("file", file)
         args.must_contain_enum_value("model", model)
         args.must_contain_enum_value("response_format", response_format)
@@ -249,7 +252,7 @@ def openai_audio_transcriptions_create(
         args.may_contain("temperature", temperature)
         args.may_contain("timestamp_granularities", timestamp_granularities)
 
-        return openai_client.audio.transcriptions.create(**args.args)
+        return openai_client.audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_audio_translations_create(
     # Input:
@@ -268,14 +271,14 @@ def openai_audio_translations_create(
     with open(file_path, "rb") as file:
         # Checked: all, order, named, falsy
 
-        args = collections.PotentiallyFalsyArgs()
+        args = pcollections.PotentiallyFalsyArgs()
         args.must_contain("file", file)
         args.must_contain_enum_value("model", model)
         args.must_contain_enum_value("response_format", response_format)
         args.may_contain("prompt", prompt)
         args.may_contain("temperature", temperature)
 
-        return openai_client.audio.translations.create(**args.args)
+        return openai_client.audio.translations.create(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Chat
@@ -322,7 +325,7 @@ def openai_chat_completions_create(
 
     # Checked: all, order, named, falsy
 
-    args = collections.PotentiallyFalsyArgs()
+    args = pcollections.PotentiallyFalsyArgs()
     args.must_contain_enum_value("model", model)
     args.must_contain("messages", messages)
     args.may_contain("frequency_penalty", frequency_penalty)
@@ -554,11 +557,9 @@ def openai_images_generate(
 
     ''' Returns a list of file paths. '''
 
-    file_paths = []
-
     # Checked: all, order, named, falsy
 
-    args = collections.PotentiallyFalsyArgs()
+    args = pcollections.PotentiallyFalsyArgs()
     args.must_contain_enum_value("model", model)
     args.must_contain("prompt", prompt)
     args.may_contain("n", n)
@@ -571,7 +572,7 @@ def openai_images_generate(
     # It takes care of saving the images as well.
     args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-    return openai_client.images.generate(**args.args)
+    return openai_client.images.generate(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -598,7 +599,7 @@ def openai_images_edit(
     with open(input_file_path, "rb") as input_file:
         # Checked: all, order, named, falsy
 
-        args = collections.PotentiallyFalsyArgs()
+        args = pcollections.PotentiallyFalsyArgs()
         args.must_contain("image", input_file)
         args.must_contain_enum_value("model", model)
         args.must_contain("prompt", prompt)
@@ -612,10 +613,10 @@ def openai_images_edit(
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                return openai_client.images.edit(**args.args)
+                return openai_client.images.edit(**args.args) # pylint: disable=missing-kwoa
 
         else:
-            return openai_client.images.edit(**args.args)
+            return openai_client.images.edit(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -640,7 +641,7 @@ def openai_images_create_variation(
     with open(input_file_path, "rb") as input_file:
         # Checked: all, order, named, falsy
 
-        args = collections.PotentiallyFalsyArgs()
+        args = pcollections.PotentiallyFalsyArgs()
         args.must_contain("image", input_file)
         args.must_contain_enum_value("model", model)
         args.may_contain("n", n)
@@ -649,4 +650,4 @@ def openai_images_create_variation(
 
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-        return openai_client.images.create_variation(**args.args)
+        return openai_client.images.create_variation(**args.args) # pylint: disable=missing-kwoa

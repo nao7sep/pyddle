@@ -4,14 +4,15 @@
 import datetime
 import json
 import os
+import sqlite3
+
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_path as ppath
 import pyddle_string as pstring
-import sqlite3
 
 # https://docs.python.org/3/reference/datamodel.html#modules
-executing_script_files_directory_path = pglobal.get_main_script_directory_path()
+executing_script_files_directory_path = ppath.dirname(pglobal.get_main_script_file_path())
 first_kvs_file_path = os.path.join(executing_script_files_directory_path, ".pyddle_kvs.json")
 
 # https://docs.python.org/3/library/os.path.html#os.path.expanduser

@@ -4,9 +4,9 @@
 import json
 import PIL.Image
 import PIL.ImageDraw
-import pyddle_console as console
+import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
-import pyddle_file_system as file_system
+import pyddle_file_system as pfs
 import pyddle_openai as openai
 import pyddle_string as pstring
 
@@ -19,7 +19,7 @@ def test_audio():
     # Makes audio.
 
     audio_response = openai.openai_audio_speech_create(
-        input=english_text_for_audio,
+        _input=english_text_for_audio,
         model=openai.OpenAiModel.TTS_1_HD,
         voice=openai.OpenAiVoice.NOVA,
         response_format=openai.OpenAiAudioFormat.MP3)
@@ -72,7 +72,7 @@ def test_audio():
     # Makes new audio from the translated transcription.
 
     translated_audio_response = openai.openai_audio_speech_create(
-        input=translated_transcription_text,
+        _input=translated_transcription_text,
         model=openai.OpenAiModel.TTS_1_HD,
         voice=openai.OpenAiVoice.ALLOY,
         response_format=openai.OpenAiAudioFormat.MP3)
