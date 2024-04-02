@@ -3,8 +3,9 @@
 
 from builtins import print as builtin_print
 import colorama
+
 import pyddle_string as pstring
-import pyddle_type as type
+import pyddle_type as ptype
 
 # Specified colors appear differently depending on the platform.
 # These should be an acceptable starting point.
@@ -13,26 +14,26 @@ important_colors = [colorama.Back.BLUE, colorama.Fore.WHITE]
 warning_colors = [colorama.Back.YELLOW, colorama.Fore.BLACK]
 error_colors = [colorama.Back.RED, colorama.Fore.WHITE]
 
-def print(str, indents="", colors: list[str]=None, end="\n"):
-    if str:
+def print(_str, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
+    if _str:
         if colors:
-            builtin_print(f"{indents}{"".join(colors)}{str}{colorama.Style.RESET_ALL}", end=end)
+            builtin_print(f"{indents}{"".join(colors)}{_str}{colorama.Style.RESET_ALL}", end=end)
 
         else:
-            builtin_print(f"{indents}{str}", end=end)
+            builtin_print(f"{indents}{_str}", end=end)
 
     else:
         builtin_print("", end=end)
 
-def print_lines(str: list[str], indents="", colors: list[str]=None, trailing="", end="\n"):
-    if str:
+def print_lines(_str: list[str], indents="", colors: list[str]=None, trailing="", end="\n"):
+    if _str:
         if colors:
             colors_string = "".join(colors)
 
         else:
             colors_string = None
 
-        for line in str:
+        for line in _str:
             parts = pstring.split_line_into_parts(line)
 
             if parts[1]:
@@ -61,7 +62,7 @@ def print_numbered_options(options, indents="", end="\n"):
 def input_number(prompt, indents=""):
     ''' Returns None if the input is not a number. '''
 
-    return type.str_to_int_or_default(input(f"{indents}{prompt}"), None)
+    return ptype.str_to_int_or_default(input(f"{indents}{prompt}"), None)
 
 class CommandInfo:
     def __init__(self, command, args):
@@ -82,7 +83,7 @@ class CommandInfo:
 
     def get_arg_as_int_or_default(self, index, default):
         if index < len(self.args):
-            return type.str_to_int_or_default(self.args[index], default)
+            return ptype.str_to_int_or_default(self.args[index], default)
 
         return default
 
@@ -91,7 +92,7 @@ class CommandInfo:
 
     def get_arg_as_float_or_default(self, index, default):
         if index < len(self.args):
-            return type.str_to_float_or_default(self.args[index], default)
+            return ptype.str_to_float_or_default(self.args[index], default)
 
         return default
 
@@ -100,16 +101,16 @@ class CommandInfo:
 
     def get_arg_as_complex_or_default(self, index, default):
         if index < len(self.args):
-            return type.str_to_complex_or_default(self.args[index], default)
+            return ptype.str_to_complex_or_default(self.args[index], default)
 
         return default
 
     def get_arg_as_bool(self, index):
-        return type.str_to_bool(self.args[index])
+        return ptype.str_to_bool(self.args[index])
 
     def get_arg_as_bool_or_default(self, index, default):
         if index < len(self.args):
-            return type.str_to_bool_or_default(self.args[index], default)
+            return ptype.str_to_bool_or_default(self.args[index], default)
 
         return default
 
@@ -146,12 +147,12 @@ class CommandInfo:
 
         return "\n".join(lines)
 
-def parse_command_str(str):
+def parse_command_str(_str):
     ''' Returns None if the command string is empty. '''
 
     # A smart function that recognizes a chain of any whitespace chars as one separator by default.
 
-    parts = str.split()
+    parts = _str.split()
 
     if len(parts) > 0:
         command = parts[0]

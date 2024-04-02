@@ -2,13 +2,14 @@
 # This script outputs all environment variables and their values.
 
 import os
-import pyddle_console as console
+
+import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
-import pyddle_file_system as file_system
+import pyddle_file_system as pfs
 import pyddle_string as pstring
 
-main_separator = ''
-other_separators = []
+main_separator = '' # pylint: disable=invalid-name
+other_separators = [] # pylint: disable=invalid-name
 
 # On Windows, the most commonly used separator seems to be ';'.
 # On Mac, it seems to be ':'.
@@ -17,14 +18,14 @@ other_separators = []
 #     excluding ':', which frequently appears in paths on Windows.
 
 if pstring.equals_ignore_case(os.name, 'nt'):
-    main_separator = ';'
+    main_separator = ';' # pylint: disable=invalid-name
     other_separators = [',']
 
 else:
-    main_separator = ':'
+    main_separator = ':' # pylint: disable=invalid-name
     other_separators = [';', ',']
 
-is_first_variable = True
+is_first_variable = True # pylint: disable=invalid-name
 
 pfs.make_and_move_to_output_subdirectory()
 
@@ -33,7 +34,7 @@ with pfs.open_file_and_write_utf_encoding_bom("output_environment_variables.txt"
         separated_values = [separated_value for separated_value in value.split(main_separator) if separated_value] # Works like len(separated_value) > 0.
 
         if is_first_variable:
-            is_first_variable = False
+            is_first_variable = False # pylint: disable=invalid-name
 
         else:
             file.write("\n")

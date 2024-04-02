@@ -2,8 +2,9 @@
 # This script outputs all the locale encoding aliases.
 
 import locale
+
 import pyddle_debugging as pdebugging
-import pyddle_file_system as file_system
+import pyddle_file_system as pfs
 
 pfs.make_and_move_to_output_subdirectory()
 
