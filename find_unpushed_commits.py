@@ -5,18 +5,19 @@
 # Although it's an option to rename it like repository_checker.py or get_status_of_repositories.py, I'll stick to the action-oriented name.
 
 import os
-import pyddle_console as console
-import pyddle_debugging as pdebugging
-import pyddle_json_based_kvs as kvs
-import pyddle_path
-import pyddle_string as pstring
 import subprocess
 import traceback
+
+import pyddle_console as pconsole
+import pyddle_debugging as pdebugging
+import pyddle_json_based_kvs as pkvs
+import pyddle_path as ppath
+import pyddle_string as pstring
 
 class RepositoryInfo:
     def __init__(self, directory_path):
         self.directory_path = directory_path
-        self.name = pyddle_path.basename(directory_path)
+        self.name = ppath.basename(directory_path)
         self.__remote_branch_name = None
         self.__local_branch_name = None
         self.__untracked_files = None
@@ -35,7 +36,7 @@ class RepositoryInfo:
 
         # HEAD@{upstream} refers to the upstream branch of the currently checked-out branch.
         # {upstream} refers to the default remote branch associated with the local branch the user is currently on.
-        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "HEAD@{upstream}"], capture_output=True)
+        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "HEAD@{upstream}"], capture_output=True, check=False)
 
         # If something is wrong like no upstream branch is configured, we just let the script crash.
         # Git is excessively complicated and a lot of things are one-time errors.
@@ -53,7 +54,7 @@ class RepositoryInfo:
         os.chdir(self.directory_path)
 
         # HEAD refers to the current branch's latest commit.
-        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True)
+        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, check=False)
 
         self.__local_branch_name = result.stdout.decode("utf-8").strip()
 
@@ -75,7 +76,7 @@ class RepositoryInfo:
 
         # https://git-scm.com/docs/git-status
 
-        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True)
+        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, check=False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -196,7 +197,7 @@ class RepositoryInfo:
 
         # https://git-scm.com/docs/git-stash
 
-        result = subprocess.run(["git", "stash", "list"], capture_output=True)
+        result = subprocess.run(["git", "stash", "list"], capture_output=True, check=False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -221,10 +222,10 @@ class RepositoryInfo:
         remote_name = self.remote_branch_name.split("/")[0]
 
         # Fetches updates from all branches from the specified remote.
-        result = subprocess.run(["git", "fetch", remote_name])
+        result = subprocess.run(["git", "fetch", remote_name], check=False)
 
         # Getting the commits that are on the remote branch but not in HEAD, which points to the tip of the local branch.
-        result = subprocess.run(["git", "log", f"HEAD..{self.remote_branch_name}", "--oneline"], capture_output=True)
+        result = subprocess.run(["git", "log", f"HEAD..{self.remote_branch_name}", "--oneline"], capture_output=True, check=False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -249,7 +250,7 @@ class RepositoryInfo:
         # https://git-scm.com/docs/git-log
 
         # Getting the commits that are in HEAD but not on the remote branch.
-        result = subprocess.run(["git", "log", f"{self.remote_branch_name}..HEAD", "--oneline"], capture_output=True)
+        result = subprocess.run(["git", "log", f"{self.remote_branch_name}..HEAD", "--oneline"], capture_output=True, check=False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -286,10 +287,10 @@ def is_good_remote_branch_name(name):
     # Plus, "HEAD" has been returned as local branch names, but not as remote branch names.
     # I'll check for these two cases (just in case) and see what happens.
 
-    return name and pstring.equals_ignore_case(name, "HEAD") == False
+    return name and pstring.equals_ignore_case(name, "HEAD") is False
 
 def is_good_local_branch_name(name):
-    return name and pstring.equals_ignore_case(name, "HEAD") == False
+    return name and pstring.equals_ignore_case(name, "HEAD") is False
 
 # ------------------------------------------------------------------------------
 #     App
@@ -372,7 +373,7 @@ try:
                     for commit in repository.unpushed_commits:
                         pconsole.print(commit, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
 
-except Exception:
+except Exception: # pylint: disable=broad-except
     pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
 
 finally:

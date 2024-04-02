@@ -4,9 +4,9 @@
 import datetime
 import json
 import os
-import pyddle_file_system as file_system
+import pyddle_file_system as pfs
 import pyddle_global as pglobal
-import pyddle_path # path is a too common name.
+import pyddle_path as ppath
 import pyddle_string as pstring
 import sqlite3
 

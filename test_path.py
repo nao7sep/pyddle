@@ -2,16 +2,17 @@
 # A simple script to test path-related operations.
 
 # import os => Seems to work without this.
+
 import pyddle_debugging as pdebugging
 # pyddle_path must be imported in pyddle_debugging.
 
-windows_file_path = r'C:\Users\username\Documents\file.txt'
-mac_file_path = '/Users/username/Documents/file.txt'
-file_name = 'file.txt'
+WINDOWS_FILE_PATH = r'C:\Users\username\Documents\file.txt'
+MAC_FILE_PATH = '/Users/username/Documents/file.txt'
+FILE_NAME = 'file.txt'
 
-pdebugging.try_evaluate(f'os.path.basename(r"{windows_file_path}")')
-pdebugging.try_evaluate(f'os.path.basename(r"{mac_file_path}")')
-pdebugging.try_evaluate(f'os.path.basename(r"{file_name}")')
+pdebugging.try_evaluate(f'os.path.basename(r"{WINDOWS_FILE_PATH}")')
+pdebugging.try_evaluate(f'os.path.basename(r"{MAC_FILE_PATH}")')
+pdebugging.try_evaluate(f'os.path.basename(r"{FILE_NAME}")')
 
 # On Windows:
 # os.path.basename(r"C:\Users\username\Documents\file.txt") => file.txt
@@ -35,9 +36,9 @@ pdebugging.try_evaluate(f'os.path.basename(r"{file_name}")')
 # os.path.basename(r"/Users/username/Documents/file.txt") => file.txt
 # os.path.basename(r"file.txt") => file.txt
 
-pdebugging.try_evaluate(f'os.path.dirname(r"{windows_file_path}")')
-pdebugging.try_evaluate(f'os.path.dirname(r"{mac_file_path}")')
-pdebugging.try_evaluate(f'os.path.dirname(r"{file_name}")')
+pdebugging.try_evaluate(f'os.path.dirname(r"{WINDOWS_FILE_PATH}")')
+pdebugging.try_evaluate(f'os.path.dirname(r"{MAC_FILE_PATH}")')
+pdebugging.try_evaluate(f'os.path.dirname(r"{FILE_NAME}")')
 
 # On Windows:
 # os.path.dirname(r"C:\Users\username\Documents\file.txt") => C:\Users\username\Documents
@@ -51,9 +52,9 @@ pdebugging.try_evaluate(f'os.path.dirname(r"{file_name}")')
 # os.path.dirname(r"/Users/username/Documents/file.txt") => /Users/username/Documents
 # os.path.dirname(r"file.txt") =>
 
-pdebugging.try_evaluate(f'os.path.splitext(r"{windows_file_path}")')
-pdebugging.try_evaluate(f'os.path.splitext(r"{mac_file_path}")')
-pdebugging.try_evaluate(f'os.path.splitext(r"{file_name}")')
+pdebugging.try_evaluate(f'os.path.splitext(r"{WINDOWS_FILE_PATH}")')
+pdebugging.try_evaluate(f'os.path.splitext(r"{MAC_FILE_PATH}")')
+pdebugging.try_evaluate(f'os.path.splitext(r"{FILE_NAME}")')
 
 # On Windows:
 # os.path.splitext(r"C:\Users\username\Documents\file.txt") => ('C:\\Users\\username\\Documents\\file', '.txt')
@@ -66,25 +67,25 @@ pdebugging.try_evaluate(f'os.path.splitext(r"{file_name}")')
 # os.path.splitext(r"file.txt") => ('file', '.txt')
 
 # ------------------------------------------------------------------------------
-#     pyddle_path.basename/dirname
+#     basename/dirname
 # ------------------------------------------------------------------------------
 
-pdebugging.try_evaluate(f'pyddle_path.basename(r"{windows_file_path}")')
-pdebugging.try_evaluate(f'pyddle_path.basename(r"{mac_file_path}")')
-pdebugging.try_evaluate(f'pyddle_path.basename(r"{file_name}")')
+pdebugging.try_evaluate(f'ppath.basename(r"{WINDOWS_FILE_PATH}")')
+pdebugging.try_evaluate(f'ppath.basename(r"{MAC_FILE_PATH}")')
+pdebugging.try_evaluate(f'ppath.basename(r"{FILE_NAME}")')
 
 # On Windows and Mac:
-# pyddle_path.basename(r"C:\Users\username\Documents\file.txt") => file.txt
-# pyddle_path.basename(r"/Users/username/Documents/file.txt") => file.txt
-# pyddle_path.basename(r"file.txt") => file.txt
+# ppath.basename(r"C:\Users\username\Documents\file.txt") => file.txt
+# ppath.basename(r"/Users/username/Documents/file.txt") => file.txt
+# ppath.basename(r"file.txt") => file.txt
 
-pdebugging.try_evaluate(f'pyddle_path.dirname(r"{windows_file_path}")')
-pdebugging.try_evaluate(f'pyddle_path.dirname(r"{mac_file_path}")')
-pdebugging.try_evaluate(f'pyddle_path.dirname(r"{file_name}")')
+pdebugging.try_evaluate(f'ppath.dirname(r"{WINDOWS_FILE_PATH}")')
+pdebugging.try_evaluate(f'ppath.dirname(r"{MAC_FILE_PATH}")')
+pdebugging.try_evaluate(f'ppath.dirname(r"{FILE_NAME}")')
 
 # On Windows and Mac:
-# pyddle_path.dirname(r"C:\Users\username\Documents\file.txt") => C:\Users\username\Documents
-# pyddle_path.dirname(r"/Users/username/Documents/file.txt") => /Users/username/Documents
-# pyddle_path.dirname(r"file.txt") =>
+# ppath.dirname(r"C:\Users\username\Documents\file.txt") => C:\Users\username\Documents
+# ppath.dirname(r"/Users/username/Documents/file.txt") => /Users/username/Documents
+# ppath.dirname(r"file.txt") =>
 
 pdebugging.display_press_enter_key_to_continue_if_not_debugging()

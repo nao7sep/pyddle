@@ -7,26 +7,26 @@ import enum
 import json
 import math
 import os
-import pyddle_console as console
-import pyddle_datetime as dt
-import pyddle_debugging as pdebugging
-import pyddle_file_system as file_system
-import pyddle_json_based_kvs as kvs
-import pyddle_string as pstring
 import random
 import re
 import sqlite3
 import traceback
 import uuid
 
+import pyddle_console as pconsole
+import pyddle_datetime as pdatetime
+import pyddle_debugging as pdebugging
+import pyddle_file_system as pfs
+import pyddle_json_based_kvs as pkvs
+import pyddle_string as pstring
+
 # ------------------------------------------------------------------------------
 #     Classes
 # ------------------------------------------------------------------------------
 
 class TaskResult(enum.Enum):
-    # Should have been all capital letters.
-    Done = 1,
-    Checked = 2
+    DONE = 1,
+    CHECKED = 2
 
 class TaskInfo:
     def __init__(self, guid, creation_utc, handled_utc, is_active, is_shown, content, times_per_week, result: TaskResult):
@@ -43,27 +43,27 @@ class TaskInfo:
 
 # It looks like this helper method is applied to any object that json.dump cant natively serialize.
 # It would be good practice to serialize only expected types and raise an error if an unexpected type appears.
-def serialize_task(task):
-    if isinstance(task, TaskInfo):
+def serialize_task(_task):
+    if isinstance(_task, TaskInfo):
         return {
-            "guid": str(task.guid),
-            "creation_utc": pdatetime.utc_to_roundtrip_string(task.creation_utc),
-            "handled_utc": pdatetime.utc_to_roundtrip_string(task.handled_utc) if task.handled_utc is not None else None,
-            "is_active": task.is_active,
+            "guid": str(_task.guid),
+            "creation_utc": pdatetime.utc_to_roundtrip_string(_task.creation_utc),
+            "handled_utc": pdatetime.utc_to_roundtrip_string(_task.handled_utc) if _task.handled_utc is not None else None,
+            "is_active": _task.is_active,
             # is_shown is not saved.
             # It is a state that persists only during the current run of the app.
-            "content": task.content,
-            "times_per_week": task.times_per_week,
+            "content": _task.content,
+            "times_per_week": _task.times_per_week,
             # If None, None is set.
             # If not, serialize_task is called.
-            "result": task.result
+            "result": _task.result
         }
 
-    elif isinstance(task, TaskResult):
-        return task.name
+    elif isinstance(_task, TaskResult):
+        return _task.name
 
     else:
-        raise RuntimeError(f"Unsupported type: {type(task)}")
+        raise RuntimeError(f"Unsupported type: {type(_task)}")
 
 def deserialize_task(task_data):
     return TaskInfo(
@@ -115,27 +115,27 @@ class TaskList:
 
                 connection.commit()
 
-    def create_task(self, task, no_save=False):
-        self.tasks.append(task)
+    def create_task(self, _task, no_save=False):
+        self.tasks.append(_task)
 
         if not no_save:
             self.save()
 
-        return task
+        return _task
 
-    def update_task(self, task):
-        for index, existing_task in enumerate(self.tasks):
-            if existing_task.guid == task.guid:
-                self.tasks[index] = task
+    def update_task(self, _task):
+        for _index, existing_task in enumerate(self.tasks):
+            if existing_task.guid == _task.guid:
+                self.tasks[_index] = _task
                 self.save()
                 return True
 
         return False
 
-    def delete_task(self, task):
-        for index, existing_task in enumerate(self.tasks):
-            if existing_task.guid == task.guid:
-                del self.tasks[index]
+    def delete_task(self, _task):
+        for _index, existing_task in enumerate(self.tasks):
+            if existing_task.guid == _task.guid:
+                del self.tasks[_index]
                 self.save()
                 return True
 
@@ -145,7 +145,7 @@ class TaskList:
 #     Helpers
 # ------------------------------------------------------------------------------
 
-def generate_sample_data(handled_task_list, task_list):
+def generate_sample_data(_handled_task_list, _task_list):
     tasks = [
         # AI-generated trivial life-related tasks that are not valuable but must not be neglected:
 
@@ -189,9 +189,9 @@ def generate_sample_data(handled_task_list, task_list):
     for content, times_per_week in tasks:
         # As the goal of the sample data is to test the app's "stat" command,
         #     trivial attributes such as creation_utc and is_active are not randomized here.
-        task_list.create_task(TaskInfo(uuid.uuid4(), pdatetime.get_utc_now(), None, True, True, content, times_per_week, None), no_save=True)
+        _task_list.create_task(TaskInfo(uuid.uuid4(), pdatetime.get_utc_now(), None, True, True, content, times_per_week, None), no_save=True)
 
-    task_list.save()
+    _task_list.save()
 
     # As of 2024-03-15, generating handled tasks in the past 30 * 365 days on my 15 year old computer takes 2 minutes.
     # The size of handled_tasks.json is 41,771 KB.
@@ -217,7 +217,7 @@ def generate_sample_data(handled_task_list, task_list):
         handled_tasks = random.randint(inclusive_min_handled_tasks_per_day, inclusive_max_handled_tasks_per_day)
         done_tasks = round(handled_tasks * done_tasks_out_of_10_handled_ones / 10)
 
-        for index in range(handled_tasks):
+        for _index in range(handled_tasks):
             # In python, datetime objects are offset-aware OR offset-naive.
             # Maybe I'm missing something, but datetime.date() seems to return an offset-naive object,
             #     not an offset-aware representation of the moment the day has started.
@@ -233,56 +233,56 @@ def generate_sample_data(handled_task_list, task_list):
             # "utc" is a noun here.
             handled_utc = datetime.datetime(utc_then.year, utc_then.month, utc_then.day, hours, minutes, seconds, random.randint(0, 1000000 - 1), tzinfo=datetime.UTC)
 
-            task = random.choice(task_list.tasks) # Allowing duplicates.
+            _task = random.choice(_task_list.tasks) # Allowing duplicates.
 
-            handled_task = copy.copy(task)
-            handled_task.handled_utc = handled_utc
+            _handled_task = copy.copy(_task)
+            _handled_task.handled_utc = handled_utc
 
-            if index < done_tasks:
-                handled_task.result = TaskResult.Done
+            if _index < done_tasks:
+                _handled_task.result = TaskResult.DONE
 
             else:
-                handled_task.result = TaskResult.Checked
+                _handled_task.result = TaskResult.CHECKED
 
-            handled_task_list.create_task(handled_task, no_save=True)
+            _handled_task_list.create_task(_handled_task, no_save=True)
 
-    handled_task_list.save()
+    _handled_task_list.save()
 
-def select_shown_tasks(handled_task_list, task_list, shows_all):
+def select_shown_tasks(_handled_task_list, _task_list, shows_all):
     seven_days_ago_utc = pdatetime.get_utc_now() - datetime.timedelta(days=7)
-    handled_tasks_in_last_seven_days = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > seven_days_ago_utc]
+    handled_tasks_in_last_seven_days = [task for task in _handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > seven_days_ago_utc]
 
-    execution_counts = {}
+    _execution_counts = {}
 
-    for task in handled_tasks_in_last_seven_days:
-        if task.guid in execution_counts:
-            execution_counts[task.guid] += 1
+    for _task in handled_tasks_in_last_seven_days:
+        if _task.guid in _execution_counts:
+            _execution_counts[_task.guid] += 1
 
         else:
-            execution_counts[task.guid] = 1
+            _execution_counts[_task.guid] = 1
 
-    shown_tasks = []
+    _shown_tasks = []
 
     if not shows_all:
-        for task in task_list.tasks:
-            if task.is_active and task.is_shown:
-                if task.guid in execution_counts:
-                    if execution_counts[task.guid] < task.times_per_week:
-                        shown_tasks.append(task)
+        for _task in _task_list.tasks:
+            if _task.is_active and _task.is_shown:
+                if _task.guid in _execution_counts:
+                    if _execution_counts[_task.guid] < _task.times_per_week:
+                        _shown_tasks.append(_task)
 
                 else:
-                    shown_tasks.append(task)
+                    _shown_tasks.append(_task)
 
     else:
-        shown_tasks = task_list.tasks
+        _shown_tasks = _task_list.tasks
 
     # Not great coding, but I dont want to change shown_tasks to an array of tuples.
-    return shown_tasks, execution_counts
+    return _shown_tasks, _execution_counts
 
-def parse_command_str(command_str):
+def parse_command_str(_command_str):
     # Regex not compiled.
     # Infrequent operation.
-    match = re.match(r"^(?P<command>[a-z]+)(\s+(?P<number>[0-9]+)(\s+(?P<parameter>.+))?)?$", command_str, re.IGNORECASE)
+    match = re.match(r"^(?P<command>[a-z]+)(\s+(?P<number>[0-9]+)(\s+(?P<parameter>.+))?)?$", _command_str, re.IGNORECASE)
 
     if match:
         number_str = match.group("number")
@@ -290,16 +290,16 @@ def parse_command_str(command_str):
         if number_str:
             try:
                 # May fail if the number is too big.
-                number = int(number_str)
+                _number = int(number_str)
 
                 parameter_str = match.group("parameter")
 
                 if parameter_str:
                     parameter_str = parameter_str.strip()
 
-                return match.group("command"), number, parameter_str
+                return match.group("command"), _number, parameter_str
 
-            except Exception:
+            except Exception: # pylint: disable=broad-except
                 pass
 
         else:
@@ -307,13 +307,13 @@ def parse_command_str(command_str):
 
     return None, None, None
 
-def validate_shown_task_index(shown_tasks, number):
-    return number is not None and number > 0 and number <= len(shown_tasks)
+def validate_shown_task_index(_shown_tasks, _number):
+    return _number is not None and _number > 0 and _number <= len(_shown_tasks)
 
-def validate_times_per_week(number):
-    return number is not None and number > 0
+def validate_times_per_week(_number):
+    return _number is not None and _number > 0
 
-def show_statistics(handled_task_list, task_list, days):
+def show_statistics(_handled_task_list, _task_list, days):
     # This method should only return organized data and there must be another method that displays it,
     #     but I'll start with a simple implementation to see how it goes.
     # At this moment, I'm not entirely sure how the data should appear and how useful it'll be.
@@ -323,39 +323,39 @@ def show_statistics(handled_task_list, task_list, days):
 
     if days:
         too_old_utc = pdatetime.get_utc_now() - datetime.timedelta(days=days)
-        not_too_old_handled_tasks = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > too_old_utc]
+        not_too_old_handled_tasks = [task for task in _handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > too_old_utc]
 
     else:
-        not_too_old_handled_tasks = handled_task_list.tasks
+        not_too_old_handled_tasks = _handled_task_list.tasks
 
     execution_counts_and_more = {}
     first_handled_utc = pdatetime.get_utc_now()
 
-    for task in not_too_old_handled_tasks:
-        if task.guid in execution_counts_and_more:
-            execution_count, last_DONE_utc = execution_counts_and_more[task.guid]
+    for _task in not_too_old_handled_tasks:
+        if _task.guid in execution_counts_and_more:
+            _execution_count, last_done_utc = execution_counts_and_more[_task.guid]
 
-            execution_count += 1
+            _execution_count += 1
 
-            if task.result is TaskResult.Done:
-                if last_DONE_utc:
-                    if task.handled_utc > last_DONE_utc:
-                        last_DONE_utc = task.handled_utc
+            if _task.result is TaskResult.DONE:
+                if last_done_utc:
+                    if _task.handled_utc > last_done_utc:
+                        last_done_utc = _task.handled_utc
 
                 else:
-                    last_DONE_utc = task.handled_utc
+                    last_done_utc = _task.handled_utc
 
-            execution_counts_and_more[task.guid] = execution_count, last_DONE_utc
+            execution_counts_and_more[_task.guid] = _execution_count, last_done_utc
 
         else:
-            if task.result is TaskResult.Done:
-                execution_counts_and_more[task.guid] = 1, task.handled_utc
+            if _task.result is TaskResult.DONE:
+                execution_counts_and_more[_task.guid] = 1, _task.handled_utc
 
             else:
-                execution_counts_and_more[task.guid] = 1, None
+                execution_counts_and_more[_task.guid] = 1, None
 
-        if task.handled_utc < first_handled_utc:
-            first_handled_utc = task.handled_utc
+        if _task.handled_utc < first_handled_utc:
+            first_handled_utc = _task.handled_utc
 
     # Used when the "days" parameter is not provided.
     # Additional note: Specified "days" will extract exactly the right amount of data from the past regardless of the current time.
@@ -367,32 +367,32 @@ def show_statistics(handled_task_list, task_list, days):
 
     statistics = []
 
-    for task in task_list.tasks:
-        if task.is_active: # We consider inactive tasks as if they had been deleted.
-            if task.guid in execution_counts_and_more:
-                execution_count, last_DONE_utc = execution_counts_and_more[task.guid]
+    for _task in _task_list.tasks:
+        if _task.is_active: # We consider inactive tasks as if they had been deleted.
+            if _task.guid in execution_counts_and_more:
+                _execution_count, last_done_utc = execution_counts_and_more[_task.guid]
                 # The last field is completion_rate.
-                statistics.append((task, execution_count, last_DONE_utc, 0))
+                statistics.append((_task, _execution_count, last_done_utc, 0))
 
             else:
-                statistics.append((task, 0, None, 0))
+                statistics.append((_task, 0, None, 0))
 
-    for index, (task, execution_count, last_DONE_utc, _) in enumerate(statistics):
+    for _index, (_task, _execution_count, last_done_utc, _) in enumerate(statistics):
         if days:
             # If the user has been using the app for 3 days and "stat 7" is executed for example,
             #     it would be quite natural to display how many times the tasks should be done in 7 days, rather than 3.
-            expected_times = task.times_per_week * days / 7
+            expected_times = _task.times_per_week * days / 7
             # Tested.
             # Old code preserved as-is.
             # console.print_important(f"{task.content}: {execution_count}/{expected_times} times in {days} days")
 
         else:
-            expected_times = task.times_per_week * actual_days / 7
+            expected_times = _task.times_per_week * actual_days / 7
             # Old code preserved as-is.
             # console.print_important(f"{task.content}: {execution_count}/{expected_times} times in {actual_days} days")
 
-        completion_rate = round(execution_count / expected_times * 100) # expected_times is guaranteed to be non-zero.
-        statistics[index] = (task, execution_count, last_DONE_utc, completion_rate)
+        completion_rate = round(_execution_count / expected_times * 100) # expected_times is guaranteed to be non-zero.
+        statistics[_index] = (_task, _execution_count, last_done_utc, completion_rate)
 
     # Sorting by completion_rate.
     statistics = sorted(statistics, key=lambda x: x[3], reverse=True)
@@ -409,11 +409,11 @@ def show_statistics(handled_task_list, task_list, days):
         pconsole.print("No data available.", indents=pstring.leveledIndents[1])
         return
 
-    for task, execution_count, last_DONE_utc, completion_rate in statistics:
+    for _task, _execution_count, last_done_utc, completion_rate in statistics:
         past_time_string = ""
 
-        if last_DONE_utc:
-            past_total_seconds = (pdatetime.get_utc_now() - last_DONE_utc).total_seconds()
+        if last_done_utc:
+            past_total_seconds = (pdatetime.get_utc_now() - last_done_utc).total_seconds()
 
             if past_total_seconds < 60:
                 # The // operator seems to leave the fraction part.
@@ -432,7 +432,7 @@ def show_statistics(handled_task_list, task_list, days):
                 # We wont consider it a problem because this app focuses on frequency/quantity management; it's not a calender.
                 past_time_string = f", {math.ceil(past_total_seconds / (24 * 60 * 60))} days ago"
 
-        output_str = f"{task.content}, {completion_rate}%{past_time_string}"
+        output_str = f"{_task.content}, {completion_rate}%{past_time_string}"
 
         if completion_rate >= (200 / 3):
             pconsole.print(output_str, indents=pstring.leveledIndents[1])
@@ -467,7 +467,7 @@ try:
 
     pconsole.print("Type 'help' for a list of commands.")
 
-    shows_all_next_time = False
+    shows_all_next_time = False # pylint: disable=invalid-name
 
     while True:
         try:
@@ -481,9 +481,9 @@ try:
                         execution_count = execution_counts[task.guid]
 
                     else:
-                        execution_count = 0
+                        execution_count = 0 # pylint: disable=invalid-name
 
-                    additional_info = ""
+                    additional_info = "" # pylint: disable=invalid-name
 
                     if not task.is_active:
                         additional_info += ", inactive"
@@ -492,11 +492,11 @@ try:
                         additional_info += ", hidden"
 
                     if execution_count >= task.times_per_week:
-                        additional_info += f", good"
+                        additional_info += ", good"
 
                     pconsole.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=pstring.leveledIndents[1])
 
-            shows_all_next_time = False
+            shows_all_next_time = False # pylint: disable=invalid-name
 
             pconsole.print("Command", colors=pconsole.important_colors, end="")
             command_str = input(": ")
@@ -535,7 +535,7 @@ try:
                     continue
 
             elif pstring.equals_ignore_case(command, "all"):
-                shows_all_next_time = True
+                shows_all_next_time = True # pylint: disable=invalid-name
                 continue
 
             elif pstring.equals_ignore_case(command, "done"):
@@ -546,7 +546,7 @@ try:
 
                     handled_task = copy.copy(task)
                     handled_task.handled_utc = pdatetime.get_utc_now()
-                    handled_task.result = TaskResult.Done
+                    handled_task.result = TaskResult.DONE
                     handled_task_list.create_task(handled_task)
 
                     continue
@@ -559,7 +559,7 @@ try:
 
                     handled_task = copy.copy(task)
                     handled_task.handled_utc = pdatetime.get_utc_now()
-                    handled_task.result = TaskResult.Checked
+                    handled_task.result = TaskResult.CHECKED
                     handled_task_list.create_task(handled_task)
 
                     continue
@@ -607,7 +607,7 @@ try:
                         task_list.update_task(task)
                         continue
 
-                    except Exception:
+                    except Exception: # pylint: disable=broad-except
                         pass
 
             elif pstring.equals_ignore_case(command, "delete"):
@@ -640,12 +640,12 @@ try:
             # Now, without changing the regex and still disallowing negative numbers, anything other than "" must be a valid command string.
 
             if command_str:
-               pconsole.print("Invalid command string.", colors=pconsole.error_colors)
+                pconsole.print("Invalid command string.", colors=pconsole.error_colors)
 
-        except Exception:
+        except Exception: # pylint: disable=broad-except
             pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
 
-except Exception:
+except Exception: # pylint: disable=broad-except
     pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
 
 finally:

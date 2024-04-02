@@ -6,10 +6,10 @@ import enum
 import mimetypes
 import openai
 import os
-import pyddle_collections as collections
-import pyddle_json_based_kvs as kvs
-import pyddle_file_system as file_system
-import pyddle_path # as path
+import pyddle_collections as pcollections
+import pyddle_json_based_kvs as pkvs
+import pyddle_file_system as pfs
+import pyddle_path as ppath
 import requests
 import tiktoken
 
@@ -507,8 +507,8 @@ def openai_save_images(file_path, response):
 
     file_paths = []
 
-    dirname = pyddle_path.dirname(file_path)
-    basename = pyddle_path.basename(file_path)
+    dirname = ppath.dirname(file_path)
+    basename = ppath.basename(file_path)
     root, extension = os.path.splitext(basename)
 
     # https://github.com/openai/openai-python/blob/main/src/openai/types/images_response.py

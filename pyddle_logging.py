@@ -6,7 +6,7 @@ import os
 import pyddle_datetime
 import pyddle_file_system as file_system
 import pyddle_global as pglobal
-import pyddle_path # path is a too common name.
+import pyddle_path as ppath
 import pyddle_string as pstring
 
 # Requires the developer to call pyddle_first.set_main_script_file_path() before using this module.
