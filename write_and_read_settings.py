@@ -38,7 +38,7 @@ data = {
 
 # Create the "output" subdirectory and set the working directory to it.
 
-file_system.make_and_move_to_output_subdirectory()
+pfs.make_and_move_to_output_subdirectory()
 
 # ------------------------------------------------------------------------------
 #     INI file
@@ -52,14 +52,14 @@ config.add_section("data")
 for key, value in data.items():
     config["data"][key] = str(value)
 
-with file_system.open_file_and_write_utf_encoding_bom("write_and_read_settings.ini") as config_file:
+with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.ini") as config_file:
     config.write(config_file)
 
 # Read the data from the INI file.
 
 config.clear()
 
-with file_system.open_file_and_detect_utf_encoding("write_and_read_settings.ini") as config_file:
+with pfs.open_file_and_detect_utf_encoding("write_and_read_settings.ini") as config_file:
     config.read_file(config_file)
 
 print("Data from the INI file:")
@@ -79,12 +79,12 @@ print(f"Bytes converted to Base64: {data['bytes']}")
 
 # Write the data into a JSON file.
 
-with file_system.open_file_and_write_utf_encoding_bom("write_and_read_settings.json") as json_file:
+with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.json") as json_file:
     json.dump(data, json_file, indent=4)
 
 # Read the data from the JSON file.
 
-with file_system.open_file_and_detect_utf_encoding("write_and_read_settings.json") as json_file:
+with pfs.open_file_and_detect_utf_encoding("write_and_read_settings.json") as json_file:
     data_from_json = json.load(json_file)
 
 # Convert the Base64 strings in the 2 portions of data back to bytes.
@@ -112,12 +112,12 @@ for key, value in data.items():
 
 pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'UTF-8')).toprettyxml(indent=pstring.leveledIndents[1])
 
-with file_system.open_file_and_write_utf_encoding_bom("write_and_read_settings.xml") as xml_file:
+with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.xml") as xml_file:
     xml_file.write(pretty_xml)
 
 # Read the data from the XML file.
 
-with file_system.open_file_and_detect_utf_encoding("write_and_read_settings.xml") as xml_file:
+with pfs.open_file_and_detect_utf_encoding("write_and_read_settings.xml") as xml_file:
     tree = xml.etree.ElementTree.parse(xml_file)
 
 root = tree.getroot()
@@ -133,7 +133,7 @@ for child in root:
 
 # Write the data into a CSV file.
 
-with file_system.open_file_and_write_utf_encoding_bom("write_and_read_settings.csv") as csv_file:
+with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.csv") as csv_file:
     # "\r\n", the default value on Windows, might cause the parser to read an empty row within each line ending.
     writer = csv.writer(csv_file, lineterminator="\n")
 
@@ -144,7 +144,7 @@ with file_system.open_file_and_write_utf_encoding_bom("write_and_read_settings.c
 
 # The value for the none key will be read as an empty string as the CSV format doesnt support None values.
 
-with file_system.open_file_and_detect_utf_encoding("write_and_read_settings.csv") as csv_file:
+with pfs.open_file_and_detect_utf_encoding("write_and_read_settings.csv") as csv_file:
     reader = csv.reader(csv_file)
     data_from_csv = list(reader)
 

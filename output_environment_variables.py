@@ -26,9 +26,9 @@ else:
 
 is_first_variable = True
 
-file_system.make_and_move_to_output_subdirectory()
+pfs.make_and_move_to_output_subdirectory()
 
-with file_system.open_file_and_write_utf_encoding_bom("output_environment_variables.txt") as file:
+with pfs.open_file_and_write_utf_encoding_bom("output_environment_variables.txt") as file:
     for key, value in sorted(os.environ.items()):
         separated_values = [separated_value for separated_value in value.split(main_separator) if separated_value] # Works like len(separated_value) > 0.
 

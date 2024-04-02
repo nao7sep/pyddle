@@ -5,11 +5,11 @@ import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 import zoneinfo
 
-file_system.make_and_move_to_output_subdirectory()
+pfs.make_and_move_to_output_subdirectory()
 
 # If no timezones are available, run: pip3/pip install tzdata
 
-with file_system.open_file_and_write_utf_encoding_bom("output_available_timezones.txt") as file:
+with pfs.open_file_and_write_utf_encoding_bom("output_available_timezones.txt") as file:
     for timezone in sorted(zoneinfo.available_timezones()):
         file.write(timezone + '\n')
         print(timezone)

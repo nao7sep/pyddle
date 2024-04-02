@@ -5,16 +5,16 @@ import os
 import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 
-file_system.make_and_move_to_output_subdirectory()
+pfs.make_and_move_to_output_subdirectory()
 
-for encoding, bom in file_system.utf_encodings_and_boms:
+for encoding, bom in pfs.utf_encodings_and_boms:
     encoding_in_lowercase = encoding.lower()
     file_name = f"test_file_system_{encoding_in_lowercase.replace("-", "_")}.txt"
 
-    with file_system.open_file_and_write_utf_encoding_bom(file_name, encoding) as file:
+    with pfs.open_file_and_write_utf_encoding_bom(file_name, encoding) as file:
         file.write(encoding)
 
-    with file_system.open_file_and_detect_utf_encoding(file_name) as file:
+    with pfs.open_file_and_detect_utf_encoding(file_name) as file:
         content = file.read()
         file.buffer.seek(0, os.SEEK_END)
         file_length = file.buffer.tell()

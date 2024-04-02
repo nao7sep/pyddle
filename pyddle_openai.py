@@ -203,7 +203,7 @@ def openai_audio_speech_create(
     return openai_client.audio.speech.create(**args.args)
 
 def openai_save_audio(file_path, response):
-    file_system.create_parent_directory(file_path)
+    pfs.create_parent_directory(file_path)
     response.write_to_file(file_path)
 
 # ------------------------------------------------------------------------------
@@ -528,7 +528,7 @@ def openai_save_images(file_path, response):
             #     2. DALL-E-3 can generate only 1 image at a time
             downloader.raise_for_status()
 
-            file_system.create_parent_directory(new_file_path)
+            pfs.create_parent_directory(new_file_path)
 
             with open(new_file_path, "wb") as file:
                 # I've seen 8192 in a lot of places.

@@ -73,59 +73,59 @@ pdebugging.try_evaluate('"".find("")') # Finds "" and returns 0.
 pdebugging.try_evaluate('"a".find("")') # Again returns 0.
 pdebugging.try_evaluate('"".find("a")')
 
-pdebugging.try_evaluate('pyddle_string.index_of_any(None, [""])') # Must go through len(str).
-pdebugging.try_evaluate('pyddle_string.index_of_any("", [None])') # Checked explicitly.
+pdebugging.try_evaluate('pstring.index_of_any(None, [""])') # Must go through len(str).
+pdebugging.try_evaluate('pstring.index_of_any("", [None])') # Checked explicitly.
 
-pdebugging.try_evaluate('pyddle_string.index_of_any("", [""])')
-pdebugging.try_evaluate('pyddle_string.index_of_any("a", [""])')
-pdebugging.try_evaluate('pyddle_string.index_of_any("", ["a"])')
+pdebugging.try_evaluate('pstring.index_of_any("", [""])')
+pdebugging.try_evaluate('pstring.index_of_any("a", [""])')
+pdebugging.try_evaluate('pstring.index_of_any("", ["a"])')
 
 # Again the edge-of-cliff situation described in pyddle_string.py occurs and 1 is returned.
 # last_index_of_any too must explicitly return the length of the source string
 #     when at least one of the substrings is "".
 
 pdebugging.try_evaluate('"a".rfind("")')
-pdebugging.try_evaluate('pyddle_string.last_index_of_any("a", [""])')
+pdebugging.try_evaluate('pstring.last_index_of_any("a", [""])')
 
 # Just making sure.
-pdebugging.try_evaluate('pyddle_string.last_index_of_any("012", ["1"])')
-pdebugging.try_evaluate('pyddle_string.last_index_of_any("012", ["3"])')
+pdebugging.try_evaluate('pstring.last_index_of_any("012", ["1"])')
+pdebugging.try_evaluate('pstring.last_index_of_any("012", ["3"])')
 
 # None.find("") => 'NoneType' object has no attribute 'find'
 # "".find(None) => must be str, not NoneType
 # "".find("") => 0
 # "a".find("") => 0
 # "".find("a") => -1
-# pyddle_string.index_of_any(None, [""]) => object of type 'NoneType' has no len()
-# pyddle_string.index_of_any("", [None]) => None is not a valid substring.
-# pyddle_string.index_of_any("", [""]) => 0
-# pyddle_string.index_of_any("a", [""]) => 0
-# pyddle_string.index_of_any("", ["a"]) => -1
+# pstring.index_of_any(None, [""]) => object of type 'NoneType' has no len()
+# pstring.index_of_any("", [None]) => None is not a valid substring.
+# pstring.index_of_any("", [""]) => 0
+# pstring.index_of_any("a", [""]) => 0
+# pstring.index_of_any("", ["a"]) => -1
 # "a".rfind("") => 1
-# pyddle_string.last_index_of_any("a", [""]) => 1
-# pyddle_string.last_index_of_any("012", ["1"]) => 1
-# pyddle_string.last_index_of_any("012", ["3"]) => -1
+# pstring.last_index_of_any("a", [""]) => 1
+# pstring.last_index_of_any("012", ["1"]) => 1
+# pstring.last_index_of_any("012", ["3"]) => -1
 
 # ------------------------------------------------------------------------------
 #     Line parts
 # ------------------------------------------------------------------------------
 
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts(None)')
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts("")')
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" ")')
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts("a")')
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" a")')
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts("a ")')
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" a ")')
-pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" \\n ")')
+pdebugging.try_evaluate('pstring.split_line_into_parts(None)')
+pdebugging.try_evaluate('pstring.split_line_into_parts("")')
+pdebugging.try_evaluate('pstring.split_line_into_parts(" ")')
+pdebugging.try_evaluate('pstring.split_line_into_parts("a")')
+pdebugging.try_evaluate('pstring.split_line_into_parts(" a")')
+pdebugging.try_evaluate('pstring.split_line_into_parts("a ")')
+pdebugging.try_evaluate('pstring.split_line_into_parts(" a ")')
+pdebugging.try_evaluate('pstring.split_line_into_parts(" \\n ")')
 
-# pyddle_string.split_line_into_parts(None) => (None, None, None)
-# pyddle_string.split_line_into_parts("") => ('', '', '')
-# pyddle_string.split_line_into_parts(" ") => (' ', '', '')
-# pyddle_string.split_line_into_parts("a") => ('', 'a', '')
-# pyddle_string.split_line_into_parts(" a") => (' ', 'a', '')
-# pyddle_string.split_line_into_parts("a ") => ('', 'a', ' ')
-# pyddle_string.split_line_into_parts(" a ") => (' ', 'a', ' ')
-# pyddle_string.split_line_into_parts(" \n ") => (' \n ', '', '')
+# pstring.split_line_into_parts(None) => (None, None, None)
+# pstring.split_line_into_parts("") => ('', '', '')
+# pstring.split_line_into_parts(" ") => (' ', '', '')
+# pstring.split_line_into_parts("a") => ('', 'a', '')
+# pstring.split_line_into_parts(" a") => (' ', 'a', '')
+# pstring.split_line_into_parts("a ") => ('', 'a', ' ')
+# pstring.split_line_into_parts(" a ") => (' ', 'a', ' ')
+# pstring.split_line_into_parts(" \n ") => (' \n ', '', '')
 
 pdebugging.display_press_enter_key_to_continue_if_not_debugging()

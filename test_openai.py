@@ -10,7 +10,7 @@ import pyddle_file_system as file_system
 import pyddle_openai as openai
 import pyddle_string as pstring
 
-file_system.make_and_move_to_output_subdirectory("openai")
+pfs.make_and_move_to_output_subdirectory("openai")
 
 # GitHub Copilot automatically generated this and I liked it. :)
 english_text_for_audio = "Hello, my name is Pyddle. I am a Python library for creating games and applications. I am a work in progress, but I am getting better every day. I am excited to see what you will create with me. Have fun and happy coding!"
@@ -41,7 +41,7 @@ def test_audio():
 
     transcription_file_name = "test_openai_english_transcription.json"
     transcription_json = transcription.model_dump_json(indent=4)
-    file_system.write_all_text_to_file(transcription_file_name, transcription_json)
+    pfs.write_all_text_to_file(transcription_file_name, transcription_json)
     print(f"English transcription saved to: {transcription_file_name}")
 
     # Displays the transcription.
@@ -61,7 +61,7 @@ def test_audio():
 
     translated_transcription_file_name = "test_openai_japanese_translation_by_chat.json"
     translated_transcription_json = translated_transcription_response.model_dump_json(indent=4)
-    file_system.write_all_text_to_file(translated_transcription_file_name, translated_transcription_json)
+    pfs.write_all_text_to_file(translated_transcription_file_name, translated_transcription_json)
     print(f"Japanese translation by Chat saved to: {translated_transcription_file_name}")
 
     # Displays the translated transcription.
@@ -94,7 +94,7 @@ def test_audio():
 
     translation_file_name = "test_openai_english_translation.json"
     translation_json = translation.model_dump_json(indent=4)
-    file_system.write_all_text_to_file(translation_file_name, translation_json)
+    pfs.write_all_text_to_file(translation_file_name, translation_json)
     print(f"English translation saved to: {translation_file_name}")
 
     # Displays the translation.
@@ -103,7 +103,7 @@ def test_audio():
 
 def compare_original_and_translated_texts():
     translation_file_name = "test_openai_english_translation.json"
-    translation_json = file_system.read_all_text_from_file(translation_file_name)
+    translation_json = pfs.read_all_text_from_file(translation_file_name)
     translation_text = json.loads(translation_json)["text"]
 
     # Compare the text:
@@ -116,7 +116,7 @@ def compare_original_and_translated_texts():
 
     comparison_file_name = "test_openai_text_comparison.json"
     comparison_json = comparison_response.model_dump_json(indent=4)
-    file_system.write_all_text_to_file(comparison_file_name, comparison_json)
+    pfs.write_all_text_to_file(comparison_file_name, comparison_json)
     print(f"Text comparison results saved to: {comparison_file_name}")
 
     # Displays the comparison results.
@@ -153,7 +153,7 @@ def test_chat():
     for index in range(3):
         different_tool_file_name = f"test_openai_tool_{index + 1}.json"
         different_tool_json = different_tool_responses[index].model_dump_json(indent=4)
-        file_system.write_all_text_to_file(different_tool_file_name, different_tool_json)
+        pfs.write_all_text_to_file(different_tool_file_name, different_tool_json)
         print(f"Tool {index + 1} saved to: {different_tool_file_name}")
 
     # Displays the answers.
@@ -192,7 +192,7 @@ def test_chat():
     for index in range(3):
         summarization_file_name = f"test_openai_tool_{index + 1}_summary.json"
         summarization_json = summarization_responses[index].model_dump_json(indent=4)
-        file_system.write_all_text_to_file(summarization_file_name, summarization_json)
+        pfs.write_all_text_to_file(summarization_file_name, summarization_json)
         print(f"Tool {index + 1} summary saved to: {summarization_file_name}")
 
     # Displays the summaries.
@@ -265,7 +265,7 @@ def test_chat():
 
     suitable_tool_file_name = "test_openai_suitable_tool.json"
     suitable_tool_json = json.dumps(chunk_models, indent=4)
-    file_system.write_all_text_to_file(suitable_tool_file_name, suitable_tool_json)
+    pfs.write_all_text_to_file(suitable_tool_file_name, suitable_tool_json)
     print(f"Suitable tool saved to: {suitable_tool_file_name}")
 
 # Technically, Vision is a part of Chat, but it would be more efficient to test it in the context of Images.
@@ -280,7 +280,7 @@ def test_images_and_vision():
 
     prompt_generation_file_name = "test_openai_image_prompts.json"
     prompt_generation_json = prompt_generation_response.model_dump_json(indent=4)
-    file_system.write_all_text_to_file(prompt_generation_file_name, prompt_generation_json)
+    pfs.write_all_text_to_file(prompt_generation_file_name, prompt_generation_json)
     print(f"Image prompts saved to: {prompt_generation_file_name}")
 
     prompt_generation_answer = openai.openai_extract_first_message(prompt_generation_response)
@@ -406,7 +406,7 @@ def test_images_and_vision():
 
         vision_each_image_file_name = f"test_openai_image_{index + 1}_vision.json"
         vision_each_image_json = vision_each_image_responses[index].model_dump_json(indent=4)
-        file_system.write_all_text_to_file(vision_each_image_file_name, vision_each_image_json)
+        pfs.write_all_text_to_file(vision_each_image_file_name, vision_each_image_json)
         print(f"Vision results for image {index + 1} saved to: {vision_each_image_file_name}")
 
         vision_each_image_answers.append(openai.openai_extract_first_message(vision_each_image_responses[index]))
@@ -427,7 +427,7 @@ def test_images_and_vision():
 
     vision_all_images_file_name = "test_openai_images_vision.json"
     vision_all_images_json = vision_all_images_response.model_dump_json(indent=4)
-    file_system.write_all_text_to_file(vision_all_images_file_name, vision_all_images_json)
+    pfs.write_all_text_to_file(vision_all_images_file_name, vision_all_images_json)
     print(f"Vision results for all images saved to: {vision_all_images_file_name}")
 
     vision_all_images_answer = openai.openai_extract_first_message(vision_all_images_response)

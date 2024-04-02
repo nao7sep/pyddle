@@ -5,9 +5,9 @@ import locale
 import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 
-file_system.make_and_move_to_output_subdirectory()
+pfs.make_and_move_to_output_subdirectory()
 
-with file_system.open_file_and_write_utf_encoding_bom("output_locale_encoding_alias.txt") as file: # Typo preserved.
+with pfs.open_file_and_write_utf_encoding_bom("output_locale_encoding_alias.txt") as file: # Typo preserved.
     for key, value in sorted(locale.locale_encoding_alias.items()):
         file.write(f"{key}: {value}\n")
         print(f"{key}: {value}")

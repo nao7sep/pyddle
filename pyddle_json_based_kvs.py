@@ -20,13 +20,13 @@ second_kvs_file_path = os.path.join(os.path.expanduser("~"), ".pyddle_kvs.json")
 first_kvs_data = {}
 
 if os.path.isfile(first_kvs_file_path):
-    content = file_system.read_all_text_from_file(first_kvs_file_path)
+    content = pfs.read_all_text_from_file(first_kvs_file_path)
     first_kvs_data = json.loads(content)
 
 second_kvs_data = {}
 
 if os.path.isfile(second_kvs_file_path):
-    content = file_system.read_all_text_from_file(second_kvs_file_path)
+    content = pfs.read_all_text_from_file(second_kvs_file_path)
     second_kvs_data = json.loads(content)
 
 merged_kvs_data = {**first_kvs_data, **second_kvs_data}
@@ -100,7 +100,7 @@ def delete_from_second_kvs_data(key):
 
 def save_kvs_data_to_file(path, data):
     json_string = json.dumps(data, ensure_ascii=False, indent=4)
-    file_system.write_all_text_to_file(path, json_string)
+    pfs.write_all_text_to_file(path, json_string)
 
     root, _ = os.path.splitext(path)
     db_file_path = root + ".db"

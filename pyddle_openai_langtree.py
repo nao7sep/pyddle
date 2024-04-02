@@ -85,7 +85,7 @@ class OpenAiBaseNode:
     def __init__(self, role: openai.OpenAiRole, content):
         # Set automatically:
         self.guid = uuid.uuid4()
-        self.creation_utc = dt.get_utc_now()
+        self.creation_utc = pdatetime.get_utc_now()
 
         # Relations:
         # Foreign key.

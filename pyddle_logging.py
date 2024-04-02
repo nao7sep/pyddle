@@ -53,7 +53,7 @@ def flush():
     if logs:
         os.makedirs(logs_directory_path, exist_ok=True)
 
-        with file_system.open_file_and_write_utf_encoding_bom(log_file_path, append=True) as file:
+        with pfs.open_file_and_write_utf_encoding_bom(log_file_path, append=True) as file:
             for log in logs:
                 file.write(log)
 

@@ -47,8 +47,8 @@ def serialize_task(task):
     if isinstance(task, TaskInfo):
         return {
             "guid": str(task.guid),
-            "creation_utc": dt.utc_to_roundtrip_string(task.creation_utc),
-            "handled_utc": dt.utc_to_roundtrip_string(task.handled_utc) if task.handled_utc is not None else None,
+            "creation_utc": pdatetime.utc_to_roundtrip_string(task.creation_utc),
+            "handled_utc": pdatetime.utc_to_roundtrip_string(task.handled_utc) if task.handled_utc is not None else None,
             "is_active": task.is_active,
             # is_shown is not saved.
             # It is a state that persists only during the current run of the app.
@@ -68,8 +68,8 @@ def serialize_task(task):
 def deserialize_task(task_data):
     return TaskInfo(
         uuid.UUID(task_data["guid"]),
-        dt.roundtrip_string_to_utc(task_data["creation_utc"]),
-        dt.roundtrip_string_to_utc(task_data["handled_utc"]) if task_data["handled_utc"] is not None else None,
+        pdatetime.roundtrip_string_to_utc(task_data["creation_utc"]),
+        pdatetime.roundtrip_string_to_utc(task_data["handled_utc"]) if task_data["handled_utc"] is not None else None,
         task_data["is_active"],
         True, # is_shown is not saved.
         task_data["content"],
@@ -88,15 +88,15 @@ class TaskList:
 
     def load(self):
         if os.path.isfile(self.file_path):
-            with file_system.open_file_and_detect_utf_encoding(self.file_path) as tasks_file:
+            with pfs.open_file_and_detect_utf_encoding(self.file_path) as tasks_file:
                 data_from_json = json.load(tasks_file)
                 self.tasks = [deserialize_task(task_data) for task_data in data_from_json]
 
     def save(self):
         json_string = json.dumps(self.tasks, ensure_ascii=False, indent=4, default=serialize_task)
 
-        file_system.create_parent_directory(self.file_path)
-        file_system.write_all_text_to_file(self.file_path, json_string)
+        pfs.create_parent_directory(self.file_path)
+        pfs.write_all_text_to_file(self.file_path, json_string)
 
         if self.backups:
             root, _ = os.path.splitext(self.file_path)
@@ -111,7 +111,7 @@ class TaskList:
 
                 cursor.execute("INSERT INTO low_priority_queue_task_list_strings (utc, string) "
                                    "VALUES (?, ?)",
-                                   (dt.get_utc_now().isoformat(), json_string))
+                                   (pdatetime.get_utc_now().isoformat(), json_string))
 
                 connection.commit()
 
@@ -189,7 +189,7 @@ def generate_sample_data(handled_task_list, task_list):
     for content, times_per_week in tasks:
         # As the goal of the sample data is to test the app's "stat" command,
         #     trivial attributes such as creation_utc and is_active are not randomized here.
-        task_list.create_task(TaskInfo(uuid.uuid4(), dt.get_utc_now(), None, True, True, content, times_per_week, None), no_save=True)
+        task_list.create_task(TaskInfo(uuid.uuid4(), pdatetime.get_utc_now(), None, True, True, content, times_per_week, None), no_save=True)
 
     task_list.save()
 
@@ -209,7 +209,7 @@ def generate_sample_data(handled_task_list, task_list):
     inclusive_max_handled_tasks_per_day = round(len(tasks) * 2 / 3)
     done_tasks_out_of_10_handled_ones = 20 / 3 # Preserving the old name.
 
-    utc_now = dt.get_utc_now()
+    utc_now = pdatetime.get_utc_now()
 
     for day_offset in range(days - 1 + 1, -1 + 1, -1): # Modified not to generate a future datetime.
         # "utc" is like an adjective here.
@@ -249,7 +249,7 @@ def generate_sample_data(handled_task_list, task_list):
     handled_task_list.save()
 
 def select_shown_tasks(handled_task_list, task_list, shows_all):
-    seven_days_ago_utc = dt.get_utc_now() - datetime.timedelta(days=7)
+    seven_days_ago_utc = pdatetime.get_utc_now() - datetime.timedelta(days=7)
     handled_tasks_in_last_seven_days = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > seven_days_ago_utc]
 
     execution_counts = {}
@@ -322,14 +322,14 @@ def show_statistics(handled_task_list, task_list, days):
     # If it does its job, I might just leave it as-is, though. :)
 
     if days:
-        too_old_utc = dt.get_utc_now() - datetime.timedelta(days=days)
+        too_old_utc = pdatetime.get_utc_now() - datetime.timedelta(days=days)
         not_too_old_handled_tasks = [task for task in handled_task_list.tasks if task.handled_utc is not None and task.handled_utc > too_old_utc]
 
     else:
         not_too_old_handled_tasks = handled_task_list.tasks
 
     execution_counts_and_more = {}
-    first_handled_utc = dt.get_utc_now()
+    first_handled_utc = pdatetime.get_utc_now()
 
     for task in not_too_old_handled_tasks:
         if task.guid in execution_counts_and_more:
@@ -361,7 +361,7 @@ def show_statistics(handled_task_list, task_list, days):
     # Additional note: Specified "days" will extract exactly the right amount of data from the past regardless of the current time.
     # "stat" alone, on the other hand, lets the user see time subjectively, seeing even one second ago as a part of the first day past.
     # So, even before 24 hours have passed since the first handling of a task, we must consider one day has passed.
-    actual_days = (dt.get_utc_now() - first_handled_utc).days + 1
+    actual_days = (pdatetime.get_utc_now() - first_handled_utc).days + 1
 
     # Making a flat list of tuples for sorting:
 
@@ -413,7 +413,7 @@ def show_statistics(handled_task_list, task_list, days):
         past_time_string = ""
 
         if last_DONE_utc:
-            past_total_seconds = (dt.get_utc_now() - last_DONE_utc).total_seconds()
+            past_total_seconds = (pdatetime.get_utc_now() - last_DONE_utc).total_seconds()
 
             if past_total_seconds < 60:
                 # The // operator seems to leave the fraction part.
@@ -531,7 +531,7 @@ try:
 
             elif pstring.equals_ignore_case(command, "create"):
                 if validate_times_per_week(number) and parameter:
-                    task_list.create_task(TaskInfo(uuid.uuid4(), dt.get_utc_now(), None, True, True, parameter, number, None))
+                    task_list.create_task(TaskInfo(uuid.uuid4(), pdatetime.get_utc_now(), None, True, True, parameter, number, None))
                     continue
 
             elif pstring.equals_ignore_case(command, "all"):
@@ -545,7 +545,7 @@ try:
                     # is_shown is not saved.
 
                     handled_task = copy.copy(task)
-                    handled_task.handled_utc = dt.get_utc_now()
+                    handled_task.handled_utc = pdatetime.get_utc_now()
                     handled_task.result = TaskResult.Done
                     handled_task_list.create_task(handled_task)
 
@@ -558,7 +558,7 @@ try:
                     # is_shown is not saved.
 
                     handled_task = copy.copy(task)
-                    handled_task.handled_utc = dt.get_utc_now()
+                    handled_task.handled_utc = pdatetime.get_utc_now()
                     handled_task.result = TaskResult.Checked
                     handled_task_list.create_task(handled_task)
 
