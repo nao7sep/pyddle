@@ -6,10 +6,10 @@
 
 import os
 import pyddle_console as console
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_json_based_kvs as kvs
 import pyddle_path
-import pyddle_string as string
+import pyddle_string as pstring
 import subprocess
 import traceback
 
@@ -286,10 +286,10 @@ def is_good_remote_branch_name(name):
     # Plus, "HEAD" has been returned as local branch names, but not as remote branch names.
     # I'll check for these two cases (just in case) and see what happens.
 
-    return name and string.equals_ignore_case(name, "HEAD") == False
+    return name and pstring.equals_ignore_case(name, "HEAD") == False
 
 def is_good_local_branch_name(name):
-    return name and string.equals_ignore_case(name, "HEAD") == False
+    return name and pstring.equals_ignore_case(name, "HEAD") == False
 
 # ------------------------------------------------------------------------------
 #     App
@@ -313,67 +313,67 @@ try:
                 console.print(f"Repository: {repository.name}")
 
                 if is_good_remote_branch_name(repository.remote_branch_name):
-                    console.print(f"Remote: {repository.remote_branch_name}", indents=string.leveledIndents[1])
+                    console.print(f"Remote: {repository.remote_branch_name}", indents=pstring.leveledIndents[1])
 
                 else:
-                    console.print(f"Remote: {repository.remote_branch_name}", indents=string.leveledIndents[1], colors=console.important_colors)
+                    console.print(f"Remote: {repository.remote_branch_name}", indents=pstring.leveledIndents[1], colors=console.important_colors)
 
                 if is_good_local_branch_name(repository.local_branch_name):
-                    console.print(f"Local: {repository.local_branch_name}", indents=string.leveledIndents[1])
+                    console.print(f"Local: {repository.local_branch_name}", indents=pstring.leveledIndents[1])
 
                 else:
-                    console.print(f"Local: {repository.local_branch_name}", indents=string.leveledIndents[1], colors=console.important_colors)
+                    console.print(f"Local: {repository.local_branch_name}", indents=pstring.leveledIndents[1], colors=console.important_colors)
 
                 if repository.untracked_files:
-                    console.print("Untracked files:", indents=string.leveledIndents[1])
+                    console.print("Untracked files:", indents=pstring.leveledIndents[1])
 
                     for file in repository.untracked_files:
-                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(file, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
                 if repository.conflicted_files:
-                    console.print("Conflicted files:", indents=string.leveledIndents[1])
+                    console.print("Conflicted files:", indents=pstring.leveledIndents[1])
 
                     for file in repository.conflicted_files:
-                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(file, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
                 if repository.modified_files:
-                    console.print("Modified files:", indents=string.leveledIndents[1])
+                    console.print("Modified files:", indents=pstring.leveledIndents[1])
 
                     for file in repository.modified_files:
-                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(file, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
                 if repository.deleted_files:
-                    console.print("Deleted files:", indents=string.leveledIndents[1])
+                    console.print("Deleted files:", indents=pstring.leveledIndents[1])
 
                     for file in repository.deleted_files:
-                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(file, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
                 if repository.staged_files:
-                    console.print("Staged files:", indents=string.leveledIndents[1])
+                    console.print("Staged files:", indents=pstring.leveledIndents[1])
 
                     for file in repository.staged_files:
-                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(file, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
                 if repository.stashed_files:
-                    console.print("Stashed files:", indents=string.leveledIndents[1])
+                    console.print("Stashed files:", indents=pstring.leveledIndents[1])
 
                     for file in repository.stashed_files:
-                        console.print(file, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(file, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
                 if repository.unpulled_commits:
-                    console.print("Unpulled commits:", indents=string.leveledIndents[1])
+                    console.print("Unpulled commits:", indents=pstring.leveledIndents[1])
 
                     for commit in repository.unpulled_commits:
-                        console.print(commit, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(commit, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
                 if repository.unpushed_commits:
-                    console.print("Unpushed commits:", indents=string.leveledIndents[1])
+                    console.print("Unpushed commits:", indents=pstring.leveledIndents[1])
 
                     for commit in repository.unpushed_commits:
-                        console.print(commit, indents=string.leveledIndents[2], colors=console.important_colors)
+                        console.print(commit, indents=pstring.leveledIndents[2], colors=console.important_colors)
 
 except Exception:
     console.print(traceback.format_exc(), colors=console.error_colors)
 
 finally:
-    debugging.display_press_enter_key_to_continue_if_not_debugging()
+    pdebugging.display_press_enter_key_to_continue_if_not_debugging()

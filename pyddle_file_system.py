@@ -2,13 +2,14 @@
 # This script contains file-system-related functions.
 
 import os
-import pyddle_global as global
-import pyddle_path # path is a too common name.
-import pyddle_string as string
 import zipfile
 
+import pyddle_global as pglobal
+import pyddle_path as ppath
+import pyddle_string as pstring
+
 def create_parent_directory(path):
-    parent_directory_path = pyddle_path.dirname(path)
+    parent_directory_path = ppath.dirname(path)
 
     if parent_directory_path:
         os.makedirs(parent_directory_path, exist_ok=True)
@@ -16,8 +17,7 @@ def create_parent_directory(path):
 def make_and_move_to_output_subdirectory(subdirectory=None):
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
 
-    # Supposing this module is in a subdirectory of the project's root directory.
-    directory_path = os.path.join(global.get_main_script_directory_path(), "output")
+    directory_path = os.path.join(ppath.dirname(pglobal.get_main_script_file_path()), "output")
 
     if subdirectory:
         directory_path = os.path.join(directory_path, subdirectory)
@@ -50,7 +50,7 @@ def get_utf_encoding_bom(encoding):
     uppercase_encoding = encoding.upper()
 
     for encoding, bom in utf_encodings_and_boms:
-        if string.equals(encoding, uppercase_encoding):
+        if pstring.equals(encoding, uppercase_encoding):
             return bom
 
 def write_utf_encoding_bom_to_file(file, encoding):
@@ -61,11 +61,11 @@ def write_utf_encoding_bom_to_file(file, encoding):
     if bom:
         file.write(bom)
 
-def detect_utf_encoding(bytes):
+def detect_utf_encoding(_bytes):
     """ Returns (None, None) if the encoding is not detected. """
 
     for encoding, bom in utf_encodings_and_boms:
-        if bytes.startswith(bom):
+        if _bytes.startswith(bom):
             return encoding, bom
 
     return None, None
@@ -77,8 +77,8 @@ def detect_utf_encoding_of_file(file):
     """
 
     position = file.tell()
-    bytes = file.read(4)
-    encoding, bom = detect_utf_encoding(bytes)
+    _bytes = file.read(4)
+    encoding, bom = detect_utf_encoding(_bytes)
 
     if encoding:
         file.seek(position + len(bom))
@@ -121,7 +121,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
     encoding, bom = detect_utf_encoding_of_file(file.buffer)
 
     if encoding:
-        if string.equals_ignore_case(encoding, "UTF-8"):
+        if pstring.equals_ignore_case(encoding, "UTF-8"):
             # The position should be right after the BOM.
             return file
 
@@ -133,7 +133,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
             return file
 
     else:
-        if string.equals_ignore_case(fallback_encoding, "UTF-8"):
+        if pstring.equals_ignore_case(fallback_encoding, "UTF-8"):
             # The position should be at the beginning of the file.
             return file
 
@@ -160,9 +160,9 @@ def read_all_text_from_file(path, detect_encoding=True, fallback_encoding="UTF-8
         with open(path, "r", encoding=fallback_encoding) as file:
             return file.read()
 
-def write_all_bytes_to_file(path, bytes):
+def write_all_bytes_to_file(path, _bytes):
     with open(path, "wb") as file:
-        file.write(bytes)
+        file.write(_bytes)
 
 def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
     if write_bom:
@@ -173,9 +173,9 @@ def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
         with open(path, "w", encoding=encoding) as file:
             file.write(text)
 
-def append_all_bytes_to_file(path, bytes):
+def append_all_bytes_to_file(path, _bytes):
     with open(path, "ab") as file:
-        file.write(bytes)
+        file.write(_bytes)
 
 def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
     """ If the file already has content without a BOM, the BOM will NOT be written. """
@@ -193,7 +193,7 @@ def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
 # ------------------------------------------------------------------------------
 
 def zip_archive_directory(directory_path, archive_file_path, not_archived_directory_names=None, not_archived_file_names=None):
-    archive_directory_path = pyddle_path.dirname(archive_file_path)
+    archive_directory_path = ppath.dirname(archive_file_path)
     os.makedirs(archive_directory_path, exist_ok=True)
 
     # https://docs.python.org/3/library/zipfile.html
@@ -209,13 +209,13 @@ def zip_archive_subdirectory(zip_file, root_directory_path, subdirectory_path, n
         path = os.path.join(subdirectory_path, name)
 
         if os.path.isdir(path):
-            if not_archived_directory_names and string.contains_ignore_case(not_archived_directory_names, name):
+            if not_archived_directory_names and pstring.contains_ignore_case(not_archived_directory_names, name):
                 continue
 
             zip_archive_subdirectory(zip_file, root_directory_path, path, not_archived_directory_names, not_archived_file_names)
 
         elif os.path.isfile(path):
-            if not_archived_file_names and string.contains_ignore_case(not_archived_file_names, name):
+            if not_archived_file_names and pstring.contains_ignore_case(not_archived_file_names, name):
                 continue
 
             # https://docs.python.org/3/library/os.path.html#os.path.relpath

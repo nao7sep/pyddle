@@ -4,7 +4,7 @@
 import pyddle_global as global
 global.set_main_script_file_path(__file__)
 
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_logging as logging
 import pyddle_output as output
 
@@ -17,4 +17,4 @@ output.print_and_log("")
 
 logging.flush()
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

@@ -3,13 +3,14 @@
 
 import json
 import os
-import pyddle_file_system as file_system
-import pyddle_path # path is a too common name.
-import pyddle_string as string
 import re
 import shutil
 import subprocess
 import xml.etree.ElementTree
+
+import pyddle_file_system as pfs
+import pyddle_path as ppath
+import pyddle_string as pstring
 
 # ------------------------------------------------------------------------------
 #     Solution/project info
@@ -27,7 +28,7 @@ class SolutionInfo:
         self.directory_path = directory_path
         self.file_path = file_path
         self.is_obsolete = is_obsolete
-        self.projects = None
+        self.projects = []
         self.__common_version_string = None
         self.__source_archive_file_path = None
 
@@ -38,8 +39,8 @@ class SolutionInfo:
             first_version_string = self.projects[0].version_string
 
             for project in self.projects[1:]:
-                if not string.equals(project.version_string, first_version_string):
-                    raise RuntimeError(f"Version strings differ.")
+                if not pstring.equals(project.version_string, first_version_string):
+                    raise RuntimeError("Version strings differ.")
 
             self.__common_version_string = first_version_string
 
@@ -81,8 +82,8 @@ class ProjectInfo:
                 try:
                     extracted_version_string = version_digits_to_string(parse_version_string(extracted_version_string))
 
-                except Exception:
-                    raise RuntimeError(f"Invalid version string: {extracted_version_string}")
+                except Exception as exception:
+                    raise RuntimeError(f"Invalid version string: {extracted_version_string}") from exception
 
                 app_manifest_file_path = os.path.join(self.directory_path, "app.manifest")
 
@@ -93,11 +94,11 @@ class ProjectInfo:
                         try:
                             alternatively_extracted_version_string = version_digits_to_string(parse_version_string(alternatively_extracted_version_string))
 
-                        except Exception:
-                            raise RuntimeError(f"Invalid version string: {alternatively_extracted_version_string}")
+                        except Exception as exception:
+                            raise RuntimeError(f"Invalid version string: {alternatively_extracted_version_string}") from exception
 
-                        if not string.equals(alternatively_extracted_version_string, extracted_version_string):
-                            raise RuntimeError(f"Version strings from 2 files differ.")
+                        if not pstring.equals(alternatively_extracted_version_string, extracted_version_string):
+                            raise RuntimeError("Version strings from 2 files differ.")
 
                 self.__version_string = extracted_version_string
 
@@ -112,11 +113,11 @@ class ProjectInfo:
                         try:
                             self.__version_string = version_digits_to_string(parse_version_string(extracted_version_string))
 
-                        except Exception:
-                            raise RuntimeError(f"Invalid version string: {extracted_version_string}")
+                        except Exception as exception:
+                            raise RuntimeError(f"Invalid version string: {extracted_version_string}") from exception
 
             if self.__version_string is None:
-                raise RuntimeError(f"Version string not extracted.")
+                raise RuntimeError("Version string not extracted.")
 
         return self.__version_string
 
@@ -162,7 +163,7 @@ class ProjectInfo:
 def extract_version_string_from_csproj_file(path):
     """ Returns None if the version string is not found. """
 
-    with file_system.open_file_and_detect_utf_encoding(path) as file:
+    with pfs.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # Project
 
@@ -187,7 +188,7 @@ def extract_default_namespace_from_root_tag(tag):
 def extract_version_string_from_app_manifest_file(path):
     """ Returns None if the version string is not found. """
 
-    with file_system.open_file_and_detect_utf_encoding(path) as file:
+    with pfs.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # assembly
         namespaces = extract_default_namespace_from_root_tag(root.tag)
@@ -198,7 +199,7 @@ def extract_version_string_from_app_manifest_file(path):
             # https://docs.python.org/3/library/xml.etree.elementtree.html#xml.etree.ElementTree.Element.get
             return assembly_identity.get("version")
 
-assembly_info_file_version_string_pattern = r"\[assembly:\s*AssemblyVersion\s*\(\"(?P<version>\d+\.\d+(\.\d+){0,2})\"\)\]"
+ASSEMBLY_INFO_FILE_VERSION_STRING_PATTERN = r"\[assembly:\s*AssemblyVersion\s*\(\"(?P<version>\d+\.\d+(\.\d+){0,2})\"\)\]"
 
 def extract_version_string_from_assembly_info_file(path):
     """
@@ -207,19 +208,19 @@ def extract_version_string_from_assembly_info_file(path):
         There's no point in loosening the regex to match invalid version strings.
     """
 
-    with file_system.open_file_and_detect_utf_encoding(path) as file:
+    with pfs.open_file_and_detect_utf_encoding(path) as file:
         for line in file:
             if line.lstrip().startswith("//"):
                 continue
 
             # Regex not compiled.
             # Infrequent operation.
-            match = re.match(assembly_info_file_version_string_pattern, line, flags=re.IGNORECASE)
+            match = re.match(ASSEMBLY_INFO_FILE_VERSION_STRING_PATTERN, line, flags=re.IGNORECASE)
 
             if match:
                 return match.group("version")
 
-def parse_version_string(str):
+def parse_version_string(_str):
     """
         Returns a list of 4 integers.
         Raises a ValueError if the string is not a valid version string.
@@ -228,12 +229,10 @@ def parse_version_string(str):
     # https://learn.microsoft.com/en-us/dotnet/api/system.version.parse
 
     digits = [0, 0, 0, 0]
-    parts = str.split(".")
+    parts = _str.split(".")
 
-    for index in range(len(parts)):
-        # It's not clearly documented, but "int" seems to raise a ValueError if the string is not a number.
-        # https://docs.python.org/3/library/functions.html#int
-        digits[index] = int(parts[index])
+    for index, part in enumerate(parts):
+        digits[index] = int(part)
 
     return digits
 
@@ -266,7 +265,7 @@ def version_digits_to_string(digits, minimum_digit_count=2):
 def extract_referenced_project_names_from_csproj_file(path):
     """ Returns an empty list if no references are found. """
 
-    with file_system.open_file_and_detect_utf_encoding(path) as file:
+    with pfs.open_file_and_detect_utf_encoding(path) as file:
         tree = xml.etree.ElementTree.parse(file)
         root = tree.getroot() # Project
         namespaces = extract_default_namespace_from_root_tag(root.tag)
@@ -279,7 +278,7 @@ def extract_referenced_project_names_from_csproj_file(path):
 
                 if include:
                     # It's usually like: <ProjectReference Include="..\yyLib\yyLib.csproj" />
-                    file_name_without_extension, _ = os.path.splitext(pyddle_path.basename(include))
+                    file_name_without_extension, _ = os.path.splitext(ppath.basename(include))
                     referenced_project_names.append(file_name_without_extension)
 
             for reference in item_group.findall("Reference", namespaces=namespaces):
@@ -296,26 +295,26 @@ def extract_referenced_project_names_from_csproj_file(path):
 
         return referenced_project_names
 
-def is_valid_referenced_project_name(str):
-    if '=' in str:
+def is_valid_referenced_project_name(_str):
+    if '=' in _str:
         return False
 
     # We must keep updating the following part.
     # Fortunately, since .NET Core, .csproj files contain only what's absolutely necessary.
 
-    if string.equals_ignore_case(str, "System"):
+    if pstring.equals_ignore_case(_str, "System"):
         return False
 
-    if string.startswith_ignore_case(str, "System."):
+    if pstring.startswith_ignore_case(_str, "System."):
         return False
 
-    if string.equals_ignore_case(str, "PresentationCore"):
+    if pstring.equals_ignore_case(_str, "PresentationCore"):
         return False
 
-    if string.equals_ignore_case(str, "WindowsBase"):
+    if pstring.equals_ignore_case(_str, "WindowsBase"):
         return False
 
-    if string.startswith_ignore_case(str, "Microsoft."):
+    if pstring.startswith_ignore_case(_str, "Microsoft."):
         return False
 
     return True
@@ -323,7 +322,7 @@ def is_valid_referenced_project_name(str):
 def find_referenced_project(solutions, referenced_project_name):
     for solution in solutions:
         for project in solution.projects:
-            if string.equals_ignore_case(project.name, referenced_project_name):
+            if pstring.equals_ignore_case(project.name, referenced_project_name):
                 return project
 
 def get_all_referenced_projects(project):
@@ -356,7 +355,7 @@ def sort_projects_to_build(projects):
                 is_referenced = True
                 break
 
-        if is_referenced == False:
+        if is_referenced is False:
             sorted_projects.append(project)
 
     return sorted_projects
@@ -368,10 +367,10 @@ def sort_projects_to_build(projects):
 def archive_solution(solution, not_archived_directory_names=None, not_archived_file_names=None):
     messages = []
 
-    solution_archives_directory_path = pyddle_path.dirname(solution.source_archive_file_path)
+    solution_archives_directory_path = ppath.dirname(solution.source_archive_file_path)
     os.makedirs(solution_archives_directory_path, exist_ok=True)
 
-    archived_file_count = file_system.zip_archive_directory(solution.directory_path, solution.source_archive_file_path, not_archived_directory_names, not_archived_file_names)
+    archived_file_count = pfs.zip_archive_directory(solution.directory_path, solution.source_archive_file_path, not_archived_directory_names, not_archived_file_names)
 
     if archived_file_count:
         messages.append(f"Archive file created: {solution.source_archive_file_path}")
@@ -396,7 +395,7 @@ def build_project(project, no_restore=False):
     if no_restore:
         args.append("--no-restore")
 
-    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+    result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
     return subprocess_result_into_messages(result)
 
 def update_nuget_packages_in_project(project):
@@ -405,11 +404,11 @@ def update_nuget_packages_in_project(project):
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-list-package
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "console" ] # Output for display.
-    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+    result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
     messages.extend(subprocess_result_into_messages(result))
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "json" ] # For parsing.
-    result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+    result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
 
     # When an old project contains "package.config", which isnt supported by the "dotnet" command, we get a string like the following set to "stderr":
     #     プロジェクト 'C:\Repositories\Nekote2018\Nekote2018\Nekote2018.csproj' では NuGet パッケージに package.config を使用しますが、コマンドはパッケージ参照プロジェクトでのみ動作します。
@@ -436,13 +435,13 @@ def update_nuget_packages_in_project(project):
             for framework in project_in_json["frameworks"]:
                 if "topLevelPackages" in framework:
                     for package in framework["topLevelPackages"]:
-                        id = package["id"]
+                        _id = package["id"]
                         latest_version = package["latestVersion"]
 
                         # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package
 
-                        args = [ "dotnet", "add", project.file_path, "package", id, "--version", latest_version ]
-                        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+                        args = [ "dotnet", "add", project.file_path, "package", _id, "--version", latest_version ]
+                        result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
                         messages.extend(subprocess_result_into_messages(result))
 
     return messages
@@ -476,12 +475,12 @@ def clean(project, supported_runtimes, delete_obj_directory):
         # BR08 dotnet Commands.json contains (excessively) detailed comments.
 
         args = [ "dotnet", "clean", project.file_path, "--configuration", "Release" ]
-        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+        result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
         messages.extend(subprocess_result_into_messages(result))
 
         for supported_runtime in supported_runtimes:
             args = [ "dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime ]
-            result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+            result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
             messages.extend(subprocess_result_into_messages(result))
 
     else:
@@ -498,13 +497,13 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
     # When I wasnt sure what I was doing with "dotnet build --no-incremental" and "dotnet publish --no-build" due to the issues described below,
     #     I had to make sure I wasnt unintentionally linking old binaries of class libraries to newly built apps.
 
-    vs_directory_path = os.path.join(project.solution.directory_path, ".vs")
+    # vs_directory_path = os.path.join(project.solution.directory_path, ".vs")
     # shutil.rmtree(vs_directory_path, ignore_errors=True)
 
-    bin_directory_path = os.path.join(project.directory_path, "bin")
+    # bin_directory_path = os.path.join(project.directory_path, "bin")
     # shutil.rmtree(bin_directory_path, ignore_errors=True)
 
-    obj_directory_path = os.path.join(project.directory_path, "obj")
+    # obj_directory_path = os.path.join(project.directory_path, "obj")
     # shutil.rmtree(obj_directory_path, ignore_errors=True)
 
     # "Episodic comments" have been moved to: BR08 dotnet Commands.json
@@ -523,15 +522,15 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
             shutil.rmtree(runtime_specific_publish_directory_path)
 
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
-        result = subprocess.run(args, capture_output=True, cwd=project.directory_path)
+        result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
         messages.extend(subprocess_result_into_messages(result))
 
-        solution_archives_directory_path = pyddle_path.dirname(project.solution.source_archive_file_path)
+        solution_archives_directory_path = ppath.dirname(project.solution.source_archive_file_path)
         os.makedirs(solution_archives_directory_path, exist_ok=True)
 
         binaries_archive_file_name = f"{project.name}-v{project.version_string}-{supported_runtime}.zip"
         binaries_archive_file_path = os.path.join(solution_archives_directory_path, binaries_archive_file_name)
-        archived_file_count = file_system.zip_archive_directory(runtime_specific_publish_directory_path, binaries_archive_file_path, not_archived_directory_names, not_archived_file_names)
+        archived_file_count = pfs.zip_archive_directory(runtime_specific_publish_directory_path, binaries_archive_file_path, not_archived_directory_names, not_archived_file_names)
 
         if archived_file_count:
             messages.append(f"Archive file created: {binaries_archive_file_path}")
@@ -551,11 +550,11 @@ def subprocess_result_into_messages(result):
 
     if result.stdout:
         messages.append("stdout:")
-        messages.extend(f'{string.leveledIndents[1]}{message}' for message in result.stdout.decode("utf-8").splitlines() if message)
+        messages.extend(f'{pstring.leveledIndents[1]}{message}' for message in result.stdout.decode("utf-8").splitlines() if message)
 
     if result.stderr:
         messages.append("stderr:")
-        messages.extend(f'{string.leveledIndents[1]}{message}' for message in result.stderr.decode("utf-8").splitlines() if message)
+        messages.extend(f'{pstring.leveledIndents[1]}{message}' for message in result.stderr.decode("utf-8").splitlines() if message)
 
     return messages
 

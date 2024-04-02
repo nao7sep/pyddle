@@ -1,7 +1,7 @@
 ﻿# Created: 2024-03-23
 # Type-conversion-related things.
 
-import pyddle_string as string
+import pyddle_string as pstring
 
 # We dont necessarily have to use these just to parse strings.
 # Some will be useful.
@@ -46,10 +46,10 @@ boolTrueStrs = ["True", "Yes", "1"] # I wont be covering numbers other than 1 fo
 boolFalseStrs = ["False", "No", "0"]
 
 def str_to_bool(str):
-    if string.contains_ignore_case(boolTrueStrs, str):
+    if pstring.contains_ignore_case(boolTrueStrs, str):
         return True
 
-    if string.contains_ignore_case(boolFalseStrs, str):
+    if pstring.contains_ignore_case(boolFalseStrs, str):
         return False
 
     raise RuntimeError(f"Invalid boolean string: {str}")

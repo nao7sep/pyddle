@@ -1,7 +1,7 @@
 ﻿# Created: 2024-03-05
 # This script contains string-related functions.
 
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import re
 
 leveledIndents = [
@@ -512,7 +512,7 @@ def split_line_into_parts(str):
 
     match = compiled_regex_for_split_line_into_parts.match(str)
 
-    if debugging.is_debugging():
+    if pdebugging.is_debugging():
         if not match:
             # Unless the "re" module is implemented incorrectly, the number of groups should always be 3.
             raise RuntimeError(f"Line parts could not be extracted from \"{str}\".")

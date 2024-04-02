@@ -2,9 +2,10 @@
 # This script plays with SQLite for educational purposes.
 
 import datetime
-import pyddle_debugging as debugging
-import pyddle_string as string
 import sqlite3
+
+import pyddle_debugging as pdebugging
+import pyddle_string as pstring
 
 # https://www.sqlite.org/inmemorydb.html
 connection = sqlite3.connect(":memory:")
@@ -63,18 +64,18 @@ column_names = [description[0] for description in cursor.description]
 for row in data: # Expecting only one row.
     # https://docs.python.org/3/library/functions.html#zip
     for column_name, value in zip(column_names, row):
-        print(f"{string.leveledIndents[1]}{column_name}: {value}")
+        print(f"{pstring.leveledIndents[1]}{column_name}: {value}")
 
 cursor.execute(f"SELECT COUNT(*) FROM table1 WHERE strftime('%Y', utc_string) = '{datetime.datetime.now(datetime.UTC).year}'")
 
 data = cursor.fetchall()
 
 if data[0][0]: # Assuming one row with one column is returned.
-    print(f"There's a row in table1 with a datetime value from the current year.")
+    print("There's a row in table1 with a datetime value from the current year.")
 
 else:
-    print(f"There's no row in table1 with a datetime value from the current year.")
+    print("There's no row in table1 with a datetime value from the current year.")
 
 connection.close()
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

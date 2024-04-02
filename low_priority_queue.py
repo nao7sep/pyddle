@@ -9,10 +9,10 @@ import math
 import os
 import pyddle_console as console
 import pyddle_datetime as dt
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 import pyddle_json_based_kvs as kvs
-import pyddle_string as string
+import pyddle_string as pstring
 import random
 import re
 import sqlite3
@@ -406,7 +406,7 @@ def show_statistics(handled_task_list, task_list, days):
     # This could be checked a few blocks earlier,
     #     but the statistics are unavailable only in the beginning.
     if not statistics:
-        console.print("No data available.", indents=string.leveledIndents[1])
+        console.print("No data available.", indents=pstring.leveledIndents[1])
         return
 
     for task, execution_count, last_DONE_utc, completion_rate in statistics:
@@ -435,13 +435,13 @@ def show_statistics(handled_task_list, task_list, days):
         output_str = f"{task.content}, {completion_rate}%{past_time_string}"
 
         if completion_rate >= (200 / 3):
-            console.print(output_str, indents=string.leveledIndents[1])
+            console.print(output_str, indents=pstring.leveledIndents[1])
 
         elif completion_rate >= (100 / 3):
-            console.print(output_str, indents=string.leveledIndents[1], colors=console.warning_colors)
+            console.print(output_str, indents=pstring.leveledIndents[1], colors=console.warning_colors)
 
         else:
-            console.print(output_str, indents=string.leveledIndents[1], colors=console.error_colors)
+            console.print(output_str, indents=pstring.leveledIndents[1], colors=console.error_colors)
 
 # ------------------------------------------------------------------------------
 #     Application
@@ -494,7 +494,7 @@ try:
                     if execution_count >= task.times_per_week:
                         additional_info += f", good"
 
-                    console.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=string.leveledIndents[1])
+                    console.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=pstring.leveledIndents[1])
 
             shows_all_next_time = False
 
@@ -503,42 +503,42 @@ try:
 
             command, number, parameter = parse_command_str(command_str)
 
-            if string.equals_ignore_case(command, "help"):
+            if pstring.equals_ignore_case(command, "help"):
                 console.print("Commands:")
-                console.print("help", indents=string.leveledIndents[1])
+                console.print("help", indents=pstring.leveledIndents[1])
 
-                if debugging.is_debugging():
-                    console.print("sample => Generates sample data.", indents=string.leveledIndents[1])
+                if pdebugging.is_debugging():
+                    console.print("sample => Generates sample data.", indents=pstring.leveledIndents[1])
 
-                console.print("create <times_per_week> <content>", indents=string.leveledIndents[1])
-                console.print("all => Shows all tasks including inactive/hidden ones.", indents=string.leveledIndents[1])
-                console.print("done <task_number> => Means you have done it.", indents=string.leveledIndents[1])
-                console.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=string.leveledIndents[1])
-                console.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=string.leveledIndents[1])
-                console.print("activate <task_number>", indents=string.leveledIndents[1])
-                console.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=string.leveledIndents[1])
-                console.print("show <task_number>", indents=string.leveledIndents[1])
-                console.print("content <task_number> <content>", indents=string.leveledIndents[1])
-                console.print("times <task_number> <times_per_week>", indents=string.leveledIndents[1])
-                console.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=string.leveledIndents[1])
-                console.print("stat (<days>) => Uses all data if no number is provided.", indents=string.leveledIndents[1])
-                console.print("exit", indents=string.leveledIndents[1])
+                console.print("create <times_per_week> <content>", indents=pstring.leveledIndents[1])
+                console.print("all => Shows all tasks including inactive/hidden ones.", indents=pstring.leveledIndents[1])
+                console.print("done <task_number> => Means you have done it.", indents=pstring.leveledIndents[1])
+                console.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=pstring.leveledIndents[1])
+                console.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=pstring.leveledIndents[1])
+                console.print("activate <task_number>", indents=pstring.leveledIndents[1])
+                console.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=pstring.leveledIndents[1])
+                console.print("show <task_number>", indents=pstring.leveledIndents[1])
+                console.print("content <task_number> <content>", indents=pstring.leveledIndents[1])
+                console.print("times <task_number> <times_per_week>", indents=pstring.leveledIndents[1])
+                console.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=pstring.leveledIndents[1])
+                console.print("stat (<days>) => Uses all data if no number is provided.", indents=pstring.leveledIndents[1])
+                console.print("exit", indents=pstring.leveledIndents[1])
                 continue
 
-            elif debugging.is_debugging() and string.equals_ignore_case(command, "sample"):
+            elif pdebugging.is_debugging() and pstring.equals_ignore_case(command, "sample"):
                 generate_sample_data(handled_task_list, task_list)
                 continue
 
-            elif string.equals_ignore_case(command, "create"):
+            elif pstring.equals_ignore_case(command, "create"):
                 if validate_times_per_week(number) and parameter:
                     task_list.create_task(TaskInfo(uuid.uuid4(), dt.get_utc_now(), None, True, True, parameter, number, None))
                     continue
 
-            elif string.equals_ignore_case(command, "all"):
+            elif pstring.equals_ignore_case(command, "all"):
                 shows_all_next_time = True
                 continue
 
-            elif string.equals_ignore_case(command, "done"):
+            elif pstring.equals_ignore_case(command, "done"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = False
@@ -551,7 +551,7 @@ try:
 
                     continue
 
-            elif string.equals_ignore_case(command, "check"):
+            elif pstring.equals_ignore_case(command, "check"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = False
@@ -564,42 +564,42 @@ try:
 
                     continue
 
-            elif string.equals_ignore_case(command, "deactivate"):
+            elif pstring.equals_ignore_case(command, "deactivate"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_active = False
                     task_list.update_task(task)
                     continue
 
-            elif string.equals_ignore_case(command, "activate"):
+            elif pstring.equals_ignore_case(command, "activate"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_active = True
                     task_list.update_task(task)
                     continue
 
-            elif string.equals_ignore_case(command, "hide"):
+            elif pstring.equals_ignore_case(command, "hide"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = False
                     task_list.update_task(task)
                     continue
 
-            elif string.equals_ignore_case(command, "show"):
+            elif pstring.equals_ignore_case(command, "show"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
                     task = shown_tasks[number - 1]
                     task.is_shown = True
                     task_list.update_task(task)
                     continue
 
-            elif string.equals_ignore_case(command, "content"):
+            elif pstring.equals_ignore_case(command, "content"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number) and parameter:
                     task = shown_tasks[number - 1]
                     task.content = parameter
                     task_list.update_task(task)
                     continue
 
-            elif string.equals_ignore_case(command, "times"):
+            elif pstring.equals_ignore_case(command, "times"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number) and parameter:
                     try:
                         task = shown_tasks[number - 1]
@@ -610,9 +610,9 @@ try:
                     except Exception:
                         pass
 
-            elif string.equals_ignore_case(command, "delete"):
+            elif pstring.equals_ignore_case(command, "delete"):
                 if shown_tasks and validate_shown_task_index(shown_tasks, number):
-                    if  string.equals_ignore_case(parameter, "confirm"):
+                    if  pstring.equals_ignore_case(parameter, "confirm"):
                         task = shown_tasks[number - 1]
                         task_list.delete_task(task)
 
@@ -622,7 +622,7 @@ try:
 
                     continue
 
-            elif string.equals_ignore_case(command, "stat"):
+            elif pstring.equals_ignore_case(command, "stat"):
                 if validate_times_per_week(number): # Well, it just works. :P
                     show_statistics(handled_task_list, task_list, number)
                     continue
@@ -631,7 +631,7 @@ try:
                     show_statistics(handled_task_list, task_list, days=None)
                     continue
 
-            elif string.equals_ignore_case(command, "exit"):
+            elif pstring.equals_ignore_case(command, "exit"):
                 break
 
             # The current implementation as of 2024-03-15 doesnt support negative numbers; they are explicitly excluded by the regex.
@@ -649,4 +649,4 @@ except Exception:
     console.print(traceback.format_exc(), colors=console.error_colors)
 
 finally:
-    debugging.display_press_enter_key_to_continue_if_not_debugging()
+    pdebugging.display_press_enter_key_to_continue_if_not_debugging()

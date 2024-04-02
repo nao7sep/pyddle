@@ -2,8 +2,8 @@
 # This script finds all Python-looking directories on all Windows drives / Mac volumes.
 
 import os
-import pyddle_debugging as debugging
-import pyddle_string as string
+import pyddle_debugging as pdebugging
+import pyddle_string as pstring
 
 def is_python_looking_directory(path):
     expected_directory_names = ['include', 'lib'] # These 2 are always expected.
@@ -12,7 +12,7 @@ def is_python_looking_directory(path):
         if not os.path.isdir(os.path.join(path, name)):
             return False
 
-    if debugging.is_debugging():
+    if pdebugging.is_debugging():
         print(f"Possible Python directory: {path}") # There can be variants of Python installations.
 
     expected_file_names = ['python3.exe', 'python.exe', 'python3', 'python']
@@ -24,7 +24,7 @@ def is_python_looking_directory(path):
     return False
 
 def get_all_drive_or_volume_paths():
-    if string.equals_ignore_case(os.name, 'nt'):
+    if pstring.equals_ignore_case(os.name, 'nt'):
         for drive_letter in [chr(code) for code in range(ord('A'), ord('Z') + 1)]:
             if os.path.isdir(f"{drive_letter}:\\"):
                 yield f"{drive_letter}:\\"
@@ -52,4 +52,4 @@ for drive_or_volume_path in get_all_drive_or_volume_paths():
 # In an non-debugging environment, the scanned directory count will be overwritten by the "Press Enter key" message.
 # In a debugging environment, the console should get to a new prompt, with or without overwriting the last scanned directory count.
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

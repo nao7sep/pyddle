@@ -2,7 +2,7 @@
 # This script tests the core functionalities of the file_system module.
 
 import os
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 
 file_system.make_and_move_to_output_subdirectory()
@@ -20,4 +20,4 @@ for encoding, bom in file_system.utf_encodings_and_boms:
         file_length = file.buffer.tell()
         print(f"{file_name}: {content} ({file_length} bytes)")
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

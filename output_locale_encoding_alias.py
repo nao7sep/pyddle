@@ -2,7 +2,7 @@
 # This script outputs all the locale encoding aliases.
 
 import locale
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 
 file_system.make_and_move_to_output_subdirectory()
@@ -12,4 +12,4 @@ with file_system.open_file_and_write_utf_encoding_bom("output_locale_encoding_al
         file.write(f"{key}: {value}\n")
         print(f"{key}: {value}")
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

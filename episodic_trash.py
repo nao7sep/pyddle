@@ -7,7 +7,7 @@ import json
 import os
 import pyddle_console as console
 import pyddle_datetime as dt
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 import pyddle_json_based_kvs as kvs
 import pyddle_path as path
@@ -186,14 +186,14 @@ def generate_random_code(episodes):
 
 def get_episode(episodes, code):
     for episode in episodes:
-        if pyddle_string.equals_ignore_case(episode.code, code):
+        if pstring.equals_ignore_case(episode.code, code):
             return episode
 
     return None
 
 def get_note(notes, code):
     for note in notes:
-        if pyddle_string.equals_ignore_case(note.code, code):
+        if pstring.equals_ignore_case(note.code, code):
             return note
 
         if note.notes:
@@ -215,51 +215,51 @@ def generate_file_name(code, title):
 
 def episodes_help_command():
     console.print("Commands:")
-    console.print("help", indents=pyddle_string.leveledIndents[1])
-    console.print("create <title>", indents=pyddle_string.leveledIndents[1])
-    console.print("list", indents=pyddle_string.leveledIndents[1])
-    console.print("open <code>", indents=pyddle_string.leveledIndents[1])
-    console.print("title <code> <title>", indents=pyddle_string.leveledIndents[1])
-    console.print("delete <code>", indents=pyddle_string.leveledIndents[1])
-    console.print("exit", indents=pyddle_string.leveledIndents[1])
+    console.print("help", indents=pstring.leveledIndents[1])
+    console.print("create <title>", indents=pstring.leveledIndents[1])
+    console.print("list", indents=pstring.leveledIndents[1])
+    console.print("open <code>", indents=pstring.leveledIndents[1])
+    console.print("title <code> <title>", indents=pstring.leveledIndents[1])
+    console.print("delete <code>", indents=pstring.leveledIndents[1])
+    console.print("exit", indents=pstring.leveledIndents[1])
 
 def notes_help_command():
     console.print("Commands:")
-    console.print("help", indents=pyddle_string.leveledIndents[1])
-    console.print("create <content>", indents=pyddle_string.leveledIndents[1])
-    console.print("create copy => Copies content from Clipboard", indents=pyddle_string.leveledIndents[1])
-    console.print("child <parent_code> <content>", indents=pyddle_string.leveledIndents[1])
-    console.print("child <parent_code> copy => Copies content from Clipboard", indents=pyddle_string.leveledIndents[1])
-    console.print("list", indents=pyddle_string.leveledIndents[1])
-    console.print("read <code>", indents=pyddle_string.leveledIndents[1])
-    console.print("parent <code> <parent_code>", indents=pyddle_string.leveledIndents[1])
-    console.print("content <code> <content>", indents=pyddle_string.leveledIndents[1])
-    console.print("content <code> copy => Copies content from Clipboard", indents=pyddle_string.leveledIndents[1])
-    console.print("delete <code>", indents=pyddle_string.leveledIndents[1])
-    console.print("close", indents=pyddle_string.leveledIndents[1])
+    console.print("help", indents=pstring.leveledIndents[1])
+    console.print("create <content>", indents=pstring.leveledIndents[1])
+    console.print("create copy => Copies content from Clipboard", indents=pstring.leveledIndents[1])
+    console.print("child <parent_code> <content>", indents=pstring.leveledIndents[1])
+    console.print("child <parent_code> copy => Copies content from Clipboard", indents=pstring.leveledIndents[1])
+    console.print("list", indents=pstring.leveledIndents[1])
+    console.print("read <code>", indents=pstring.leveledIndents[1])
+    console.print("parent <code> <parent_code>", indents=pstring.leveledIndents[1])
+    console.print("content <code> <content>", indents=pstring.leveledIndents[1])
+    console.print("content <code> copy => Copies content from Clipboard", indents=pstring.leveledIndents[1])
+    console.print("delete <code>", indents=pstring.leveledIndents[1])
+    console.print("close", indents=pstring.leveledIndents[1])
 
 def episodes_list_command(episodes):
     console.print("Episodes:")
 
     if not episodes:
-        console.print("No episodes found.", indents=pyddle_string.leveledIndents[1])
+        console.print("No episodes found.", indents=pstring.leveledIndents[1])
         return
 
     # Sorted like a directory's file list.
     for episode in sorted(episodes, key=lambda episode: episode.title.lower()):
-        console.print(f"{episode.code} {episode.title}", indents=pyddle_string.leveledIndents[1])
+        console.print(f"{episode.code} {episode.title}", indents=pstring.leveledIndents[1])
 
 def notes_list_command(notes, depth):
     if depth == 0:
         console.print("Notes:")
 
         if not notes:
-            console.print("No notes found.", indents=pyddle_string.leveledIndents[1])
+            console.print("No notes found.", indents=pstring.leveledIndents[1])
             return
 
     for note in notes:
         partial_content = pyddle_string.splitlines(note.content)[0] # For a start, experimentally.
-        console.print(f"{note.code} {partial_content}", indents=pyddle_string.leveledIndents[depth + 1])
+        console.print(f"{note.code} {partial_content}", indents=pstring.leveledIndents[depth + 1])
 
         if note.notes:
             notes_list_command(note.notes, depth + 1)
@@ -280,13 +280,13 @@ def episodes_open_command(episodes, command):
                 command = console.input_command(f"Episode {episode.code}: ")
 
                 if command:
-                    if pyddle_string.equals_ignore_case(command.command, "help"):
+                    if pstring.equals_ignore_case(command.command, "help"):
                         notes_help_command()
 
-                    elif pyddle_string.equals_ignore_case(command.command, "create"):
+                    elif pstring.equals_ignore_case(command.command, "create"):
                         content = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(0))
 
-                        if pyddle_string.equals_ignore_case(content, "copy"):
+                        if pstring.equals_ignore_case(content, "copy"):
                             try:
                                 content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
@@ -315,7 +315,7 @@ def episodes_open_command(episodes, command):
                         else:
                             console.print("Content is required.", colors=console.error_colors)
 
-                    elif pyddle_string.equals_ignore_case(command.command, "child"):
+                    elif pstring.equals_ignore_case(command.command, "child"):
                         parent_code = command.get_arg_or_default(0, None)
 
                         if parent_code:
@@ -324,7 +324,7 @@ def episodes_open_command(episodes, command):
                             if parent_note:
                                 content = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(1))
 
-                                if pyddle_string.equals_ignore_case(content, "copy"):
+                                if pstring.equals_ignore_case(content, "copy"):
                                     try:
                                         content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
@@ -359,10 +359,10 @@ def episodes_open_command(episodes, command):
                         else:
                             console.print("Parent code is required.", colors=console.error_colors)
 
-                    elif pyddle_string.equals_ignore_case(command.command, "list"):
+                    elif pstring.equals_ignore_case(command.command, "list"):
                         notes_list_command(episode.notes, depth=0)
 
-                    elif pyddle_string.equals_ignore_case(command.command, "read"):
+                    elif pstring.equals_ignore_case(command.command, "read"):
                         code = command.get_arg_or_default(0, None)
 
                         if code:
@@ -372,7 +372,7 @@ def episodes_open_command(episodes, command):
                                 console.print("Content:")
 
                                 for line in pyddle_string.splitlines(note.content):
-                                    console.print(line, indents=pyddle_string.leveledIndents[1])
+                                    console.print(line, indents=pstring.leveledIndents[1])
 
                             else:
                                 console.print("Note not found.", colors=console.error_colors)
@@ -380,7 +380,7 @@ def episodes_open_command(episodes, command):
                         else:
                             console.print("Code is required.", colors=console.error_colors)
 
-                    elif pyddle_string.equals_ignore_case(command.command, "parent"):
+                    elif pstring.equals_ignore_case(command.command, "parent"):
                         code = command.get_arg_or_default(0, None)
 
                         if code:
@@ -434,7 +434,7 @@ def episodes_open_command(episodes, command):
                         else:
                             console.print("Code is required.", colors=console.error_colors)
 
-                    elif pyddle_string.equals_ignore_case(command.command, "content"):
+                    elif pstring.equals_ignore_case(command.command, "content"):
                         code = command.get_arg_or_default(0, None)
 
                         if code:
@@ -443,7 +443,7 @@ def episodes_open_command(episodes, command):
                             if note:
                                 content = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(1))
 
-                                if pyddle_string.equals_ignore_case(content, "copy"):
+                                if pstring.equals_ignore_case(content, "copy"):
                                     try:
                                         content = pyddle_string.normalize_multiline_str(pyperclip.paste())
 
@@ -474,7 +474,7 @@ def episodes_open_command(episodes, command):
                         else:
                             console.print("Code is required.", colors=console.error_colors)
 
-                    elif pyddle_string.equals_ignore_case(command.command, "delete"):
+                    elif pstring.equals_ignore_case(command.command, "delete"):
                         code = command.get_arg_or_default(0, None)
 
                         if code:
@@ -496,7 +496,7 @@ def episodes_open_command(episodes, command):
                         else:
                             console.print("Code is required.", colors=console.error_colors)
 
-                    elif pyddle_string.equals_ignore_case(command.command, "close"):
+                    elif pstring.equals_ignore_case(command.command, "close"):
                         break
 
                     else:
@@ -527,7 +527,7 @@ try:
         for episode_file_name in os.listdir(episodic_directory_path):
             _, extension = os.path.splitext(episode_file_name)
 
-            if pyddle_string.equals_ignore_case(extension, ".json"):
+            if pstring.equals_ignore_case(extension, ".json"):
                 try:
                     episode = EpisodeInfo()
                     episode.file_path = os.path.join(episodic_directory_path, episode_file_name)
@@ -546,10 +546,10 @@ try:
         command = console.input_command("Command: ")
 
         if command:
-            if pyddle_string.equals_ignore_case(command.command, "help"):
+            if pstring.equals_ignore_case(command.command, "help"):
                 episodes_help_command()
 
-            elif pyddle_string.equals_ignore_case(command.command, "create"):
+            elif pstring.equals_ignore_case(command.command, "create"):
                 title = pyddle_string.normalize_singleline_str(command.get_remaining_args_as_str(0))
 
                 if title:
@@ -578,13 +578,13 @@ try:
                 else:
                     console.print("Title is required.", colors=console.error_colors)
 
-            elif pyddle_string.equals_ignore_case(command.command, "list"):
+            elif pstring.equals_ignore_case(command.command, "list"):
                 episodes_list_command(episodes)
 
-            elif pyddle_string.equals_ignore_case(command.command, "open"):
+            elif pstring.equals_ignore_case(command.command, "open"):
                 episodes_open_command(episodes, command)
 
-            elif pyddle_string.equals_ignore_case(command.command, "title"):
+            elif pstring.equals_ignore_case(command.command, "title"):
                 code = command.get_arg_or_default(0, None)
 
                 if code:
@@ -635,7 +635,7 @@ try:
                 else:
                     console.print("Code is required.", colors=console.error_colors)
 
-            elif pyddle_string.equals_ignore_case(command.command, "delete"):
+            elif pstring.equals_ignore_case(command.command, "delete"):
                 code = command.get_arg_or_default(0, None)
 
                 if code:
@@ -659,7 +659,7 @@ try:
                 else:
                     console.print("Code is required.", colors=console.error_colors)
 
-            elif pyddle_string.equals_ignore_case(command.command, "exit"):
+            elif pstring.equals_ignore_case(command.command, "exit"):
                 break
 
             else:
@@ -672,4 +672,4 @@ except Exception:
     console.print(traceback.format_exc(), colors=console.error_colors)
 
 finally:
-    debugging.display_press_enter_key_to_continue_if_not_debugging()
+    pdebugging.display_press_enter_key_to_continue_if_not_debugging()

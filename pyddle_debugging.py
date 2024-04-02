@@ -2,11 +2,13 @@
 # This scripts contains debugging-related functions.
 
 import os
-import pyddle_path # Required for test_path.py.
-import pyddle_string
+
+import pyddle_path as ppath # pylint: disable=unused-import
+# pyddle_path is required for test_path.py.
+import pyddle_string as pstring
 
 def is_debugging():
-    return pyddle_string.equals_ignore_case(os.getenv('TERM_PROGRAM'), 'vscode') # Must be updated periodically.
+    return pstring.equals_ignore_case(os.getenv('TERM_PROGRAM'), 'vscode') # Must be updated periodically.
 
 # The comments of "exec", which is like a sibling of "eval", contain:
 #     In all cases, if the optional parts are omitted, the code is executed in the current scope.
@@ -16,9 +18,10 @@ def is_debugging():
 
 def try_evaluate(code):
     try:
-        print(f"{code} => {eval(code)}")
+        print(f"{code} => {eval(code)}") # pylint: disable=eval-used
+        # Needed for testing purposes.
 
-    except Exception as exception:
+    except Exception as exception: # pylint: disable=broad-except
         print(f"{code} => {exception}")
 
 # For console apps not to close immediately after execution.

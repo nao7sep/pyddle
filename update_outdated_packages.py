@@ -4,9 +4,9 @@
 import importlib.util
 import json
 import os
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_path # path is a too common name.
-import pyddle_string as string
+import pyddle_string as pstring
 import subprocess
 import sys
 
@@ -50,28 +50,28 @@ subprocess.run([pip_file_path, "install", "--upgrade", "pip"])
 # Uninstall the tzdata package.
 # It's required to run output_available_timezones.py and will be reinstalled later.
 
-if debugging.is_debugging():
+if pdebugging.is_debugging():
     subprocess.run([pip_file_path, "uninstall", "tzdata", "-y"])
 
 # Install tzdata 2023.4, which is obsolete, for testing purposes.
 
-if debugging.is_debugging():
+if pdebugging.is_debugging():
     subprocess.run([pip_file_path, "install", "tzdata\u003D\u003D2023.4"])
 
 # Remember whether beautifulsoup4 was originally installed.
 # Oh well, I just liked the name of the package.
 
-if debugging.is_debugging():
+if pdebugging.is_debugging():
     is_beautifulsoup4_originally_installed = importlib.util.find_spec("beautifulsoup4") is not None
 
 # Attempt to uninstall beautifulsoup4.
 
-if debugging.is_debugging():
+if pdebugging.is_debugging():
     subprocess.run([pip_file_path, "uninstall", "beautifulsoup4", "-y"])
 
 # Install beautifulsoup4 4.12.2, which is obsolete, for testing purposes.
 
-if debugging.is_debugging():
+if pdebugging.is_debugging():
     subprocess.run([pip_file_path, "install", "beautifulsoup4\u003D\u003D4.12.2"])
 
 # Get a list of all outdated packages as a JSON string.
@@ -88,7 +88,7 @@ if len(outdated_packages) > 0:
     for package in outdated_packages:
         print(f'    {package["name"]} {package["version"]} => {package["latest_version"]}')
 
-    if string.equals_ignore_case(input("Would you like to update all outdated packages? (y/n) "), "y"):
+    if pstring.equals_ignore_case(input("Would you like to update all outdated packages? (y/n) "), "y"):
         for package in outdated_packages:
             # Specify the version to avoid installing a newer version than intended.
             subprocess.run([pip_file_path, "install", f'{package["name"]}\u003D\u003D{package["latest_version"]}'])
@@ -96,8 +96,8 @@ if len(outdated_packages) > 0:
 else:
     print("No outdated packages.")
 
-if debugging.is_debugging():
+if pdebugging.is_debugging():
     if not is_beautifulsoup4_originally_installed:
         subprocess.run([pip_file_path, "uninstall", "beautifulsoup4", "-y"])
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

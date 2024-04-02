@@ -8,12 +8,12 @@ global.set_main_script_file_path(__file__)
 import glob
 import os
 import pyddle_console as console
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_dotnet as dotnet
 import pyddle_json_based_kvs as kvs
 import pyddle_logging as logging
 import pyddle_output as output
-import pyddle_string as string
+import pyddle_string as pstring
 import random
 import sys
 import traceback
@@ -93,8 +93,8 @@ try:
         if not os.path.isdir(possible_solution_directory_path):
             continue
 
-        if string.contains_ignore_case(ignored_directory_names, directory_name):
-            if debugging.is_debugging():
+        if pstring.contains_ignore_case(ignored_directory_names, directory_name):
+            if pdebugging.is_debugging():
                 output.print_and_log(f"Ignored directory: {directory_name}")
 
             continue
@@ -102,7 +102,7 @@ try:
         solution_file_paths = glob.glob(os.path.join(possible_solution_directory_path, "*.sln"))
 
         if not solution_file_paths:
-            if debugging.is_debugging():
+            if pdebugging.is_debugging():
                 output.print_and_log(f"No solution files found in directory: {directory_name}", colors=console.warning_colors)
 
             continue
@@ -111,7 +111,7 @@ try:
             output.print_and_log(f"Multiple solution files found in directory: {directory_name}", colors=console.warning_colors)
             continue
 
-        is_obsolete_solution = string.contains_ignore_case(obsolete_solution_names, directory_name)
+        is_obsolete_solution = pstring.contains_ignore_case(obsolete_solution_names, directory_name)
         solutions.append(dotnet.SolutionInfo(solutions, archives_directory_path, directory_name, possible_solution_directory_path, solution_file_paths[0], is_obsolete_solution))
 
     if not solutions:
@@ -134,8 +134,8 @@ try:
                 continue
 
             # It's highly unlikely that a known better-to-avoid name (such as ".git") is used as a valid solution/project directory name.
-            if string.contains_ignore_case(ignored_directory_names, directory_name):
-                if debugging.is_debugging():
+            if pstring.contains_ignore_case(ignored_directory_names, directory_name):
+                if pdebugging.is_debugging():
                     output.print_and_log(f"Ignored directory: {solution.name}/{directory_name}")
 
                 continue
@@ -143,7 +143,7 @@ try:
             project_file_paths = glob.glob(os.path.join(possible_project_directory_path, "*.csproj"))
 
             if not project_file_paths:
-                if debugging.is_debugging():
+                if pdebugging.is_debugging():
                     output.print_and_log(f"No project files found in directory: {solution.name}/{directory_name}", colors=console.warning_colors)
 
                 continue
@@ -171,28 +171,28 @@ try:
             output.print_and_log(f"{solution.name} v{solution.common_version_string}")
 
             if not os.path.isfile(solution.source_archive_file_path):
-                output.print_and_log(solution.source_archive_file_path, indents=string.leveledIndents[1], colors=console.important_colors)
+                output.print_and_log(solution.source_archive_file_path, indents=pstring.leveledIndents[1], colors=console.important_colors)
 
             for project in sorted(solution.projects, key=lambda x: x.name):
                 try:
-                    output.print_and_log(f"{project.name} v{project.version_string}", indents=string.leveledIndents[1])
+                    output.print_and_log(f"{project.name} v{project.version_string}", indents=pstring.leveledIndents[1])
 
                     try:
                         if project.referenced_projects:
                             for referenced_project in sorted(project.referenced_projects, key=lambda x: x.name):
-                                output.print_and_log(f"{referenced_project.name} v{referenced_project.version_string}", indents=string.leveledIndents[2])
+                                output.print_and_log(f"{referenced_project.name} v{referenced_project.version_string}", indents=pstring.leveledIndents[2])
 
                         else:
-                            output.print_and_log(f"No referenced projects found.", indents=string.leveledIndents[2])
+                            output.print_and_log(f"No referenced projects found.", indents=pstring.leveledIndents[2])
 
                         valid_project_count += 1
 
                     except Exception as exception:
                         # Looks prettier without the project name.
-                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
+                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
 
                 except Exception as exception:
-                    output.print_and_log(f"{project.name}: {exception}", indents=string.leveledIndents[1], colors=console.error_colors)
+                    output.print_and_log(f"{project.name}: {exception}", indents=pstring.leveledIndents[1], colors=console.error_colors)
 
         except Exception as exception:
             output.print_and_log(f"{solution.name}: {exception}", colors=console.error_colors)
@@ -243,7 +243,7 @@ try:
     output.print_and_log(f"Projects to build:")
 
     for project in projects_to_build:
-        output.print_and_log(project.name, indents=string.leveledIndents[1])
+        output.print_and_log(project.name, indents=pstring.leveledIndents[1])
 
     logging.flush()
 
@@ -272,23 +272,23 @@ try:
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
+                        output.print_and_log(f"{project.name}:", indents=pstring.leveledIndents[1])
                         no_restore = iteration_count >= 1
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.build(no_restore), indents=string.leveledIndents[2]))
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.build(no_restore), indents=pstring.leveledIndents[2]))
 
                     except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
+                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
 
             elif choice == "2":
                 output.print_and_log("Updating NuGet packages...", colors=console.important_colors)
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"{project.name}:", indents=string.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.update_nuget_packages(), indents=string.leveledIndents[2]))
+                        output.print_and_log(f"{project.name}:", indents=pstring.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.update_nuget_packages(), indents=pstring.leveledIndents[2]))
 
                     except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
+                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
 
             elif choice == "3":
                 output.print_and_log("Rebuilding and archiving...", colors=console.important_colors)
@@ -299,32 +299,32 @@ try:
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"Cleaning {project.name}:", indents=string.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory=False), indents=string.leveledIndents[2]))
+                        output.print_and_log(f"Cleaning {project.name}:", indents=pstring.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory=False), indents=pstring.leveledIndents[2]))
 
                     except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
+                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"Rebuilding and archiving {project.name}:", indents=string.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=string.leveledIndents[2]))
+                        output.print_and_log(f"Rebuilding and archiving {project.name}:", indents=pstring.leveledIndents[1])
+                        output.print_and_log(dotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=pstring.leveledIndents[2]))
 
                         # When we archive source code, usually, tests have been done and the projects can be built without issues.
                         # So, I wont be implementing one more loop to complicate the interaction.
 
                         if project.solution not in archived_solutions:
-                            output.print_and_log(dotnet.format_result_string_from_messages(project.solution.archive(not_archived_directory_names, not_archived_file_names), indents=string.leveledIndents[2]))
+                            output.print_and_log(dotnet.format_result_string_from_messages(project.solution.archive(not_archived_directory_names, not_archived_file_names), indents=pstring.leveledIndents[2]))
                             archived_solutions.append(project.solution)
 
                     except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=string.leveledIndents[2], colors=console.error_colors)
+                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
 
             elif choice == "4":
                 print("Projects:")
 
                 for index, project in enumerate(projects_to_build):
-                    print(f"{string.leveledIndents[1]}{index + 1}) {project.name}")
+                    print(f"{pstring.leveledIndents[1]}{index + 1}) {project.name}")
 
                 try:
                     index = int(input("Enter the index of the project to exclude: ")) - 1
@@ -356,4 +356,4 @@ except Exception:
 
 finally:
     logging.flush()
-    debugging.display_press_enter_key_to_continue_if_not_debugging()
+    pdebugging.display_press_enter_key_to_continue_if_not_debugging()

@@ -7,7 +7,7 @@ import os
 import pyddle_file_system as file_system
 import pyddle_global as global
 import pyddle_path # path is a too common name.
-import pyddle_string as string
+import pyddle_string as pstring
 import sqlite3
 
 # https://docs.python.org/3/reference/datamodel.html#modules
@@ -35,7 +35,7 @@ def display_merged_kvs_data():
     print("Merged KVS data:")
 
     for key, value in merged_kvs_data.items():
-        print(f"{string.leveledIndents[1]}{key}: {value}")
+        print(f"{pstring.leveledIndents[1]}{key}: {value}")
 
 # ------------------------------------------------------------------------------
 #     CRUD operations

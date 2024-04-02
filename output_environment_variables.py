@@ -3,9 +3,9 @@
 
 import os
 import pyddle_console as console
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
-import pyddle_string as string
+import pyddle_string as pstring
 
 main_separator = ''
 other_separators = []
@@ -16,7 +16,7 @@ other_separators = []
 # Out of the 3, we look for what's not the most commonly used one on each platform,
 #     excluding ':', which frequently appears in paths on Windows.
 
-if string.equals_ignore_case(os.name, 'nt'):
+if pstring.equals_ignore_case(os.name, 'nt'):
     main_separator = ';'
     other_separators = [',']
 
@@ -42,9 +42,9 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
         file.write(f"[{key}]\n")
         print(f"[{key}]")
 
-        is_path = string.equals_ignore_case(key, "PATH") # Case-insensitively, just in case.
+        is_path = pstring.equals_ignore_case(key, "PATH") # Case-insensitively, just in case.
 
-        if debugging.is_debugging():
+        if pdebugging.is_debugging():
             if any(separator in value for separator in other_separators):
                 console.print("Contains another separator.", colors=console.warning_colors) # Worth investigating.
 
@@ -65,4 +65,4 @@ with file_system.open_file_and_write_utf_encoding_bom("output_environment_variab
             file.write("(Empty)\n")
             console.print("(Empty)", colors=console.warning_colors) # Not necessary an error.
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

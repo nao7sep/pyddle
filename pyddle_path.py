@@ -2,7 +2,7 @@
 # Contains multi-platform path-related operations.
 
 import os
-import pyddle_string as string
+import pyddle_string as pstring
 
 # os.path.basename(), os.path.dirname(), os.path.splitext() (and some more) are not available as static methods in pathlib.
 # https://docs.python.org/3/library/pathlib.html#correspondence-to-tools-in-the-os-module
@@ -11,7 +11,7 @@ import pyddle_string as string
 #     we should probably avoid using os.path.basename() and os.path.dirname().
 
 def basename(path):
-    index = string.last_index_of_any(path, ['\\', '/'])
+    index = pstring.last_index_of_any(path, ['\\', '/'])
 
     if index >= 0:
         return path[index + 1 :]
@@ -19,7 +19,7 @@ def basename(path):
     return path
 
 def dirname(path):
-    index = string.last_index_of_any(path, ['\\', '/'])
+    index = pstring.last_index_of_any(path, ['\\', '/'])
 
     if index >= 0:
         return path[: index]
@@ -79,18 +79,18 @@ def is_windows_reserved_file_name(file_name):
 
     if length == 3:
         for reserved_file_name in windows_reserved_file_names[0]:
-            if string.equals_ignore_case(root, reserved_file_name):
+            if pstring.equals_ignore_case(root, reserved_file_name):
                 return True
 
     elif length == 4:
-        if string.startswith_ignore_case(root, "C"):
+        if pstring.startswith_ignore_case(root, "C"):
             for reserved_file_name in windows_reserved_file_names[1]:
-                if string.equals_ignore_case(root, reserved_file_name):
+                if pstring.equals_ignore_case(root, reserved_file_name):
                     return True
 
-        elif string.startswith_ignore_case(root, "L"):
+        elif pstring.startswith_ignore_case(root, "L"):
             for reserved_file_name in windows_reserved_file_names[2]:
-                if string.equals_ignore_case(root, reserved_file_name):
+                if pstring.equals_ignore_case(root, reserved_file_name):
                     return True
 
     return False

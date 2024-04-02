@@ -7,7 +7,7 @@ import pyddle_datetime
 import pyddle_file_system as file_system
 import pyddle_global as global
 import pyddle_path # path is a too common name.
-import pyddle_string as string
+import pyddle_string as pstring
 
 # Requires the developer to call pyddle_first.set_main_script_file_path() before using this module.
 # I think it's OK; it's quick, runs at negligible cost and certainly improves the usability of the log file.
@@ -37,7 +37,7 @@ def log(str, indents="", end="\n", flush=False):
 def log_lines(str: list[str], indents="", trailing="", end="\n", flush=False):
     if str:
         for line in str:
-            parts = string.split_line_into_parts(line)
+            parts = pstring.split_line_into_parts(line)
 
             if parts[1]:
                 # Using the original string of the line.

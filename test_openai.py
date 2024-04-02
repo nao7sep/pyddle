@@ -5,10 +5,10 @@ import json
 import PIL.Image
 import PIL.ImageDraw
 import pyddle_console as console
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 import pyddle_openai as openai
-import pyddle_string as string
+import pyddle_string as pstring
 
 file_system.make_and_move_to_output_subdirectory("openai")
 
@@ -161,8 +161,8 @@ def test_chat():
     for index in range(3):
         print(f"Tool {index + 1}:")
 
-        for line in string.splitlines(different_tool_answers[index]):
-            console.print(line, indents=string.leveledIndents[1])
+        for line in pstring.splitlines(different_tool_answers[index]):
+            console.print(line, indents=pstring.leveledIndents[1])
 
     # Summarizes the answers.
 
@@ -200,8 +200,8 @@ def test_chat():
     for index in range(3):
         print(f"Tool {index + 1} summary:")
 
-        for line in string.splitlines(summarization_answers[index]):
-            console.print(line, indents=string.leveledIndents[1])
+        for line in pstring.splitlines(summarization_answers[index]):
+            console.print(line, indents=pstring.leveledIndents[1])
 
     # Asks to select the most suitable tool based on the summaries.
 
@@ -251,7 +251,7 @@ def test_chat():
 
             else:
                 if needs_indentation:
-                    print(string.leveledIndents[1], end="")
+                    print(pstring.leveledIndents[1], end="")
                     needs_indentation = False
 
             print(chunk_str, end="")
@@ -284,12 +284,12 @@ def test_images_and_vision():
     print(f"Image prompts saved to: {prompt_generation_file_name}")
 
     prompt_generation_answer = openai.openai_extract_first_message(prompt_generation_response)
-    image_generation_prompts = string.splitlines(prompt_generation_answer)
+    image_generation_prompts = pstring.splitlines(prompt_generation_answer)
 
     print("Image prompts:")
 
     for index, prompt in enumerate(image_generation_prompts):
-        console.print(f"Prompt {index + 1}: {prompt}", indents=string.leveledIndents[1])
+        console.print(f"Prompt {index + 1}: {prompt}", indents=pstring.leveledIndents[1])
 
     # Generates images from the prompts.
 
@@ -314,10 +314,10 @@ def test_images_and_vision():
     for index in range(3):
         rgb_image = PIL.Image.open(image_generation_file_names[index])
 
-        if not string.equals_ignore_case(rgb_image.format, "PNG"):
+        if not pstring.equals_ignore_case(rgb_image.format, "PNG"):
             raise RuntimeError(f"Image {index + 1} is not in PNG format.")
 
-        if string.equals_ignore_case(rgb_image.mode, "RGBA"):
+        if pstring.equals_ignore_case(rgb_image.mode, "RGBA"):
             raise RuntimeError(f"Image {index + 1} is already in RGBA mode.")
 
         rgba_image = rgb_image.convert("RGBA")
@@ -413,8 +413,8 @@ def test_images_and_vision():
 
         print(f"Vision results for image {index + 1}:")
 
-        for line in string.splitlines(vision_each_image_answers[index]):
-            console.print(line, indents=string.leveledIndents[1])
+        for line in pstring.splitlines(vision_each_image_answers[index]):
+            console.print(line, indents=pstring.leveledIndents[1])
 
     # Asks Vision about 3 images at once.
 
@@ -434,8 +434,8 @@ def test_images_and_vision():
 
     print("Vision results for all images:")
 
-    for line in string.splitlines(vision_all_images_answer):
-        console.print(line, indents=string.leveledIndents[1])
+    for line in pstring.splitlines(vision_all_images_answer):
+        console.print(line, indents=pstring.leveledIndents[1])
 
 # ------------------------------------------------------------------------------
 #     Tests
@@ -451,4 +451,4 @@ def test_images_and_vision():
 
 test_images_and_vision()
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

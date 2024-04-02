@@ -3,7 +3,7 @@
 
 from builtins import print as builtin_print
 import colorama
-import pyddle_string as string
+import pyddle_string as pstring
 import pyddle_type as type
 
 # Specified colors appear differently depending on the platform.
@@ -33,7 +33,7 @@ def print_lines(str: list[str], indents="", colors: list[str]=None, trailing="",
             colors_string = None
 
         for line in str:
-            parts = string.split_line_into_parts(line)
+            parts = pstring.split_line_into_parts(line)
 
             if parts[1]:
                 if colors_string:
@@ -142,7 +142,7 @@ class CommandInfo:
                 # One level of indentation is added.
                 # The indices shouldnt be space-padded within the brackets.
                 # The closing bracket effectively separates the index from the argument, making a following colon unnecessary.
-                lines.append(f"{indents}{string.leveledIndents[1]}[{index}] {string.to_visible_str(arg)}")
+                lines.append(f"{indents}{pstring.leveledIndents[1]}[{index}] {pstring.to_visible_str(arg)}")
 
         return "\n".join(lines)
 

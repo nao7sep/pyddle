@@ -1,7 +1,7 @@
 ﻿# Created: 2024-03-16
 # A script to test pyddle_string.py and any string-related operations.
 
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 # pyddle_string must be imported in pyddle_debugging.
 
 # ------------------------------------------------------------------------------
@@ -9,45 +9,45 @@ import pyddle_debugging as debugging
 # ------------------------------------------------------------------------------
 
 # Starting with obvious cases.
-debugging.try_evaluate('None.startswith("")')
-debugging.try_evaluate('"".startswith(None)')
+pdebugging.try_evaluate('None.startswith("")')
+pdebugging.try_evaluate('"".startswith(None)')
 
 # "" and "" are obviously equal.
 # Then, does "" technically start with ""?
-debugging.try_evaluate('"".startswith("")')
-debugging.try_evaluate('"a".startswith("")')
-debugging.try_evaluate('"".startswith("a")') # The substring is longer.
+pdebugging.try_evaluate('"".startswith("")')
+pdebugging.try_evaluate('"a".startswith("")')
+pdebugging.try_evaluate('"".startswith("a")') # The substring is longer.
 
 # equals_at must act like startswith as they are both partial equality checkers.
 # I dont think the error types need to be identical, but something must be raised in similar situations.
-debugging.try_evaluate('pyddle_string.equals_at(None, 0, "")')
-debugging.try_evaluate('pyddle_string.equals_at("", 0, None)')
-debugging.try_evaluate('pyddle_string.equals_at("", 0, "")') # Commented in the method's source code.
+pdebugging.try_evaluate('pstring.equals_at(None, 0, "")')
+pdebugging.try_evaluate('pstring.equals_at("", 0, None)')
+pdebugging.try_evaluate('pstring.equals_at("", 0, "")') # Commented in the method's source code.
 
 # Bad index.
-debugging.try_evaluate('pyddle_string.equals_at("", None, "")')
-debugging.try_evaluate('pyddle_string.equals_at("", -1, "")')
-debugging.try_evaluate('pyddle_string.equals_at("", 1, "")')
+pdebugging.try_evaluate('pstring.equals_at("", None, "")')
+pdebugging.try_evaluate('pstring.equals_at("", -1, "")')
+pdebugging.try_evaluate('pstring.equals_at("", 1, "")')
 
-debugging.try_evaluate('pyddle_string.equals_at("012", 1, "1")')
-debugging.try_evaluate('pyddle_string.equals_at("012", 1, "12")')
+pdebugging.try_evaluate('pstring.equals_at("012", 1, "1")')
+pdebugging.try_evaluate('pstring.equals_at("012", 1, "12")')
 # A substring given to startswith may be longer than the source string.
-debugging.try_evaluate('pyddle_string.equals_at("012", 1, "123")')
+pdebugging.try_evaluate('pstring.equals_at("012", 1, "123")')
 
 # None.startswith("") => 'NoneType' object has no attribute 'startswith'
 # "".startswith(None) => startswith first arg must be str or a tuple of str, not NoneType
 # "".startswith("") => True
 # "a".startswith("") => True
 # "".startswith("a") => False
-# pyddle_string.equals_at(None, 0, "") => object of type 'NoneType' has no len()
-# pyddle_string.equals_at("", 0, None) => object of type 'NoneType' has no len()
-# pyddle_string.equals_at("", 0, "") => True
-# pyddle_string.equals_at("", None, "") => '<' not supported between instances of 'NoneType' and 'int'
-# pyddle_string.equals_at("", -1, "") => Index out of range.
-# pyddle_string.equals_at("", 1, "") => Index out of range.
-# pyddle_string.equals_at("012", 1, "1") => True
-# pyddle_string.equals_at("012", 1, "12") => True
-# pyddle_string.equals_at("012", 1, "123") => False
+# pstring.equals_at(None, 0, "") => object of type 'NoneType' has no len()
+# pstring.equals_at("", 0, None) => object of type 'NoneType' has no len()
+# pstring.equals_at("", 0, "") => True
+# pstring.equals_at("", None, "") => '<' not supported between instances of 'NoneType' and 'int'
+# pstring.equals_at("", -1, "") => Index out of range.
+# pstring.equals_at("", 1, "") => Index out of range.
+# pstring.equals_at("012", 1, "1") => True
+# pstring.equals_at("012", 1, "12") => True
+# pstring.equals_at("012", 1, "123") => False
 
 # ------------------------------------------------------------------------------
 #     index_of_any/last_index_of_any
@@ -66,30 +66,30 @@ debugging.try_evaluate('pyddle_string.equals_at("012", 1, "123")')
 # I expect index_of to work like C#'s String.IndexOf, returning -1 when the substring is not found.
 # index_of_any must raise an error when index_of(each_substring) would.
 
-debugging.try_evaluate('None.find("")')
-debugging.try_evaluate('"".find(None)')
+pdebugging.try_evaluate('None.find("")')
+pdebugging.try_evaluate('"".find(None)')
 
-debugging.try_evaluate('"".find("")') # Finds "" and returns 0.
-debugging.try_evaluate('"a".find("")') # Again returns 0.
-debugging.try_evaluate('"".find("a")')
+pdebugging.try_evaluate('"".find("")') # Finds "" and returns 0.
+pdebugging.try_evaluate('"a".find("")') # Again returns 0.
+pdebugging.try_evaluate('"".find("a")')
 
-debugging.try_evaluate('pyddle_string.index_of_any(None, [""])') # Must go through len(str).
-debugging.try_evaluate('pyddle_string.index_of_any("", [None])') # Checked explicitly.
+pdebugging.try_evaluate('pyddle_string.index_of_any(None, [""])') # Must go through len(str).
+pdebugging.try_evaluate('pyddle_string.index_of_any("", [None])') # Checked explicitly.
 
-debugging.try_evaluate('pyddle_string.index_of_any("", [""])')
-debugging.try_evaluate('pyddle_string.index_of_any("a", [""])')
-debugging.try_evaluate('pyddle_string.index_of_any("", ["a"])')
+pdebugging.try_evaluate('pyddle_string.index_of_any("", [""])')
+pdebugging.try_evaluate('pyddle_string.index_of_any("a", [""])')
+pdebugging.try_evaluate('pyddle_string.index_of_any("", ["a"])')
 
 # Again the edge-of-cliff situation described in pyddle_string.py occurs and 1 is returned.
 # last_index_of_any too must explicitly return the length of the source string
 #     when at least one of the substrings is "".
 
-debugging.try_evaluate('"a".rfind("")')
-debugging.try_evaluate('pyddle_string.last_index_of_any("a", [""])')
+pdebugging.try_evaluate('"a".rfind("")')
+pdebugging.try_evaluate('pyddle_string.last_index_of_any("a", [""])')
 
 # Just making sure.
-debugging.try_evaluate('pyddle_string.last_index_of_any("012", ["1"])')
-debugging.try_evaluate('pyddle_string.last_index_of_any("012", ["3"])')
+pdebugging.try_evaluate('pyddle_string.last_index_of_any("012", ["1"])')
+pdebugging.try_evaluate('pyddle_string.last_index_of_any("012", ["3"])')
 
 # None.find("") => 'NoneType' object has no attribute 'find'
 # "".find(None) => must be str, not NoneType
@@ -110,14 +110,14 @@ debugging.try_evaluate('pyddle_string.last_index_of_any("012", ["3"])')
 #     Line parts
 # ------------------------------------------------------------------------------
 
-debugging.try_evaluate('pyddle_string.split_line_into_parts(None)')
-debugging.try_evaluate('pyddle_string.split_line_into_parts("")')
-debugging.try_evaluate('pyddle_string.split_line_into_parts(" ")')
-debugging.try_evaluate('pyddle_string.split_line_into_parts("a")')
-debugging.try_evaluate('pyddle_string.split_line_into_parts(" a")')
-debugging.try_evaluate('pyddle_string.split_line_into_parts("a ")')
-debugging.try_evaluate('pyddle_string.split_line_into_parts(" a ")')
-debugging.try_evaluate('pyddle_string.split_line_into_parts(" \\n ")')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts(None)')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts("")')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" ")')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts("a")')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" a")')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts("a ")')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" a ")')
+pdebugging.try_evaluate('pyddle_string.split_line_into_parts(" \\n ")')
 
 # pyddle_string.split_line_into_parts(None) => (None, None, None)
 # pyddle_string.split_line_into_parts("") => ('', '', '')
@@ -128,4 +128,4 @@ debugging.try_evaluate('pyddle_string.split_line_into_parts(" \\n ")')
 # pyddle_string.split_line_into_parts(" a ") => (' ', 'a', ' ')
 # pyddle_string.split_line_into_parts(" \n ") => (' \n ', '', '')
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()

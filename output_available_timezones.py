@@ -1,7 +1,7 @@
 ﻿# Created: 2024-02-21
 # This script outputs all the available timezones.
 
-import pyddle_debugging as debugging
+import pyddle_debugging as pdebugging
 import pyddle_file_system as file_system
 import zoneinfo
 
@@ -14,4 +14,4 @@ with file_system.open_file_and_write_utf_encoding_bom("output_available_timezone
         file.write(timezone + '\n')
         print(timezone)
 
-debugging.display_press_enter_key_to_continue_if_not_debugging()
+pdebugging.display_press_enter_key_to_continue_if_not_debugging()
