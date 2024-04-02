@@ -516,9 +516,9 @@ def episodes_open_command(episodes, command):
 # ------------------------------------------------------------------------------
 
 try:
-    kvs_key_prefix = "episodic_trash/"
+    KVS_KEY_PREFIX = "episodic_trash/"
 
-    episodic_directory_path = pkvs.read_from_merged_kvs_data(f"{kvs_key_prefix}episodic_directory_path")
+    episodic_directory_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}episodic_directory_path")
     pconsole.print(f"episodic_directory_path: {episodic_directory_path}")
 
     episodes = []

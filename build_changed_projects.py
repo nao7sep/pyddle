@@ -1,83 +1,83 @@
-﻿# Created: 2024-03-11
+# Created: 2024-03-11
 # This script builds and archives all changed projects in the specified repositories directory.
-
-# For logging:
-import pyddle_global as global
-global.set_main_script_file_path(__file__)
 
 import glob
 import os
-import pyddle_console as console
-import pyddle_debugging as pdebugging
-import pyddle_dotnet as dotnet
-import pyddle_json_based_kvs as kvs
-import pyddle_logging as logging
-import pyddle_output as output
-import pyddle_string as pstring
 import random
 import sys
 import traceback
+
+import pyddle_console as pconsole
+import pyddle_debugging as pdebugging
+import pyddle_dotnet as pdotnet
+import pyddle_global as pglobal
+import pyddle_json_based_kvs as pkvs
+import pyddle_logging as plogging
+import pyddle_output as poutput
+import pyddle_string as pstring
+
+pglobal.set_main_script_file_path(__file__)
 
 try:
     # ------------------------------------------------------------------------------
     #     Load settings
     # ------------------------------------------------------------------------------
 
-    kvs_key_prefix = "build_changed_projects/"
+    KVS_KEY_PREFIX = "build_changed_projects/"
 
-    repositories_directory_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}repositories_directory_path")
-    output.print_and_log(f"repositories_directory_path: {repositories_directory_path}")
+    repositories_directory_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}repositories_directory_path")
+    poutput.print_and_log(f"repositories_directory_path: {repositories_directory_path}")
 
-    archives_directory_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}archives_directory_path")
-    output.print_and_log(f"archives_directory_path: {archives_directory_path}")
+    archives_directory_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}archives_directory_path")
+    poutput.print_and_log(f"archives_directory_path: {archives_directory_path}")
 
     # A neutral character that is rarely used in solution/project names.
-    value_separator = "|"
+    VALUE_SEPARATOR = "|"
 
     ignored_directory_names = []
-    ignored_directory_names_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}ignored_directory_names")
+    ignored_directory_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}ignored_directory_names")
 
     if ignored_directory_names_string:
-        ignored_directory_names = [value.strip() for value in ignored_directory_names_string.split(value_separator) if value.strip()]
+        ignored_directory_names = [value.strip() for value in ignored_directory_names_string.split(VALUE_SEPARATOR) if value.strip()]
 
         if ignored_directory_names:
-            output.print_and_log(f"ignored_directory_names: {ignored_directory_names}")
+            poutput.print_and_log(f"ignored_directory_names: {ignored_directory_names}")
 
     obsolete_solution_names = []
-    obsolete_solution_names_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}obsolete_solution_names")
+    obsolete_solution_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}obsolete_solution_names")
 
     if obsolete_solution_names_string:
-        obsolete_solution_names = [value.strip() for value in obsolete_solution_names_string.split(value_separator) if value.strip()]
+        obsolete_solution_names = [value.strip() for value in obsolete_solution_names_string.split(VALUE_SEPARATOR) if value.strip()]
 
         if obsolete_solution_names:
-            output.print_and_log(f"obsolete_solution_names: {obsolete_solution_names}")
+            poutput.print_and_log(f"obsolete_solution_names: {obsolete_solution_names}")
 
     supported_runtimes = []
-    supported_runtimes_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}supported_runtimes")
+    supported_runtimes_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}supported_runtimes")
 
     if supported_runtimes_string:
-        supported_runtimes = [value.strip() for value in supported_runtimes_string.split(value_separator) if value.strip()]
+        supported_runtimes = [value.strip() for value in supported_runtimes_string.split(VALUE_SEPARATOR) if value.strip()]
 
         if supported_runtimes:
-            output.print_and_log(f"supported_runtimes: {supported_runtimes}")
+            poutput.print_and_log(f"supported_runtimes: {supported_runtimes}")
 
     not_archived_directory_names = []
-    not_archived_directory_names_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}not_archived_directory_names")
+    not_archived_directory_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}not_archived_directory_names")
 
     if not_archived_directory_names_string:
-        not_archived_directory_names = [value.strip() for value in not_archived_directory_names_string.split(value_separator) if value.strip()]
+        not_archived_directory_names = [value.strip() for value in not_archived_directory_names_string.split(VALUE_SEPARATOR) if value.strip()]
 
         if not_archived_directory_names:
-            output.print_and_log(f"not_archived_directory_names: {not_archived_directory_names}")
+            poutput.print_and_log(f"not_archived_directory_names: {not_archived_directory_names}")
 
     not_archived_file_names = []
-    not_archived_file_names_string = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}not_archived_file_names")
+    not_archived_file_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}not_archived_file_names")
 
     if not_archived_file_names_string:
-        not_archived_file_names = [value.strip() for value in not_archived_file_names_string.split(value_separator) if value.strip()]
+        not_archived_file_names = [value.strip() for value in not_archived_file_names_string.split(VALUE_SEPARATOR) if value.strip()]
 
         if not_archived_file_names:
-            output.print_and_log(f"not_archived_file_names: {not_archived_file_names}")
+            poutput.print_and_log(f"not_archived_file_names: {not_archived_file_names}")
 
     # ------------------------------------------------------------------------------
     #     Find solution directories
@@ -95,7 +95,7 @@ try:
 
         if pstring.contains_ignore_case(ignored_directory_names, directory_name):
             if pdebugging.is_debugging():
-                output.print_and_log(f"Ignored directory: {directory_name}")
+                poutput.print_and_log(f"Ignored directory: {directory_name}")
 
             continue
 
@@ -103,19 +103,19 @@ try:
 
         if not solution_file_paths:
             if pdebugging.is_debugging():
-                output.print_and_log(f"No solution files found in directory: {directory_name}", colors=console.warning_colors)
+                poutput.print_and_log(f"No solution files found in directory: {directory_name}", colors=pconsole.warning_colors)
 
             continue
 
         if len(solution_file_paths) > 1:
-            output.print_and_log(f"Multiple solution files found in directory: {directory_name}", colors=console.warning_colors)
+            poutput.print_and_log(f"Multiple solution files found in directory: {directory_name}", colors=pconsole.warning_colors)
             continue
 
-        is_obsolete_solution = pstring.contains_ignore_case(obsolete_solution_names, directory_name)
-        solutions.append(dotnet.SolutionInfo(solutions, archives_directory_path, directory_name, possible_solution_directory_path, solution_file_paths[0], is_obsolete_solution))
+        is_obsolete_solution = pstring.contains_ignore_case(obsolete_solution_names, directory_name) # pylint: disable=invalid-name
+        solutions.append(pdotnet.SolutionInfo(solutions, archives_directory_path, directory_name, possible_solution_directory_path, solution_file_paths[0], is_obsolete_solution))
 
     if not solutions:
-        output.print_and_log(f"No solution directories found.", colors=console.warning_colors)
+        poutput.print_and_log("No solution directories found.", colors=pconsole.warning_colors)
         # "sys.exit" raises a "SystemExit" exception, which is NOT caught by the "except" block if a type is specified, allowing the script to execute the "finally" block.
         # "exit", on the other hand, is merely a helper for the interactive shell and should not be used in production code.
         sys.exit()
@@ -136,7 +136,7 @@ try:
             # It's highly unlikely that a known better-to-avoid name (such as ".git") is used as a valid solution/project directory name.
             if pstring.contains_ignore_case(ignored_directory_names, directory_name):
                 if pdebugging.is_debugging():
-                    output.print_and_log(f"Ignored directory: {solution.name}/{directory_name}")
+                    poutput.print_and_log(f"Ignored directory: {solution.name}/{directory_name}")
 
                 continue
 
@@ -144,18 +144,18 @@ try:
 
             if not project_file_paths:
                 if pdebugging.is_debugging():
-                    output.print_and_log(f"No project files found in directory: {solution.name}/{directory_name}", colors=console.warning_colors)
+                    poutput.print_and_log(f"No project files found in directory: {solution.name}/{directory_name}", colors=pconsole.warning_colors)
 
                 continue
 
             if len(project_file_paths) > 1:
-                output.print_and_log(f"Multiple project files found in directory: {solution.name}/{directory_name}", colors=console.warning_colors)
+                poutput.print_and_log(f"Multiple project files found in directory: {solution.name}/{directory_name}", colors=pconsole.warning_colors)
                 continue
 
-            project_directories.append(dotnet.ProjectInfo(solutions, solution, directory_name, possible_project_directory_path, project_file_paths[0]))
+            project_directories.append(pdotnet.ProjectInfo(solutions, solution, directory_name, possible_project_directory_path, project_file_paths[0]))
 
         if not project_directories:
-            output.print_and_log(f"No project directories found in solution: {solution.name}", colors=console.warning_colors)
+            poutput.print_and_log(f"No project directories found in solution: {solution.name}", colors=pconsole.warning_colors)
             continue
 
         solution.projects = project_directories
@@ -164,44 +164,44 @@ try:
     #     Read version strings, references, etc
     # ------------------------------------------------------------------------------
 
-    valid_project_count = 0
+    valid_project_count = 0 # pylint: disable=invalid-name
 
     for solution in sorted(solutions, key=lambda x: x.name):
         try:
-            output.print_and_log(f"{solution.name} v{solution.common_version_string}")
+            poutput.print_and_log(f"{solution.name} v{solution.common_version_string}")
 
             if not os.path.isfile(solution.source_archive_file_path):
-                output.print_and_log(solution.source_archive_file_path, indents=pstring.leveledIndents[1], colors=console.important_colors)
+                poutput.print_and_log(solution.source_archive_file_path, indents=pstring.leveledIndents[1], colors=pconsole.important_colors)
 
             for project in sorted(solution.projects, key=lambda x: x.name):
                 try:
-                    output.print_and_log(f"{project.name} v{project.version_string}", indents=pstring.leveledIndents[1])
+                    poutput.print_and_log(f"{project.name} v{project.version_string}", indents=pstring.leveledIndents[1])
 
                     try:
                         if project.referenced_projects:
                             for referenced_project in sorted(project.referenced_projects, key=lambda x: x.name):
-                                output.print_and_log(f"{referenced_project.name} v{referenced_project.version_string}", indents=pstring.leveledIndents[2])
+                                poutput.print_and_log(f"{referenced_project.name} v{referenced_project.version_string}", indents=pstring.leveledIndents[2])
 
                         else:
-                            output.print_and_log(f"No referenced projects found.", indents=pstring.leveledIndents[2])
+                            poutput.print_and_log("No referenced projects found.", indents=pstring.leveledIndents[2])
 
                         valid_project_count += 1
 
-                    except Exception as exception:
+                    except Exception as exception: # pylint: disable=broad-except
                         # Looks prettier without the project name.
-                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
+                        poutput.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=pconsole.error_colors)
 
-                except Exception as exception:
-                    output.print_and_log(f"{project.name}: {exception}", indents=pstring.leveledIndents[1], colors=console.error_colors)
+                except Exception as exception: # pylint: disable=broad-except
+                    poutput.print_and_log(f"{project.name}: {exception}", indents=pstring.leveledIndents[1], colors=pconsole.error_colors)
 
-        except Exception as exception:
-            output.print_and_log(f"{solution.name}: {exception}", colors=console.error_colors)
+        except Exception as exception: # pylint: disable=broad-except
+            poutput.print_and_log(f"{solution.name}: {exception}", colors=pconsole.error_colors)
 
     if valid_project_count:
-        output.print_and_log(f"{valid_project_count} valid projects found.")
+        poutput.print_and_log(f"{valid_project_count} valid projects found.")
 
     else:
-        output.print_and_log("No valid projects found.", colors=console.warning_colors)
+        poutput.print_and_log("No valid projects found.", colors=pconsole.warning_colors)
         sys.exit()
 
     # ------------------------------------------------------------------------------
@@ -213,7 +213,7 @@ try:
     for solution in solutions:
         if not os.path.isfile(solution.source_archive_file_path):
             for project in solution.projects:
-                    projects_to_build.append(project)
+                projects_to_build.append(project)
 
     # Adding referenced projects too, making sure they are not built twice.
 
@@ -229,7 +229,7 @@ try:
             projects_to_build.append(referenced_project)
 
     if not projects_to_build:
-        output.print_and_log("No projects to build.")
+        poutput.print_and_log("No projects to build.")
         sys.exit()
 
     # Mostly for testing purposes.
@@ -238,19 +238,19 @@ try:
     # In real-world scenarios, we need to build the projects repeatedly until all issues are resolved and the code has been committed.
     # Then, we can archive the built binaries and the source code on each platform, effectively marking the projects as "built".
 
-    projects_to_build = dotnet.sort_projects_to_build(projects_to_build)
+    projects_to_build = pdotnet.sort_projects_to_build(projects_to_build)
 
-    output.print_and_log(f"Projects to build:")
+    poutput.print_and_log("Projects to build:")
 
     for project in projects_to_build:
-        output.print_and_log(project.name, indents=pstring.leveledIndents[1])
+        poutput.print_and_log(project.name, indents=pstring.leveledIndents[1])
 
-    logging.flush()
+    plogging.flush()
 
     # Incremented at the end of EVERY iteration to avoid restoring the same packages repeatedly.
     # Restoration is automatically executed by SOME of the .NET commands; not all.
     # "build" is almost always the first command we choose, effectively ensuring the first restoration is executed.
-    iteration_count = 0
+    iteration_count = 0 # pylint: disable=invalid-name
 
     while True:
         try:
@@ -268,30 +268,30 @@ try:
 
             if choice == "1":
                 # Marked as important for attention.
-                output.print_and_log("Building...", colors=console.important_colors)
+                poutput.print_and_log("Building...", colors=pconsole.important_colors)
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"{project.name}:", indents=pstring.leveledIndents[1])
-                        no_restore = iteration_count >= 1
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.build(no_restore), indents=pstring.leveledIndents[2]))
+                        poutput.print_and_log(f"{project.name}:", indents=pstring.leveledIndents[1])
+                        no_restore = iteration_count >= 1 # pylint: disable=invalid-name
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.build(no_restore), indents=pstring.leveledIndents[2]))
 
-                    except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
+                    except Exception as exception: # pylint: disable=broad-except
+                        poutput.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=pconsole.error_colors)
 
             elif choice == "2":
-                output.print_and_log("Updating NuGet packages...", colors=console.important_colors)
+                poutput.print_and_log("Updating NuGet packages...", colors=pconsole.important_colors)
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"{project.name}:", indents=pstring.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.update_nuget_packages(), indents=pstring.leveledIndents[2]))
+                        poutput.print_and_log(f"{project.name}:", indents=pstring.leveledIndents[1])
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.update_nuget_packages(), indents=pstring.leveledIndents[2]))
 
-                    except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
+                    except Exception as exception: # pylint: disable=broad-except
+                        poutput.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=pconsole.error_colors)
 
             elif choice == "3":
-                output.print_and_log("Rebuilding and archiving...", colors=console.important_colors)
+                poutput.print_and_log("Rebuilding and archiving...", colors=pconsole.important_colors)
 
                 archived_solutions = []
 
@@ -299,26 +299,26 @@ try:
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"Cleaning {project.name}:", indents=pstring.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory=False), indents=pstring.leveledIndents[2]))
+                        poutput.print_and_log(f"Cleaning {project.name}:", indents=pstring.leveledIndents[1])
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory=False), indents=pstring.leveledIndents[2]))
 
-                    except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
+                    except Exception as exception: # pylint: disable=broad-except
+                        poutput.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=pconsole.error_colors)
 
                 for project in projects_to_build:
                     try:
-                        output.print_and_log(f"Rebuilding and archiving {project.name}:", indents=pstring.leveledIndents[1])
-                        output.print_and_log(dotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=pstring.leveledIndents[2]))
+                        poutput.print_and_log(f"Rebuilding and archiving {project.name}:", indents=pstring.leveledIndents[1])
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=pstring.leveledIndents[2]))
 
                         # When we archive source code, usually, tests have been done and the projects can be built without issues.
                         # So, I wont be implementing one more loop to complicate the interaction.
 
                         if project.solution not in archived_solutions:
-                            output.print_and_log(dotnet.format_result_string_from_messages(project.solution.archive(not_archived_directory_names, not_archived_file_names), indents=pstring.leveledIndents[2]))
+                            poutput.print_and_log(pdotnet.format_result_string_from_messages(project.solution.archive(not_archived_directory_names, not_archived_file_names), indents=pstring.leveledIndents[2]))
                             archived_solutions.append(project.solution)
 
-                    except Exception as exception:
-                        output.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=console.error_colors)
+                    except Exception as exception: # pylint: disable=broad-except
+                        poutput.print_and_log(f"{exception}", indents=pstring.leveledIndents[2], colors=pconsole.error_colors)
 
             elif choice == "4":
                 print("Projects:")
@@ -334,26 +334,26 @@ try:
                         print(f"{project.name} excluded.")
 
                     else:
-                        console.print("Invalid index.", colors=console.warning_colors) # Not logged.
+                        pconsole.print("Invalid index.", colors=pconsole.warning_colors) # Not logged.
 
-                except Exception:
-                    console.print("Invalid input.", colors=console.warning_colors)
+                except Exception: # pylint: disable=broad-except
+                    pconsole.print("Invalid input.", colors=pconsole.warning_colors)
 
             elif choice == "5":
                 break
 
-        except Exception:
-            output.print_and_log(traceback.format_exc(), colors=console.error_colors)
+        except Exception: # pylint: disable=broad-except
+            poutput.print_and_log(traceback.format_exc(), colors=pconsole.error_colors)
 
         # Within the loop, at the end of each iteration.
-        logging.flush()
+        plogging.flush()
 
         iteration_count += 1
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
-except Exception:
-    output.print_and_log(traceback.format_exc(), colors=console.error_colors)
+except Exception: # pylint: disable=broad-except
+    poutput.print_and_log(traceback.format_exc(), colors=pconsole.error_colors)
 
 finally:
-    logging.flush()
+    plogging.flush()
     pdebugging.display_press_enter_key_to_continue_if_not_debugging()

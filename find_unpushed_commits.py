@@ -296,9 +296,9 @@ def is_good_local_branch_name(name):
 # ------------------------------------------------------------------------------
 
 try:
-    kvs_key_prefix = "find_unpushed_commits/"
+    KVS_KEY_PREFIX = "find_unpushed_commits/"
 
-    repositories_directory_path = pkvs.read_from_merged_kvs_data(f"{kvs_key_prefix}repositories_directory_path")
+    repositories_directory_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}repositories_directory_path")
     pconsole.print(f"repositories_directory_path: {repositories_directory_path}")
 
     for entry in os.listdir(repositories_directory_path):

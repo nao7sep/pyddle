@@ -24,9 +24,9 @@ import tiktoken
 # https://platform.openai.com/docs/guides/production-best-practices
 
 class OpenAiSettings:
-    def __init__(self, kvs_data=None, kvs_key_prefix=None):
+    def __init__(self, kvs_data=None, KVS_KEY_PREFIX=None):
         self.kvs_data = kvs_data
-        self.kvs_key_prefix = kvs_key_prefix
+        self.KVS_KEY_PREFIX = KVS_KEY_PREFIX
 
         self.__api_key = None
         self.__organization = None
@@ -34,7 +34,7 @@ class OpenAiSettings:
 
     def get_value(self, key):
         if self.kvs_data:
-            return self.kvs_data.get(f"{self.kvs_key_prefix}{key}")
+            return self.kvs_data.get(f"{self.KVS_KEY_PREFIX}{key}")
 
         # We can add data sources here.
 
@@ -63,7 +63,7 @@ class OpenAiSettings:
 
 openai_settings = OpenAiSettings(
     kvs_data=pkvs.merged_kvs_data,
-    kvs_key_prefix="pyddle_openai/")
+    KVS_KEY_PREFIX="pyddle_openai/")
 
 # ------------------------------------------------------------------------------
 #     Models
