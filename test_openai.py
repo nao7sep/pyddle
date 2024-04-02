@@ -162,7 +162,7 @@ def test_chat():
         print(f"Tool {index + 1}:")
 
         for line in pstring.splitlines(different_tool_answers[index]):
-            console.print(line, indents=pstring.leveledIndents[1])
+            pconsole.print(line, indents=pstring.leveledIndents[1])
 
     # Summarizes the answers.
 
@@ -201,7 +201,7 @@ def test_chat():
         print(f"Tool {index + 1} summary:")
 
         for line in pstring.splitlines(summarization_answers[index]):
-            console.print(line, indents=pstring.leveledIndents[1])
+            pconsole.print(line, indents=pstring.leveledIndents[1])
 
     # Asks to select the most suitable tool based on the summaries.
 
@@ -289,7 +289,7 @@ def test_images_and_vision():
     print("Image prompts:")
 
     for index, prompt in enumerate(image_generation_prompts):
-        console.print(f"Prompt {index + 1}: {prompt}", indents=pstring.leveledIndents[1])
+        pconsole.print(f"Prompt {index + 1}: {prompt}", indents=pstring.leveledIndents[1])
 
     # Generates images from the prompts.
 
@@ -414,7 +414,7 @@ def test_images_and_vision():
         print(f"Vision results for image {index + 1}:")
 
         for line in pstring.splitlines(vision_each_image_answers[index]):
-            console.print(line, indents=pstring.leveledIndents[1])
+            pconsole.print(line, indents=pstring.leveledIndents[1])
 
     # Asks Vision about 3 images at once.
 
@@ -435,7 +435,7 @@ def test_images_and_vision():
     print("Vision results for all images:")
 
     for line in pstring.splitlines(vision_all_images_answer):
-        console.print(line, indents=pstring.leveledIndents[1])
+        pconsole.print(line, indents=pstring.leveledIndents[1])
 
 # ------------------------------------------------------------------------------
 #     Tests

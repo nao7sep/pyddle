@@ -1,4 +1,4 @@
-﻿# Created: 2024-03-14
+# Created: 2024-03-14
 # A simple app to manage a queue of low-priority tasks.
 
 import copy
@@ -398,15 +398,15 @@ def show_statistics(handled_task_list, task_list, days):
     statistics = sorted(statistics, key=lambda x: x[3], reverse=True)
 
     if days:
-        console.print(f"Past {days} days:")
+        pconsole.print(f"Past {days} days:")
 
     else:
-        console.print(f"Past {actual_days} days:")
+        pconsole.print(f"Past {actual_days} days:")
 
     # This could be checked a few blocks earlier,
     #     but the statistics are unavailable only in the beginning.
     if not statistics:
-        console.print("No data available.", indents=pstring.leveledIndents[1])
+        pconsole.print("No data available.", indents=pstring.leveledIndents[1])
         return
 
     for task, execution_count, last_DONE_utc, completion_rate in statistics:
@@ -435,13 +435,13 @@ def show_statistics(handled_task_list, task_list, days):
         output_str = f"{task.content}, {completion_rate}%{past_time_string}"
 
         if completion_rate >= (200 / 3):
-            console.print(output_str, indents=pstring.leveledIndents[1])
+            pconsole.print(output_str, indents=pstring.leveledIndents[1])
 
         elif completion_rate >= (100 / 3):
-            console.print(output_str, indents=pstring.leveledIndents[1], colors=console.warning_colors)
+            pconsole.print(output_str, indents=pstring.leveledIndents[1], colors=pconsole.warning_colors)
 
         else:
-            console.print(output_str, indents=pstring.leveledIndents[1], colors=console.error_colors)
+            pconsole.print(output_str, indents=pstring.leveledIndents[1], colors=pconsole.error_colors)
 
 # ------------------------------------------------------------------------------
 #     Application
@@ -450,14 +450,14 @@ def show_statistics(handled_task_list, task_list, days):
 try:
     kvs_key_prefix = "low_priority_queue/"
 
-    tasks_file_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}tasks_file_path")
-    console.print(f"tasks_file_path: {tasks_file_path}")
+    tasks_file_path = pkvs.read_from_merged_kvs_data(f"{kvs_key_prefix}tasks_file_path")
+    pconsole.print(f"tasks_file_path: {tasks_file_path}")
 
-    handled_tasks_file_path = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}handled_tasks_file_path")
-    console.print(f"handled_tasks_file_path: {handled_tasks_file_path}")
+    handled_tasks_file_path = pkvs.read_from_merged_kvs_data(f"{kvs_key_prefix}handled_tasks_file_path")
+    pconsole.print(f"handled_tasks_file_path: {handled_tasks_file_path}")
 
-    backups_task_lists = kvs.read_from_merged_kvs_data(f"{kvs_key_prefix}backups_task_lists")
-    console.print(f"backups_task_lists: {backups_task_lists}")
+    backups_task_lists = pkvs.read_from_merged_kvs_data(f"{kvs_key_prefix}backups_task_lists")
+    pconsole.print(f"backups_task_lists: {backups_task_lists}")
 
     task_list = TaskList(tasks_file_path, backups_task_lists)
     task_list.load()
@@ -465,7 +465,7 @@ try:
     handled_task_list = TaskList(handled_tasks_file_path, backups_task_lists)
     handled_task_list.load()
 
-    console.print("Type 'help' for a list of commands.")
+    pconsole.print("Type 'help' for a list of commands.")
 
     shows_all_next_time = False
 
@@ -474,7 +474,7 @@ try:
             shown_tasks, execution_counts = select_shown_tasks(handled_task_list, task_list, shows_all_next_time)
 
             if shown_tasks:
-                console.print("Tasks:")
+                pconsole.print("Tasks:")
 
                 for index, task in enumerate(shown_tasks):
                     if task.guid in execution_counts:
@@ -494,35 +494,35 @@ try:
                     if execution_count >= task.times_per_week:
                         additional_info += f", good"
 
-                    console.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=pstring.leveledIndents[1])
+                    pconsole.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=pstring.leveledIndents[1])
 
             shows_all_next_time = False
 
-            console.print("Command", colors=console.important_colors, end="")
+            pconsole.print("Command", colors=pconsole.important_colors, end="")
             command_str = input(": ")
 
             command, number, parameter = parse_command_str(command_str)
 
             if pstring.equals_ignore_case(command, "help"):
-                console.print("Commands:")
-                console.print("help", indents=pstring.leveledIndents[1])
+                pconsole.print("Commands:")
+                pconsole.print("help", indents=pstring.leveledIndents[1])
 
                 if pdebugging.is_debugging():
-                    console.print("sample => Generates sample data.", indents=pstring.leveledIndents[1])
+                    pconsole.print("sample => Generates sample data.", indents=pstring.leveledIndents[1])
 
-                console.print("create <times_per_week> <content>", indents=pstring.leveledIndents[1])
-                console.print("all => Shows all tasks including inactive/hidden ones.", indents=pstring.leveledIndents[1])
-                console.print("done <task_number> => Means you have done it.", indents=pstring.leveledIndents[1])
-                console.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=pstring.leveledIndents[1])
-                console.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=pstring.leveledIndents[1])
-                console.print("activate <task_number>", indents=pstring.leveledIndents[1])
-                console.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=pstring.leveledIndents[1])
-                console.print("show <task_number>", indents=pstring.leveledIndents[1])
-                console.print("content <task_number> <content>", indents=pstring.leveledIndents[1])
-                console.print("times <task_number> <times_per_week>", indents=pstring.leveledIndents[1])
-                console.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=pstring.leveledIndents[1])
-                console.print("stat (<days>) => Uses all data if no number is provided.", indents=pstring.leveledIndents[1])
-                console.print("exit", indents=pstring.leveledIndents[1])
+                pconsole.print("create <times_per_week> <content>", indents=pstring.leveledIndents[1])
+                pconsole.print("all => Shows all tasks including inactive/hidden ones.", indents=pstring.leveledIndents[1])
+                pconsole.print("done <task_number> => Means you have done it.", indents=pstring.leveledIndents[1])
+                pconsole.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=pstring.leveledIndents[1])
+                pconsole.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=pstring.leveledIndents[1])
+                pconsole.print("activate <task_number>", indents=pstring.leveledIndents[1])
+                pconsole.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=pstring.leveledIndents[1])
+                pconsole.print("show <task_number>", indents=pstring.leveledIndents[1])
+                pconsole.print("content <task_number> <content>", indents=pstring.leveledIndents[1])
+                pconsole.print("times <task_number> <times_per_week>", indents=pstring.leveledIndents[1])
+                pconsole.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=pstring.leveledIndents[1])
+                pconsole.print("stat (<days>) => Uses all data if no number is provided.", indents=pstring.leveledIndents[1])
+                pconsole.print("exit", indents=pstring.leveledIndents[1])
                 continue
 
             elif pdebugging.is_debugging() and pstring.equals_ignore_case(command, "sample"):
@@ -617,8 +617,8 @@ try:
                         task_list.delete_task(task)
 
                     else:
-                        console.print("Destructive operation.", colors=console.warning_colors)
-                        console.print("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.", colors=console.warning_colors)
+                        pconsole.print("Destructive operation.", colors=pconsole.warning_colors)
+                        pconsole.print("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.", colors=pconsole.warning_colors)
 
                     continue
 
@@ -640,13 +640,13 @@ try:
             # Now, without changing the regex and still disallowing negative numbers, anything other than "" must be a valid command string.
 
             if command_str:
-               console.print("Invalid command string.", colors=console.error_colors)
+               pconsole.print("Invalid command string.", colors=pconsole.error_colors)
 
         except Exception:
-            console.print(traceback.format_exc(), colors=console.error_colors)
+            pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
 
 except Exception:
-    console.print(traceback.format_exc(), colors=console.error_colors)
+    pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
 
 finally:
     pdebugging.display_press_enter_key_to_continue_if_not_debugging()

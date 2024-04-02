@@ -62,7 +62,7 @@ class OpenAiSettings:
         return self.__base_url
 
 openai_settings = OpenAiSettings(
-    kvs_data=kvs.merged_kvs_data,
+    kvs_data=pkvs.merged_kvs_data,
     kvs_key_prefix="pyddle_openai/")
 
 # ------------------------------------------------------------------------------

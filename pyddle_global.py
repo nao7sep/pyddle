@@ -1,9 +1,7 @@
 ﻿# Created: 2024-03-08
-# This script contains globally shared things and therefore must be imported first.
+# This script contains globally shared things.
 
-# Dont import anything else.
 import os
-# Dont import anything else.
 
 # ------------------------------------------------------------------------------
 #     Main script file path
