@@ -1,4 +1,4 @@
-# Created: 2024-03-26
+﻿# Created: 2024-03-26
 # Sugar-coating classes and methods for OpenAI's API.
 
 import base64
@@ -144,6 +144,7 @@ def create_openai_client(api_key=None, organization=None, base_url=None):
     args.may_contain("api_key", api_key)
     args.may_contain("organization", organization)
     args.may_contain("base_url", base_url)
+    args.must_contain("timeout", pweb.DEFAULT_TIMEOUT)
 
     return openai.OpenAI(**args.args)
 
@@ -524,7 +525,7 @@ def openai_save_images(file_path, response):
         else:
             new_file_path = os.path.join(dirname, f"{root}-{index}{extension}")
 
-        with requests.get(image.url, stream=True) as downloader:
+        with requests.get(image.url, stream=True, timeout=pweb.DEFAULT_TIMEOUT) as downloader:
             # If it fails with the second image, the user might leave the first one on the disk.
             # I will not take care of that for 2 reasons:
             #     1. If the first one was saved, the rest should usually be saved as well
