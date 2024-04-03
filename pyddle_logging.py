@@ -17,6 +17,8 @@ import pyddle_string as pstring
 __logs_directory_path = None # pylint: disable=invalid-name
 
 def get_logs_directory_path():
+    global __logs_directory_path # pylint: disable=global-statement
+
     if not __logs_directory_path:
         __logs_directory_path = os.path.join(ppath.dirname(pglobal.get_main_script_file_path()), "logs")
 
@@ -32,8 +34,12 @@ def get_logs_directory_path():
 __log_file_path = None # pylint: disable=invalid-name
 
 def get_log_file_path():
+    global __log_file_path # pylint: disable=global-statement
+
     if not __log_file_path:
-        __log_file_path = os.path.join(get_logs_directory_path(), f"log-{pdatetime.utc_to_roundtrip_file_name_string(datetime.datetime.now(datetime.UTC))}-{ppath.basename(pglobal.get_main_script_file_path())}.log")
+        utc_timestamp = pdatetime.utc_to_roundtrip_file_name_string(datetime.datetime.now(datetime.UTC))
+        file_name_without_extension, _ = os.path.splitext(ppath.basename(pglobal.get_main_script_file_path()))
+        __log_file_path = os.path.join(get_logs_directory_path(), f"log-{utc_timestamp}-{file_name_without_extension}.log")
 
     return __log_file_path
 

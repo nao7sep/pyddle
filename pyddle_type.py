@@ -59,3 +59,122 @@ def str_to_bool_or_default(str_, default):
         return str_to_bool(str_)
     except Exception: # pylint: disable=broad-except
         return default
+
+# ------------------------------------------------------------------------------
+#     String to Enum
+# ------------------------------------------------------------------------------
+
+# I think we should basically make enum item values integers for flexibility,
+#     like we can use the names for readability OR the values for performance.
+# Then, as the names would be all uppercase, when we use the names,
+#     they should be converted to lowercase to be a little prettier.
+
+# Sometimes, it's better to use strings as the values of an enum type.
+# Like when strings containing symbols are required as arguments and they cant be used as names.
+# Also, when the enum type is merely a collection of literal strings.
+
+# The following methods will help us handle either case:
+
+def str_to_enum_by_name(str_, enum_type, ignore_case=True):
+    member = try_str_to_enum_by_name(str_, enum_type=enum_type, ignore_case=ignore_case)
+
+    if member:
+        return member
+
+    raise RuntimeError(f"Invalid enum name: {str_}")
+
+def try_str_to_enum_by_name(str_, enum_type, ignore_case=True):
+    for member in enum_type:
+        if ignore_case:
+            if pstring.equals_ignore_case(member.name, str_):
+                return member
+
+        else:
+            if member.name == str_:
+                return member
+
+    return None
+
+def str_to_enum_by_str_value(str_, enum_type, ignore_case=True):
+    member = try_str_to_enum_by_str_value(str_, enum_type=enum_type, ignore_case=ignore_case)
+
+    if member:
+        return member
+
+    raise RuntimeError(f"Invalid enum value: {str_}")
+
+def try_str_to_enum_by_str_value(str_, enum_type, ignore_case=True):
+    for member in enum_type:
+        if ignore_case:
+            if pstring.equals_ignore_case(member.value, str_):
+                return member
+
+        else:
+            if member.value == str_:
+                return member
+
+    return None
+
+# I'm not sure if we need a pair of methods for each value type.
+# It doesnt hurt to have them and we might implement some checks in the future,
+#     like an exception is raised if the underlying types differ.
+
+def str_to_enum_by_int_value(value, enum_type):
+    member = try_str_to_enum_by_int_value(value, enum_type=enum_type)
+
+    if member:
+        return member
+
+    raise RuntimeError(f"Invalid enum value: {value}")
+
+def try_str_to_enum_by_int_value(value, enum_type):
+    for member in enum_type:
+        if member.value == value:
+            return member
+
+    return None
+
+def str_to_enum_by_float_value(value, enum_type):
+    member = try_str_to_enum_by_float_value(value, enum_type=enum_type)
+
+    if member:
+        return member
+
+    raise RuntimeError(f"Invalid enum value: {value}")
+
+def try_str_to_enum_by_float_value(value, enum_type):
+    for member in enum_type:
+        if member.value == value:
+            return member
+
+    return None
+
+def str_to_enum_by_complex_value(value, enum_type):
+    member = try_str_to_enum_by_complex_value(value, enum_type=enum_type)
+
+    if member:
+        return member
+
+    raise RuntimeError(f"Invalid enum value: {value}")
+
+def try_str_to_enum_by_complex_value(value, enum_type):
+    for member in enum_type:
+        if member.value == value:
+            return member
+
+    return None
+
+def str_to_enum_by_bool_value(value, enum_type):
+    member = try_str_to_enum_by_bool_value(value, enum_type=enum_type)
+
+    if member:
+        return member
+
+    raise RuntimeError(f"Invalid enum value: {value}")
+
+def try_str_to_enum_by_bool_value(value, enum_type):
+    for member in enum_type:
+        if member.value == value:
+            return member
+
+    return None

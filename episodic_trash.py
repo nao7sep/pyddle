@@ -16,17 +16,20 @@ import pyddle_console as pconsole
 import pyddle_datetime as pdatetime
 import pyddle_debugging as pdebugging
 import pyddle_file_system as pfs
+import pyddle_global as pglobal
 import pyddle_json_based_kvs as pkvs
 import pyddle_path as ppath
 import pyddle_string as pstring
+
+pglobal.set_main_script_file_path(__file__)
 
 # ------------------------------------------------------------------------------
 #     Classes and functions
 # ------------------------------------------------------------------------------
 
 class ParentType(enum.Enum):
-    EPISODE = "Episode"
-    NOTE = "Note"
+    EPISODE = 1
+    NOTE = 2
 
 class EntryInfo(ABC):
     def __init__(self):

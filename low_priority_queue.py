@@ -20,6 +20,7 @@ import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_json_based_kvs as pkvs
 import pyddle_string as pstring
+import pyddle_type as ptype
 
 pglobal.set_main_script_file_path(__file__)
 
@@ -28,8 +29,8 @@ pglobal.set_main_script_file_path(__file__)
 # ------------------------------------------------------------------------------
 
 class TaskResult(enum.Enum):
-    DONE = "Done",
-    CHECKED = "Checked"
+    DONE = 1
+    CHECKED = 2
 
 class TaskInfo:
     def __init__(self, guid, creation_utc, handled_utc, is_active, is_shown, content, times_per_week, result: TaskResult):
@@ -63,7 +64,7 @@ def serialize_task(_task):
         }
 
     elif isinstance(_task, TaskResult):
-        return _task.name
+        return _task.name.lower()
 
     else:
         raise RuntimeError(f"Unsupported type: {type(_task)}")
@@ -77,10 +78,9 @@ def deserialize_task(task_data):
         True, # is_shown is not saved.
         task_data["content"],
         task_data["times_per_week"],
-        # If the value is an integer, the conversion to TaskResult will fail.
         # Enum objects should be represented as integers in databases,
         #     but in text files, I believe strings would be more user-friendly.
-        TaskResult(task_data["result"]) if task_data["result"] is not None else None
+        ptype.str_to_enum_by_name(task_data["result"], enum_type=TaskResult, ignore_case=True) if task_data["result"] is not None else None
     )
 
 class TaskList:

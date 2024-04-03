@@ -10,9 +10,12 @@ import traceback
 
 import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
+import pyddle_global as pglobal
 import pyddle_json_based_kvs as pkvs
 import pyddle_path as ppath
 import pyddle_string as pstring
+
+pglobal.set_main_script_file_path(__file__)
 
 class RepositoryInfo:
     def __init__(self, directory_path):

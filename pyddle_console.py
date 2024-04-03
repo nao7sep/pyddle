@@ -15,6 +15,8 @@ WARNING_COLORS = [colorama.Back.YELLOW, colorama.Fore.BLACK]
 ERROR_COLORS = [colorama.Back.RED, colorama.Fore.WHITE]
 
 def print(_str, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
+    # A frequently used method that should almost always be called like "pconsole.print".
+
     if _str:
         if colors:
             builtin_print(f"{indents}{"".join(colors)}{_str}{colorama.Style.RESET_ALL}", end=end)
