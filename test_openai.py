@@ -1,4 +1,4 @@
-﻿# Created: 2024-03-27
+# Created: 2024-03-27
 # Test/sample code for pyddle_openai.py.
 
 import json
@@ -296,7 +296,8 @@ def test_images_and_vision():
     print(f"Image prompts saved to: {prompt_generation_file_name}")
 
     prompt_generation_answer = openai.openai_extract_first_message(prompt_generation_response)
-    image_generation_prompts = pstring.splitlines(prompt_generation_answer)
+    # Sometimes, I still get 5 lines containing 3 prompts and 2 empty lines.
+    image_generation_prompts = [line for line in pstring.splitlines(prompt_generation_answer) if line]
 
     print("Image prompts:")
 
