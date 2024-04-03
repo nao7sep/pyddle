@@ -7,6 +7,7 @@ import os
 #     Main script file path
 # ------------------------------------------------------------------------------
 
+# Not a constant, but should act like one.
 MAIN_SCRIPT_FILE_PATH = None
 
 def set_main_script_file_path(file_path):

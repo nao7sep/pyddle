@@ -25,8 +25,8 @@ import pyddle_string as pstring
 # ------------------------------------------------------------------------------
 
 class ParentType(enum.Enum):
-    EPISODE = 1
-    NOTE = 2
+    EPISODE = "Episode"
+    NOTE = "Note"
 
 class EntryInfo(ABC):
     def __init__(self):

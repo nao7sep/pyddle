@@ -9,34 +9,82 @@ import sqlite3
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_path as ppath
-import pyddle_string as pstring
 
-# https://docs.python.org/3/reference/datamodel.html#modules
-executing_script_files_directory_path = ppath.dirname(pglobal.get_main_script_file_path())
-first_kvs_file_path = os.path.join(executing_script_files_directory_path, ".pyddle_kvs.json")
+# Lazy loading.
+__executing_script_files_directory_path = None # pylint: disable=invalid-name
 
-# https://docs.python.org/3/library/os.path.html#os.path.expanduser
-second_kvs_file_path = os.path.join(os.path.expanduser("~"), ".pyddle_kvs.json")
+def get_executing_script_files_directory_path():
+    global __executing_script_files_directory_path # pylint: disable=global-statement
 
-first_kvs_data = {}
+    if not __executing_script_files_directory_path:
+        __executing_script_files_directory_path = ppath.dirname(pglobal.get_main_script_file_path())
 
-if os.path.isfile(first_kvs_file_path):
-    content = pfs.read_all_text_from_file(first_kvs_file_path)
-    first_kvs_data = json.loads(content)
+    return __executing_script_files_directory_path
 
-second_kvs_data = {}
+# Lazy loading.
+__first_kvs_file_path = None # pylint: disable=invalid-name
 
-if os.path.isfile(second_kvs_file_path):
-    content = pfs.read_all_text_from_file(second_kvs_file_path)
-    second_kvs_data = json.loads(content)
+def get_first_kvs_file_path():
+    global __first_kvs_file_path # pylint: disable=global-statement
 
-merged_kvs_data = {**first_kvs_data, **second_kvs_data}
+    if not __first_kvs_file_path:
+        __first_kvs_file_path = os.path.join(get_executing_script_files_directory_path(), ".pyddle_kvs.json")
 
-def display_merged_kvs_data():
-    print("Merged KVS data:")
+    return __first_kvs_file_path
 
-    for key, value in merged_kvs_data.items():
-        print(f"{pstring.leveledIndents[1]}{key}: {value}")
+# Lazy loading.
+__second_kvs_file_path = None # pylint: disable=invalid-name
+
+def get_second_kvs_file_path():
+    global __second_kvs_file_path # pylint: disable=global-statement
+
+    if not __second_kvs_file_path:
+        # https://docs.python.org/3/library/os.path.html#os.path.expanduser
+        __second_kvs_file_path = os.path.join(os.path.expanduser("~"), ".pyddle_kvs.json")
+
+    return __second_kvs_file_path
+
+# Lazy loading.
+__first_kvs_data = None # pylint: disable=invalid-name
+
+def get_first_kvs_data():
+    global __first_kvs_data # pylint: disable=global-statement
+
+    if not __first_kvs_data:
+        first_kvs_file_path = get_first_kvs_file_path()
+
+        if os.path.isfile(first_kvs_file_path):
+            content = pfs.read_all_text_from_file(first_kvs_file_path)
+            __first_kvs_data = json.loads(content)
+
+    return __first_kvs_data
+
+# Lazy loading.
+__second_kvs_data = None # pylint: disable=invalid-name
+
+def get_second_kvs_data():
+    global __second_kvs_data # pylint: disable=global-statement
+
+    if not __second_kvs_data:
+        second_kvs_file_path = get_second_kvs_file_path()
+
+        if os.path.isfile(second_kvs_file_path):
+            content = pfs.read_all_text_from_file(second_kvs_file_path)
+            __second_kvs_data = json.loads(content)
+
+    return __second_kvs_data
+
+# Lazy loading.
+__merged_kvs_data = None # pylint: disable=invalid-name
+
+def get_merged_kvs_data():
+    global __merged_kvs_data # pylint: disable=global-statement
+
+    if not __merged_kvs_data:
+        # https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-in-python
+        __merged_kvs_data = {**get_first_kvs_data(), **get_second_kvs_data()}
+
+    return __merged_kvs_data
 
 # ------------------------------------------------------------------------------
 #     CRUD operations
@@ -52,50 +100,53 @@ def display_merged_kvs_data():
 def read_from_first_kvs_data(key):
     """ Returns None if the key is not in the dictionary. """
 
-    return first_kvs_data.get(key)
+    return get_first_kvs_data().get(key)
 
 def read_from_first_kvs_data_or_default(key, default_value):
-    return first_kvs_data.get(key, default_value)
+    return get_first_kvs_data().get(key, default_value)
 
 def read_from_second_kvs_data(key):
     """ Returns None if the key is not in the dictionary. """
 
-    return second_kvs_data.get(key)
+    return get_second_kvs_data().get(key)
 
 def read_from_second_kvs_data_or_default(key, default_value):
-    return second_kvs_data.get(key, default_value)
+    return get_second_kvs_data().get(key, default_value)
 
 def read_from_merged_kvs_data(key):
     """ Returns None if the key is not in the dictionary. """
 
-    return merged_kvs_data.get(key)
+    return get_merged_kvs_data().get(key)
 
 def read_from_merged_kvs_data_or_default(key, default_value):
-    return merged_kvs_data.get(key, default_value)
+    return get_merged_kvs_data().get(key, default_value)
 
 def update_first_kvs_data(key, value):
-    first_kvs_data[key] = value
+    get_first_kvs_data()[key] = value
 
-    if key not in second_kvs_data:
-        merged_kvs_data[key] = value
+    if key not in get_second_kvs_data():
+        get_merged_kvs_data()[key] = value
 
 def update_second_kvs_data(key, value):
-    second_kvs_data[key] = value
-    merged_kvs_data[key] = value
+    get_second_kvs_data()[key] = value
+    get_merged_kvs_data()[key] = value
+
+# In the following code, the same get_* methods may be called multiple times.
+# Once the underlying dictionaries have been loaded, the methods are efficient.
 
 def delete_from_first_kvs_data(key):
-    if key in first_kvs_data:
-        del first_kvs_data[key]
+    if key in get_first_kvs_data():
+        del get_first_kvs_data()[key]
 
-    if key in merged_kvs_data and key not in second_kvs_data:
-        del merged_kvs_data[key]
+    if key in get_merged_kvs_data() and key not in get_second_kvs_data():
+        del get_merged_kvs_data()[key]
 
 def delete_from_second_kvs_data(key):
-    if key in second_kvs_data:
-        del second_kvs_data[key]
+    if key in get_second_kvs_data():
+        del get_second_kvs_data()[key]
 
-    if key in merged_kvs_data and key not in first_kvs_data:
-        del merged_kvs_data[key]
+    if key in get_merged_kvs_data() and key not in get_first_kvs_data():
+        del get_merged_kvs_data()[key]
 
 # ------------------------------------------------------------------------------
 
@@ -103,24 +154,32 @@ def save_kvs_data_to_file(path, data):
     json_string = json.dumps(data, ensure_ascii=False, indent=4)
     pfs.write_all_text_to_file(path, json_string)
 
-    root, _ = os.path.splitext(path)
-    db_file_path = root + ".db"
+    # Saves the data to a SQLite database file for backup purposes.
+    # This is a "lucky if we have it" kind of backup.
+    # It should succeed, but if it doesnt, the program shouldnt crash.
 
-    with sqlite3.connect(db_file_path) as connection:
-        cursor = connection.cursor()
+    try:
+        root, _ = os.path.splitext(path)
+        db_file_path = root + ".db"
 
-        cursor.execute("CREATE TABLE IF NOT EXISTS pyddle_kvs_strings ("
-                           "utc DATETIME NOT NULL, "
-                           "string TEXT NOT NULL)")
+        with sqlite3.connect(db_file_path) as connection:
+            cursor = connection.cursor()
 
-        cursor.execute("INSERT INTO pyddle_kvs_strings (utc, string) "
-                           "VALUES (?, ?)",
-                           (datetime.datetime.now(datetime.UTC).isoformat(), json_string))
+            cursor.execute("CREATE TABLE IF NOT EXISTS pyddle_kvs_strings ("
+                            "utc DATETIME NOT NULL, "
+                            "string TEXT NOT NULL)")
 
-        connection.commit()
+            cursor.execute("INSERT INTO pyddle_kvs_strings (utc, string) "
+                            "VALUES (?, ?)",
+                            (datetime.datetime.now(datetime.UTC).isoformat(), json_string))
+
+            connection.commit()
+
+    except Exception: # pylint: disable=broad-except
+        pass
 
 def save_first_kvs_data_to_file():
-    save_kvs_data_to_file(first_kvs_file_path, first_kvs_data)
+    save_kvs_data_to_file(get_first_kvs_file_path(), get_first_kvs_data())
 
 def save_second_kvs_data_to_file():
-    save_kvs_data_to_file(second_kvs_file_path, second_kvs_data)
+    save_kvs_data_to_file(get_second_kvs_file_path(), get_second_kvs_data())

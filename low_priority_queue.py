@@ -17,16 +17,19 @@ import pyddle_console as pconsole
 import pyddle_datetime as pdatetime
 import pyddle_debugging as pdebugging
 import pyddle_file_system as pfs
+import pyddle_global as pglobal
 import pyddle_json_based_kvs as pkvs
 import pyddle_string as pstring
+
+pglobal.set_main_script_file_path(__file__)
 
 # ------------------------------------------------------------------------------
 #     Classes
 # ------------------------------------------------------------------------------
 
 class TaskResult(enum.Enum):
-    DONE = 1,
-    CHECKED = 2
+    DONE = "Done",
+    CHECKED = "Checked"
 
 class TaskInfo:
     def __init__(self, guid, creation_utc, handled_utc, is_active, is_shown, content, times_per_week, result: TaskResult):
@@ -77,7 +80,7 @@ def deserialize_task(task_data):
         # If the value is an integer, the conversion to TaskResult will fail.
         # Enum objects should be represented as integers in databases,
         #     but in text files, I believe strings would be more user-friendly.
-        TaskResult[task_data["result"]] if task_data["result"] is not None else None
+        TaskResult(task_data["result"]) if task_data["result"] is not None else None
     )
 
 class TaskList:

@@ -17,6 +17,7 @@ def create_parent_directory(path):
 def make_and_move_to_output_subdirectory(subdirectory=None):
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
 
+    # No lazy loading required.
     directory_path = os.path.join(ppath.dirname(pglobal.get_main_script_file_path()), "output")
 
     if subdirectory:
