@@ -10,9 +10,9 @@ import pyddle_type as ptype
 # Specified colors appear differently depending on the platform.
 # These should be an acceptable starting point.
 
-important_colors = [colorama.Back.BLUE, colorama.Fore.WHITE]
-warning_colors = [colorama.Back.YELLOW, colorama.Fore.BLACK]
-error_colors = [colorama.Back.RED, colorama.Fore.WHITE]
+IMPORTANT_COLORS = [colorama.Back.BLUE, colorama.Fore.WHITE]
+WARNING_COLORS = [colorama.Back.YELLOW, colorama.Fore.BLACK]
+ERROR_COLORS = [colorama.Back.RED, colorama.Fore.WHITE]
 
 def print(_str, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
     if _str:
@@ -143,7 +143,7 @@ class CommandInfo:
                 # One level of indentation is added.
                 # The indices shouldnt be space-padded within the brackets.
                 # The closing bracket effectively separates the index from the argument, making a following colon unnecessary.
-                lines.append(f"{indents}{pstring.leveledIndents[1]}[{index}] {pstring.to_visible_str(arg)}")
+                lines.append(f"{indents}{pstring.LEVELED_INDENTS[1]}[{index}] {pstring.to_visible_str(arg)}")
 
         return "\n".join(lines)
 

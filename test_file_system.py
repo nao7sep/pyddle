@@ -8,7 +8,7 @@ import pyddle_file_system as pfs
 
 pfs.make_and_move_to_output_subdirectory()
 
-for encoding, bom in pfs.utf_encodings_and_boms:
+for encoding, bom in pfs.UTF_ENCODINGS_AND_BOMS:
     encoding_in_lowercase = encoding.lower() # pylint: disable=invalid-name
     file_name = f"test_file_system_{encoding_in_lowercase.replace("-", "_")}.txt"
 

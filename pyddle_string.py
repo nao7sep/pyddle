@@ -5,7 +5,7 @@ import re
 
 import pyddle_debugging as pdebugging
 
-leveledIndents = [
+LEVELED_INDENTS = [
     "",
     "    ",
     "        ",
@@ -421,7 +421,7 @@ def normalize_multiline_str(str_, trim_line_start=False, trim_line_end=True,
 # ------------------------------------------------------------------------------
 
 # "\s" matches new lines as well.
-compiled_regex_for_normalize_singleline_str = re.compile(r"\s+")
+COMPILED_REGEX_FOR_NORMALIZE_SINGLELINE_STR = re.compile(r"\s+")
 
 # This method is often an overkill.
 # It may be useful in a situation where the input string can NEVER contain a line break
@@ -480,7 +480,7 @@ def normalize_singleline_str(str_, trim_start=True, remove_redundant_whitespace_
             new_str = str_
 
     if remove_redundant_whitespace_chars:
-        return compiled_regex_for_normalize_singleline_str.sub(" ", new_str)
+        return COMPILED_REGEX_FOR_NORMALIZE_SINGLELINE_STR.sub(" ", new_str)
 
     else:
         return new_str
@@ -505,13 +505,13 @@ def normalize_singleline_str(str_, trim_start=True, remove_redundant_whitespace_
 # In many cases, a line only with invisible indents and trailing whitespace doesnt need to be processed.
 # Then, if the visible content shouldnt contain a line break, make sure to check it.
 
-compiled_regex_for_split_line_into_parts = re.compile(r"^(\s*)(.*?)(\s*)$", flags=re.DOTALL)
+COMPILED_REGEX_FOR_SPLIT_LINE_INTO_PARTS = re.compile(r"^(\s*)(.*?)(\s*)$", flags=re.DOTALL)
 
 def split_line_into_parts(str_):
     if not str_:
         return (str_, str_, str_)
 
-    match = compiled_regex_for_split_line_into_parts.match(str_)
+    match = COMPILED_REGEX_FOR_SPLIT_LINE_INTO_PARTS.match(str_)
 
     if pdebugging.is_debugging():
         if not match:

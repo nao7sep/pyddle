@@ -15,26 +15,26 @@ import pyddle_string as pstring
 
 # Initialize variables of frequently used types.
 
-INT = 1
-FLOAT = 1.1
-STR = "Hello"
-LIST = [1, "2_2", 3]
-TUPLE = ("4_4", 5)
-BOOL = True
-BYTES = "はろ～".encode("UTF-8") # A friendly representation of "Hello" in Japanese.
-NONE = None
+INT_VAR = 1
+FLOAT_VAR = 1.1
+STR_VAR = "Hello"
+LIST_VAR = [1, "2_2", 3]
+TUPLE_VAR = ("4_4", 5)
+BOOL_VAR = True
+BYTES_VAR = "はろ～".encode("UTF-8") # A friendly representation of "Hello" in Japanese.
+NONE_VAR = None
 
 # Initialize a dictionary with the variables.
 
 data = {
-    "int": INT,
-    "float": FLOAT,
-    "str": STR,
-    "list": LIST,
-    "tuple": TUPLE,
-    "bool": BOOL,
-    "bytes": BYTES,
-    "none": NONE
+    "int": INT_VAR,
+    "float": FLOAT_VAR,
+    "str": STR_VAR,
+    "list": LIST_VAR,
+    "tuple": TUPLE_VAR,
+    "bool": BOOL_VAR,
+    "bytes": BYTES_VAR,
+    "none": NONE_VAR
 }
 
 # Create the "output" subdirectory and set the working directory to it.
@@ -66,7 +66,7 @@ with pfs.open_file_and_detect_utf_encoding("write_and_read_settings.ini") as con
 print("Data from the INI file:")
 
 for key, value in config["data"].items():
-    print(f"{pstring.leveledIndents[1]}{key}: {value}")
+    print(f"{pstring.LEVELED_INDENTS[1]}{key}: {value}")
 
 # ------------------------------------------------------------------------------
 #     JSON file
@@ -96,7 +96,7 @@ data_from_json["bytes"] = base64.b64decode(data_from_json["bytes"])
 print("Data from the JSON file:")
 
 for key, value in data_from_json.items():
-    print(f"{pstring.leveledIndents[1]}{key}: {value}")
+    print(f"{pstring.LEVELED_INDENTS[1]}{key}: {value}")
 
 # ------------------------------------------------------------------------------
 #     XML file
@@ -111,7 +111,7 @@ for key, value in data.items():
 
 # Convert to pretty XML.
 
-pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'UTF-8')).toprettyxml(indent=pstring.leveledIndents[1])
+pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'UTF-8')).toprettyxml(indent=pstring.LEVELED_INDENTS[1])
 
 with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.xml") as xml_file:
     xml_file.write(pretty_xml)
@@ -126,7 +126,7 @@ root = tree.getroot()
 print("Data from the XML file:")
 
 for child in root:
-    print(f"{pstring.leveledIndents[1]}{child.tag}: {child.text}")
+    print(f"{pstring.LEVELED_INDENTS[1]}{child.tag}: {child.text}")
 
 # ------------------------------------------------------------------------------
 #     CSV file
@@ -152,7 +152,7 @@ with pfs.open_file_and_detect_utf_encoding("write_and_read_settings.csv") as csv
 print("Data from the CSV file:")
 
 for row in data_from_csv:
-    print(f"{pstring.leveledIndents[1]}{row[0]}: {row[1]}")
+    print(f"{pstring.LEVELED_INDENTS[1]}{row[0]}: {row[1]}")
 
 # ------------------------------------------------------------------------------
 #     SQLite database
@@ -194,6 +194,6 @@ conn.close()
 print("Data from the SQLite database:")
 
 for row in data_from_sqlite:
-    print(f"{pstring.leveledIndents[1]}{row[0]}: {row[1]}")
+    print(f"{pstring.LEVELED_INDENTS[1]}{row[0]}: {row[1]}")
 
 pdebugging.display_press_enter_key_to_continue_if_not_debugging()

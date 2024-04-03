@@ -314,67 +314,67 @@ try:
                 pconsole.print(f"Repository: {repository.name}")
 
                 if is_good_remote_branch_name(repository.remote_branch_name):
-                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents=pstring.leveledIndents[1])
+                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents=pstring.LEVELED_INDENTS[1])
 
                 else:
-                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents=pstring.leveledIndents[1], colors=pconsole.important_colors)
+                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.IMPORTANT_COLORS)
 
                 if is_good_local_branch_name(repository.local_branch_name):
-                    pconsole.print(f"Local: {repository.local_branch_name}", indents=pstring.leveledIndents[1])
+                    pconsole.print(f"Local: {repository.local_branch_name}", indents=pstring.LEVELED_INDENTS[1])
 
                 else:
-                    pconsole.print(f"Local: {repository.local_branch_name}", indents=pstring.leveledIndents[1], colors=pconsole.important_colors)
+                    pconsole.print(f"Local: {repository.local_branch_name}", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.untracked_files:
-                    pconsole.print("Untracked files:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Untracked files:", indents=pstring.LEVELED_INDENTS[1])
 
                     for file in repository.untracked_files:
-                        pconsole.print(file, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.conflicted_files:
-                    pconsole.print("Conflicted files:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Conflicted files:", indents=pstring.LEVELED_INDENTS[1])
 
                     for file in repository.conflicted_files:
-                        pconsole.print(file, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.modified_files:
-                    pconsole.print("Modified files:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Modified files:", indents=pstring.LEVELED_INDENTS[1])
 
                     for file in repository.modified_files:
-                        pconsole.print(file, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.deleted_files:
-                    pconsole.print("Deleted files:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Deleted files:", indents=pstring.LEVELED_INDENTS[1])
 
                     for file in repository.deleted_files:
-                        pconsole.print(file, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.staged_files:
-                    pconsole.print("Staged files:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Staged files:", indents=pstring.LEVELED_INDENTS[1])
 
                     for file in repository.staged_files:
-                        pconsole.print(file, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.stashed_files:
-                    pconsole.print("Stashed files:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Stashed files:", indents=pstring.LEVELED_INDENTS[1])
 
                     for file in repository.stashed_files:
-                        pconsole.print(file, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.unpulled_commits:
-                    pconsole.print("Unpulled commits:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Unpulled commits:", indents=pstring.LEVELED_INDENTS[1])
 
                     for commit in repository.unpulled_commits:
-                        pconsole.print(commit, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(commit, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
                 if repository.unpushed_commits:
-                    pconsole.print("Unpushed commits:", indents=pstring.leveledIndents[1])
+                    pconsole.print("Unpushed commits:", indents=pstring.LEVELED_INDENTS[1])
 
                     for commit in repository.unpushed_commits:
-                        pconsole.print(commit, indents=pstring.leveledIndents[2], colors=pconsole.important_colors)
+                        pconsole.print(commit, indents=pstring.LEVELED_INDENTS[2], colors=pconsole.IMPORTANT_COLORS)
 
 except Exception: # pylint: disable=broad-except
-    pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
+    pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
 
 finally:
     pdebugging.display_press_enter_key_to_continue_if_not_debugging()

@@ -19,12 +19,12 @@ directory_path = ppath.dirname(sys.executable)
 
 # Get the path to the pip executable.
 
-subdirectory_names = ["Scripts", "bin", None]
-pip_file_names = ["pip3.exe", "pip.exe", "pip3", "pip"]
+SUBDIRECTORY_NAMES = ["Scripts", "bin", None]
+PIP_FILE_NAMES = ["pip3.exe", "pip.exe", "pip3", "pip"]
 
 def get_pip_file_path():
-    for subdirectory_name in subdirectory_names:
-        for pip_file_name in pip_file_names:
+    for subdirectory_name in SUBDIRECTORY_NAMES:
+        for pip_file_name in PIP_FILE_NAMES:
             if subdirectory_name is not None:
                 pip_file_path_ = os.path.join(directory_path, subdirectory_name, pip_file_name)
 

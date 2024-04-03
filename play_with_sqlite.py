@@ -64,7 +64,7 @@ column_names = [description[0] for description in cursor.description]
 for row in data: # Expecting only one row.
     # https://docs.python.org/3/library/functions.html#zip
     for column_name, value in zip(column_names, row):
-        print(f"{pstring.leveledIndents[1]}{column_name}: {value}")
+        print(f"{pstring.LEVELED_INDENTS[1]}{column_name}: {value}")
 
 cursor.execute(f"SELECT COUNT(*) FROM table1 WHERE strftime('%Y', utc_string) = '{datetime.datetime.now(datetime.UTC).year}'")
 

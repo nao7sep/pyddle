@@ -36,7 +36,7 @@ def make_and_move_to_output_subdirectory(subdirectory=None):
 # https://en.wikipedia.org/wiki/UTF-7
 # https://en.wikipedia.org/wiki/UTF-1
 
-utf_encodings_and_boms = {
+UTF_ENCODINGS_AND_BOMS = {
     # Names must be in uppercase.
     ("UTF-8", b"\xEF\xBB\xBF"),
     ("UTF-16BE", b"\xFE\xFF"),
@@ -50,7 +50,7 @@ def get_utf_encoding_bom(encoding):
 
     uppercase_encoding = encoding.upper()
 
-    for encoding, bom in utf_encodings_and_boms:
+    for encoding, bom in UTF_ENCODINGS_AND_BOMS:
         if pstring.equals(encoding, uppercase_encoding):
             return bom
 
@@ -65,7 +65,7 @@ def write_utf_encoding_bom_to_file(file, encoding):
 def detect_utf_encoding(_bytes):
     """ Returns (None, None) if the encoding is not detected. """
 
-    for encoding, bom in utf_encodings_and_boms:
+    for encoding, bom in UTF_ENCODINGS_AND_BOMS:
         if _bytes.startswith(bom):
             return encoding, bom
 

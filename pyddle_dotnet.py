@@ -550,11 +550,11 @@ def subprocess_result_into_messages(result):
 
     if result.stdout:
         messages.append("stdout:")
-        messages.extend(f'{pstring.leveledIndents[1]}{message}' for message in result.stdout.decode("utf-8").splitlines() if message)
+        messages.extend(f'{pstring.LEVELED_INDENTS[1]}{message}' for message in result.stdout.decode("utf-8").splitlines() if message)
 
     if result.stderr:
         messages.append("stderr:")
-        messages.extend(f'{pstring.leveledIndents[1]}{message}' for message in result.stderr.decode("utf-8").splitlines() if message)
+        messages.extend(f'{pstring.LEVELED_INDENTS[1]}{message}' for message in result.stderr.decode("utf-8").splitlines() if message)
 
     return messages
 

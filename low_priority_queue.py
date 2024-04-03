@@ -409,7 +409,7 @@ def show_statistics(_handled_task_list, _task_list, days):
     # This could be checked a few blocks earlier,
     #     but the statistics are unavailable only in the beginning.
     if not statistics:
-        pconsole.print("No data available.", indents=pstring.leveledIndents[1])
+        pconsole.print("No data available.", indents=pstring.LEVELED_INDENTS[1])
         return
 
     for _task, _execution_count, last_done_utc, completion_rate in statistics:
@@ -438,13 +438,13 @@ def show_statistics(_handled_task_list, _task_list, days):
         output_str = f"{_task.content}, {completion_rate}%{past_time_string}"
 
         if completion_rate >= (200 / 3):
-            pconsole.print(output_str, indents=pstring.leveledIndents[1])
+            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1])
 
         elif completion_rate >= (100 / 3):
-            pconsole.print(output_str, indents=pstring.leveledIndents[1], colors=pconsole.warning_colors)
+            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors=pconsole.WARNING_COLORS)
 
         else:
-            pconsole.print(output_str, indents=pstring.leveledIndents[1], colors=pconsole.error_colors)
+            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors=pconsole.ERROR_COLORS)
 
 # ------------------------------------------------------------------------------
 #     Application
@@ -497,35 +497,35 @@ try:
                     if execution_count >= task.times_per_week:
                         additional_info += ", good"
 
-                    pconsole.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=pstring.leveledIndents[1])
+                    pconsole.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=pstring.LEVELED_INDENTS[1])
 
             shows_all_next_time = False # pylint: disable=invalid-name
 
-            pconsole.print("Command", colors=pconsole.important_colors, end="")
+            pconsole.print("Command", colors=pconsole.IMPORTANT_COLORS, end="")
             command_str = input(": ")
 
             command, number, parameter = parse_command_str(command_str)
 
             if pstring.equals_ignore_case(command, "help"):
                 pconsole.print("Commands:")
-                pconsole.print("help", indents=pstring.leveledIndents[1])
+                pconsole.print("help", indents=pstring.LEVELED_INDENTS[1])
 
                 if pdebugging.is_debugging():
-                    pconsole.print("sample => Generates sample data.", indents=pstring.leveledIndents[1])
+                    pconsole.print("sample => Generates sample data.", indents=pstring.LEVELED_INDENTS[1])
 
-                pconsole.print("create <times_per_week> <content>", indents=pstring.leveledIndents[1])
-                pconsole.print("all => Shows all tasks including inactive/hidden ones.", indents=pstring.leveledIndents[1])
-                pconsole.print("done <task_number> => Means you have done it.", indents=pstring.leveledIndents[1])
-                pconsole.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=pstring.leveledIndents[1])
-                pconsole.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=pstring.leveledIndents[1])
-                pconsole.print("activate <task_number>", indents=pstring.leveledIndents[1])
-                pconsole.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=pstring.leveledIndents[1])
-                pconsole.print("show <task_number>", indents=pstring.leveledIndents[1])
-                pconsole.print("content <task_number> <content>", indents=pstring.leveledIndents[1])
-                pconsole.print("times <task_number> <times_per_week>", indents=pstring.leveledIndents[1])
-                pconsole.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=pstring.leveledIndents[1])
-                pconsole.print("stat (<days>) => Uses all data if no number is provided.", indents=pstring.leveledIndents[1])
-                pconsole.print("exit", indents=pstring.leveledIndents[1])
+                pconsole.print("create <times_per_week> <content>", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("all => Shows all tasks including inactive/hidden ones.", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("done <task_number> => Means you have done it.", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("activate <task_number>", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("show <task_number>", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("content <task_number> <content>", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("times <task_number> <times_per_week>", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("stat (<days>) => Uses all data if no number is provided.", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("exit", indents=pstring.LEVELED_INDENTS[1])
                 continue
 
             elif pdebugging.is_debugging() and pstring.equals_ignore_case(command, "sample"):
@@ -620,8 +620,8 @@ try:
                         task_list.delete_task(task)
 
                     else:
-                        pconsole.print("Destructive operation.", colors=pconsole.warning_colors)
-                        pconsole.print("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.", colors=pconsole.warning_colors)
+                        pconsole.print("Destructive operation.", colors=pconsole.WARNING_COLORS)
+                        pconsole.print("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.", colors=pconsole.WARNING_COLORS)
 
                     continue
 
@@ -643,13 +643,13 @@ try:
             # Now, without changing the regex and still disallowing negative numbers, anything other than "" must be a valid command string.
 
             if command_str:
-                pconsole.print("Invalid command string.", colors=pconsole.error_colors)
+                pconsole.print("Invalid command string.", colors=pconsole.ERROR_COLORS)
 
         except Exception: # pylint: disable=broad-except
-            pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
+            pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
 
 except Exception: # pylint: disable=broad-except
-    pconsole.print(traceback.format_exc(), colors=pconsole.error_colors)
+    pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
 
 finally:
     pdebugging.display_press_enter_key_to_continue_if_not_debugging()
