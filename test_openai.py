@@ -2,6 +2,7 @@
 # Test/sample code for pyddle_openai.py.
 
 import json
+import traceback
 
 import PIL.Image
 import PIL.ImageDraw
@@ -127,9 +128,11 @@ def compare_original_and_translated_texts():
     # Displays the comparison results.
 
     comparison_text = openai.openai_extract_first_message(comparison_response)
-    # The text usually contains line breaks, but I wont indent the lines.
-    # The results have been saved to a file.
-    print(f"Text comparison results: {comparison_text}")
+
+    print("Text comparison results:")
+
+    for line in pstring.splitlines(comparison_text):
+        pconsole.print(line, indents=pstring.LEVELED_INDENTS[1])
 
 def test_chat():
     # Converse to get 3 different household tools.
@@ -441,6 +444,9 @@ def test_images_and_vision():
 
     vision_all_images_answer = openai.openai_extract_first_message(vision_all_images_response)
 
+    # Added: I've implemented multiline output after the results have been saved.
+    # New results would look slightly different from the old ones.
+
     print("Vision results for all images:")
 
     for line in pstring.splitlines(vision_all_images_answer):
@@ -453,11 +459,16 @@ def test_images_and_vision():
 # Some of the results are saved in: AY04 Testing pyddle_openai.py.json
 # You will find the file in the Resources repository's Episodic directory.
 
-test_audio()
-compare_original_and_translated_texts()
+try:
+    test_audio()
+    compare_original_and_translated_texts()
 
-test_chat()
+    test_chat()
 
-test_images_and_vision()
+    test_images_and_vision()
 
-pdebugging.display_press_enter_key_to_continue_if_not_debugging()
+except Exception: # pylint: disable=broad-except
+    pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
+
+finally:
+    pdebugging.display_press_enter_key_to_continue_if_not_debugging()

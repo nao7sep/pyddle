@@ -32,13 +32,14 @@
 
 # GitHub Copilot often suggests 10 seconds.
 
-# So, we can safely say:
+# So, we can probably say:
 #     * 4 values should be enough for timeouts
-#     * Just because OpenAI's default is 10 minutes, doesnt mean the API wont work well with values like 20 seconds
+#     * Just because OpenAI's default is 10 minutes, doesnt mean the API wont work well with values like 20 seconds => Appears to be wrong
 #     * Considering the values above and leaning towards the safer side, 10 seconds for each should be a good starting point
 
-DEFAULT_TIMEOUT = 10 # Use this in situations where we give one for all.
-DEFAULT_CONNECT_TIMEOUT = 10
-DEFAULT_READ_TIMEOUT = 10
-DEFAULT_WRITE_TIMEOUT = 10
-DEFAULT_POOL_TIMEOUT = 10
+# Added: So, OpenAI's API doesnt work too well with 10 seconds not only when the entire message is returned at once but also when chunks are returned little by little.
+# Sometimes, the Chat Completions API nearly freezes and doesnt return anything for (a lot) more than 10 seconds.
+# Probably, it'd be better design to prepare the default timeout values for each module.
+# OpenAI's values will be defined in pyddle_openai.py.
+
+DEFAULT_TIMEOUT = 10

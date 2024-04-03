@@ -8,6 +8,7 @@ import os
 import requests
 import tiktoken
 
+import httpx
 import openai
 
 import pyddle_collections as pcollections
@@ -20,8 +21,18 @@ import pyddle_web as pweb
 # I will keep their names simple and stupid because I might want to add more later.
 
 # ------------------------------------------------------------------------------
+#     Constants
+# ------------------------------------------------------------------------------
+
+DEFAULT_TIMEOUT = pweb.DEFAULT_TIMEOUT
+DEFAULT_RESPONSE_TIMEOUT = pweb.DEFAULT_TIMEOUT * 5 * 5
+DEFAULT_CHUNK_TIMEOUT = pweb.DEFAULT_TIMEOUT * 5
+
+# ------------------------------------------------------------------------------
 #     Settings
 # ------------------------------------------------------------------------------
+
+KVS_KEY_PREFIX = "pyddle_openai/"
 
 # https://platform.openai.com/docs/api-reference
 # https://platform.openai.com/docs/guides/production-best-practices
@@ -64,9 +75,18 @@ class OpenAiSettings:
 
         return self.__base_url
 
-openai_settings = OpenAiSettings(
-    kvs_data=pkvs.get_merged_kvs_data(),
-    kvs_key_prefix="pyddle_openai/")
+# Lazy loading.
+__openai_settings = None # pylint: disable=invalid-name
+
+def get_openai_settings():
+    global __openai_settings # pylint: disable=global-statement
+
+    if __openai_settings is None:
+        __openai_settings = OpenAiSettings(
+            kvs_data=pkvs.get_merged_kvs_data(),
+            kvs_key_prefix=KVS_KEY_PREFIX)
+
+    return __openai_settings
 
 # ------------------------------------------------------------------------------
 #     Models
@@ -117,10 +137,50 @@ class OpenAiTokenCounter:
         #     and therefore there's not much point in just making the method work when half the CJK characters anyway disappear.
         return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(_str)]
 
-gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_3_5_TURBO)
-gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4)
-gpt_4_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_TURBO)
-gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_VISION) # May be unnecessary.
+# Lazy loading.
+__gpt_3_5_turbo_token_counter = None # pylint: disable=invalid-name
+
+def get_gpt_3_5_turbo_token_counter():
+    global __gpt_3_5_turbo_token_counter # pylint: disable=global-statement
+
+    if __gpt_3_5_turbo_token_counter is None:
+        __gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_3_5_TURBO)
+
+    return __gpt_3_5_turbo_token_counter
+
+# Lazy loading.
+__gpt_4_token_counter = None # pylint: disable=invalid-name
+
+def get_gpt_4_token_counter():
+    global __gpt_4_token_counter # pylint: disable=global-statement
+
+    if __gpt_4_token_counter is None:
+        __gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4)
+
+    return __gpt_4_token_counter
+
+# Lazy loading.
+__gpt_4_turbo_token_counter = None # pylint: disable=invalid-name
+
+def get_gpt_4_turbo_token_counter():
+    global __gpt_4_turbo_token_counter # pylint: disable=global-statement
+
+    if __gpt_4_turbo_token_counter is None:
+        __gpt_4_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_TURBO)
+
+    return __gpt_4_turbo_token_counter
+
+# Lazy loading.
+# May be unnecessary.
+__gpt_4_vision_token_counter = None # pylint: disable=invalid-name
+
+def get_gpt_4_vision_token_counter():
+    global __gpt_4_vision_token_counter # pylint: disable=global-statement
+
+    if __gpt_4_vision_token_counter is None:
+        __gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_VISION)
+
+    return __gpt_4_vision_token_counter
 
 # ------------------------------------------------------------------------------
 #     Clients
@@ -128,27 +188,42 @@ gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_VISION) 
 
 # https://github.com/openai/openai-python/blob/main/src/openai/_client.py
 
-def create_openai_client(api_key=None, organization=None, base_url=None):
+def create_openai_client(api_key=None, organization=None, base_url=None, timeout=None):
     ''' If the arguments are falsy and cant be retrieved from "openai_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
 
     if not api_key:
-        api_key = openai_settings.api_key
+        api_key = get_openai_settings().api_key
 
     if not organization:
-        organization = openai_settings.organization
+        organization = get_openai_settings().organization
 
     if not base_url:
-        base_url = openai_settings.base_url
+        base_url = get_openai_settings().base_url
 
     args = pcollections.PotentiallyFalsyArgs()
     args.may_contain("api_key", api_key)
     args.may_contain("organization", organization)
     args.may_contain("base_url", base_url)
-    args.must_contain("timeout", pweb.DEFAULT_TIMEOUT)
+
+    if timeout:
+        args.must_contain("timeout", timeout)
+
+    else:
+        # Explained in pyddle_web.py.
+        args.must_contain("timeout", httpx.Timeout(timeout=pweb.DEFAULT_TIMEOUT, read=DEFAULT_RESPONSE_TIMEOUT))
 
     return openai.OpenAI(**args.args)
 
-openai_client = create_openai_client()
+# Lazy loading.
+__openai_client = None # pylint: disable=invalid-name
+
+def get_openai_client():
+    global __openai_client # pylint: disable=global-statement
+
+    if __openai_client is None:
+        __openai_client = create_openai_client()
+
+    return __openai_client
 
 # ------------------------------------------------------------------------------
 #     Text to speech
@@ -186,7 +261,8 @@ def openai_audio_speech_create(
     # Based on the audio format, the user also has to choose the right file extension.
 
     # Optional parameters:
-    speed=None):
+    speed=None,
+    timeout=None):
 
     # Checked: all, order, named, falsy
     # Meaning: all parameters in the API reference are supported, their order is natural,
@@ -202,9 +278,12 @@ def openai_audio_speech_create(
     args.must_contain_enum_value("response_format", response_format)
     args.may_contain("speed", speed)
 
+    if timeout:
+        args.must_contain("timeout", timeout)
+
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    return openai_client.audio.speech.create(**args.args) # pylint: disable=missing-kwoa
+    return get_openai_client().audio.speech.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_save_audio(file_path, response):
     pfs.create_parent_directory(file_path)
@@ -239,7 +318,8 @@ def openai_audio_transcriptions_create(
     language=None,
     prompt=None,
     temperature=None,
-    timestamp_granularities=None):
+    timestamp_granularities=None,
+    timeout=None):
 
     with open(file_path, "rb") as file:
         # Checked: all, order, named, falsy
@@ -253,7 +333,10 @@ def openai_audio_transcriptions_create(
         args.may_contain("temperature", temperature)
         args.may_contain("timestamp_granularities", timestamp_granularities)
 
-        return openai_client.audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
+        if timeout:
+            args.must_contain("timeout", timeout)
+
+        return get_openai_client().audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_audio_translations_create(
     # Input:
@@ -267,7 +350,8 @@ def openai_audio_translations_create(
 
     # Optional parameters:
     prompt=None,
-    temperature=None):
+    temperature=None,
+    timeout=None):
 
     with open(file_path, "rb") as file:
         # Checked: all, order, named, falsy
@@ -279,7 +363,10 @@ def openai_audio_translations_create(
         args.may_contain("prompt", prompt)
         args.may_contain("temperature", temperature)
 
-        return openai_client.audio.translations.create(**args.args) # pylint: disable=missing-kwoa
+        if timeout:
+            args.must_contain("timeout", timeout)
+
+        return get_openai_client().audio.translations.create(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Chat
@@ -322,7 +409,8 @@ def openai_chat_completions_create(
     stream=None,
     temperature=None,
     top_p=None,
-    user=None):
+    user=None,
+    timeout=None):
 
     # Checked: all, order, named, falsy
 
@@ -344,7 +432,14 @@ def openai_chat_completions_create(
     args.may_contain("top_p", top_p)
     args.may_contain("user", user)
 
-    return openai_client.chat.completions.create(**args.args)
+    if timeout:
+        args.must_contain("timeout", timeout)
+
+    else:
+        if stream:
+            args.must_contain("timeout", httpx.Timeout(timeout=pweb.DEFAULT_TIMEOUT, read=DEFAULT_CHUNK_TIMEOUT))
+
+    return get_openai_client().chat.completions.create(**args.args)
 
 class OpenAiChatSettings:
     def __init__(self, model: OpenAiModel = None):
@@ -368,7 +463,10 @@ class OpenAiChatSettings:
 
 def openai_chat_completions_create_with_settings(
     settings: OpenAiChatSettings,
-    messages):
+    messages,
+
+    # Optional parameters:
+    timeout=None):
 
     return openai_chat_completions_create(
         model=settings.model,
@@ -386,7 +484,8 @@ def openai_chat_completions_create_with_settings(
         stream=settings.stream,
         temperature=settings.temperature,
         top_p=settings.top_p,
-        user=settings.user)
+        user=settings.user,
+        timeout=timeout)
 
 def openai_add_system_message(messages, system_message):
     messages.append({
@@ -554,7 +653,8 @@ def openai_images_generate(
     quality: OpenAiImageQuality=None,
     size: OpenAiImageSize=None,
     style: OpenAiImageStyle=None,
-    user=None):
+    user=None,
+    timeout=None):
 
     ''' Returns a list of file paths. '''
 
@@ -569,11 +669,14 @@ def openai_images_generate(
     args.may_contain_enum_value("style", style)
     args.may_contain("user", user)
 
+    if timeout:
+        args.must_contain("timeout", timeout)
+
     # This is a one-liner.
     # It takes care of saving the images as well.
     args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-    return openai_client.images.generate(**args.args) # pylint: disable=missing-kwoa
+    return get_openai_client().images.generate(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -593,7 +696,8 @@ def openai_images_edit(
     mask_file_path=None,
     n=None,
     size: OpenAiImageSize=None,
-    user=None):
+    user=None,
+    timeout=None):
 
     ''' Returns a list of file paths. '''
 
@@ -608,16 +712,19 @@ def openai_images_edit(
         args.may_contain_enum_value("size", size)
         args.may_contain("user", user)
 
+        if timeout:
+            args.must_contain("timeout", timeout)
+
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
         if mask_file_path:
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                return openai_client.images.edit(**args.args) # pylint: disable=missing-kwoa
+                return get_openai_client().images.edit(**args.args) # pylint: disable=missing-kwoa
 
         else:
-            return openai_client.images.edit(**args.args) # pylint: disable=missing-kwoa
+            return get_openai_client().images.edit(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -635,7 +742,8 @@ def openai_images_create_variation(
     # Optional parameters:
     n=None,
     size: OpenAiImageSize=None,
-    user=None):
+    user=None,
+    timeout=None):
 
     ''' Returns a list of file paths. '''
 
@@ -649,6 +757,9 @@ def openai_images_create_variation(
         args.may_contain_enum_value("size", size)
         args.may_contain("user", user)
 
+        if timeout:
+            args.must_contain("timeout", timeout)
+
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-        return openai_client.images.create_variation(**args.args) # pylint: disable=missing-kwoa
+        return get_openai_client().images.create_variation(**args.args) # pylint: disable=missing-kwoa
