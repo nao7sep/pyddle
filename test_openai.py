@@ -2,8 +2,10 @@
 # Test/sample code for pyddle_openai.py.
 
 import json
+
 import PIL.Image
 import PIL.ImageDraw
+
 import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
 import pyddle_file_system as pfs
@@ -13,13 +15,13 @@ import pyddle_string as pstring
 pfs.make_and_move_to_output_subdirectory("openai")
 
 # GitHub Copilot automatically generated this and I liked it. :)
-english_text_for_audio = "Hello, my name is Pyddle. I am a Python library for creating games and applications. I am a work in progress, but I am getting better every day. I am excited to see what you will create with me. Have fun and happy coding!"
+ENGLISH_TEXT_FOR_AUDIO = "Hello, my name is Pyddle. I am a Python library for creating games and applications. I am a work in progress, but I am getting better every day. I am excited to see what you will create with me. Have fun and happy coding!"
 
 def test_audio():
     # Makes audio.
 
     audio_response = openai.openai_audio_speech_create(
-        _input=english_text_for_audio,
+        _input=ENGLISH_TEXT_FOR_AUDIO,
         model=openai.OpenAiModel.TTS_1_HD,
         voice=openai.OpenAiVoice.NOVA,
         response_format=openai.OpenAiAudioFormat.MP3)
@@ -110,7 +112,7 @@ def compare_original_and_translated_texts():
 
     comparison_response = openai.openai_chat_completions_create(
         model=openai.OpenAiModel.GPT_4_TURBO,
-        messages=openai.openai_build_messages(f"Compare the following texts:\n\n{english_text_for_audio}\n\n {translation_text}"))
+        messages=openai.openai_build_messages(f"Compare the following texts:\n\n{ENGLISH_TEXT_FOR_AUDIO}\n\n {translation_text}"))
 
     # Saves the comparison results to a file.
 
@@ -230,7 +232,11 @@ def test_chat():
 
     chunk_models = []
 
-    for chunk in suitable_tool_response:
+    for chunk in suitable_tool_response: # pylint: disable=not-an-iterable
+        # The internally called method returns ChatCompletion or Stream[ChatCompletionChunk] depending on "stream".
+        # Iterating over the response object is correct:
+        # https://cookbook.openai.com/examples/how_to_stream_completions
+
         # https://github.com/openai/openai-python/blob/main/src/openai/types/chat/chat_completion_chunk.py
         # https://github.com/openai/openai-python/blob/main/src/openai/_models.py
 
@@ -444,10 +450,10 @@ def test_images_and_vision():
 # Some of the results are saved in: AY04 Testing pyddle_openai.py.json
 # You will find the file in the Resources repository's Episodic directory.
 
-# test_audio()
-# compare_original_and_translated_texts()
+test_audio()
+compare_original_and_translated_texts()
 
-# test_chat()
+test_chat()
 
 test_images_and_vision()
 

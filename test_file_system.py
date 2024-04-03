@@ -2,13 +2,14 @@
 # This script tests the core functionalities of the file_system module.
 
 import os
+
 import pyddle_debugging as pdebugging
-import pyddle_file_system as file_system
+import pyddle_file_system as pfs
 
 pfs.make_and_move_to_output_subdirectory()
 
 for encoding, bom in pfs.utf_encodings_and_boms:
-    encoding_in_lowercase = encoding.lower()
+    encoding_in_lowercase = encoding.lower() # pylint: disable=invalid-name
     file_name = f"test_file_system_{encoding_in_lowercase.replace("-", "_")}.txt"
 
     with pfs.open_file_and_write_utf_encoding_bom(file_name, encoding) as file:

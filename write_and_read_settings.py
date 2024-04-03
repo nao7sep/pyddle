@@ -5,35 +5,36 @@ import base64
 import configparser
 import csv
 import json
-import pyddle_debugging as pdebugging
-import pyddle_file_system as file_system
-import pyddle_string as pstring
 import sqlite3
 import xml.dom.minidom
 import xml.etree.ElementTree
 
+import pyddle_debugging as pdebugging
+import pyddle_file_system as pfs
+import pyddle_string as pstring
+
 # Initialize variables of frequently used types.
 
-_int = 1
-_float = 1.1
-_str = "Hello"
-_list = [1, "2_2", 3]
-_tuple = ("4_4", 5)
-_bool = True
-_bytes = "はろ～".encode("UTF-8") # A friendly representation of "Hello" in Japanese.
-_none = None
+INT = 1
+FLOAT = 1.1
+STR = "Hello"
+LIST = [1, "2_2", 3]
+TUPLE = ("4_4", 5)
+BOOL = True
+BYTES = "はろ～".encode("UTF-8") # A friendly representation of "Hello" in Japanese.
+NONE = None
 
 # Initialize a dictionary with the variables.
 
 data = {
-    "int": _int,
-    "float": _float,
-    "str": _str,
-    "list": _list,
-    "tuple": _tuple,
-    "bool": _bool,
-    "bytes": _bytes,
-    "none": _none
+    "int": INT,
+    "float": FLOAT,
+    "str": STR,
+    "list": LIST,
+    "tuple": TUPLE,
+    "bool": BOOL,
+    "bytes": BYTES,
+    "none": NONE
 }
 
 # Create the "output" subdirectory and set the working directory to it.
