@@ -8,31 +8,31 @@ import pyddle_string as pstring
 # The others exist because they dont have a reason not to
 #     and I dont want to have to look for them when I attempt to write consistent code.
 
-def str_to_int(str):
-    return int(str)
+def str_to_int(str_):
+    return int(str_)
 
-def str_to_int_or_default(str, default):
+def str_to_int_or_default(str_, default):
     try:
-        return int(str)
-    except Exception:
+        return int(str_)
+    except Exception: # pylint: disable=broad-except
         return default
 
-def str_to_float(str):
-    return float(str)
+def str_to_float(str_):
+    return float(str_)
 
-def str_to_float_or_default(str, default):
+def str_to_float_or_default(str_, default):
     try:
-        return float(str)
-    except Exception:
+        return float(str_)
+    except Exception: # pylint: disable=broad-except
         return default
 
-def str_to_complex(str):
-    return complex(str)
+def str_to_complex(str_):
+    return complex(str_)
 
-def str_to_complex_or_default(str, default):
+def str_to_complex_or_default(str_, default):
     try:
-        return complex(str)
-    except Exception:
+        return complex(str_)
+    except Exception: # pylint: disable=broad-except
         return default
 
 # Properly capitalized string representations of boolean values.
@@ -42,20 +42,20 @@ def str_to_complex_or_default(str, default):
 # I might also implement a method that parses a string and returns a boolean value together with its properly capitalized string representation.
 # So, I'm starting with this slightly redundant approach.
 
-boolTrueStrs = ["True", "Yes", "1"] # I wont be covering numbers other than 1 for now.
-boolFalseStrs = ["False", "No", "0"]
+TRUE_STRS = ["True", "Yes", "1"] # I wont be covering numbers other than 1 for now.
+FALSE_STRS = ["False", "No", "0"]
 
-def str_to_bool(str):
-    if pstring.contains_ignore_case(boolTrueStrs, str):
+def str_to_bool(str_):
+    if pstring.contains_ignore_case(TRUE_STRS, str_):
         return True
 
-    if pstring.contains_ignore_case(boolFalseStrs, str):
+    if pstring.contains_ignore_case(FALSE_STRS, str_):
         return False
 
-    raise RuntimeError(f"Invalid boolean string: {str}")
+    raise RuntimeError(f"Invalid boolean string: {str_}")
 
-def str_to_bool_or_default(str, default):
+def str_to_bool_or_default(str_, default):
     try:
-        return str_to_bool(str)
-    except Exception:
+        return str_to_bool(str_)
+    except Exception: # pylint: disable=broad-except
         return default

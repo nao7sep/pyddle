@@ -2,6 +2,7 @@
 # Contains multi-platform path-related operations.
 
 import os
+
 import pyddle_string as pstring
 
 # os.path.basename(), os.path.dirname(), os.path.splitext() (and some more) are not available as static methods in pathlib.
@@ -47,11 +48,11 @@ def dirname(path):
 # Integer value zero, sometimes referred to as the ASCII NUL character.
 # Characters whose integer representations are in the range from 1 through 31.
 
-invalid_file_name_chars = "<>:\"/\\|?*"
+INVALID_FILE_NAME_CHARS = "<>:\"/\\|?*"
 
 def contains_invalid_file_name_chars(file_name):
     for char in file_name:
-        if char in invalid_file_name_chars or (0 <= ord(char) <= 31):
+        if char in INVALID_FILE_NAME_CHARS or (0 <= ord(char) <= 31):
             return True
 
     return False
@@ -67,7 +68,7 @@ def violates_file_name_rules(file_name):
 # Also avoid these names followed immediately by an extension;
 #     for example, NUL.txt and NUL.tar.gz are both equivalent to NUL.
 
-windows_reserved_file_names = [
+WINDOWS_RESERVED_FILE_NAMES = [
     ["AUX", "CON", "NUL", "PRN"],
     ["COM0", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "COM¹", "COM²", "COM³"],
     ["LPT0", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9", "LPT¹", "LPT²", "LPT³"]
@@ -78,18 +79,18 @@ def is_windows_reserved_file_name(file_name):
     length = len(root)
 
     if length == 3:
-        for reserved_file_name in windows_reserved_file_names[0]:
+        for reserved_file_name in WINDOWS_RESERVED_FILE_NAMES[0]:
             if pstring.equals_ignore_case(root, reserved_file_name):
                 return True
 
     elif length == 4:
         if pstring.startswith_ignore_case(root, "C"):
-            for reserved_file_name in windows_reserved_file_names[1]:
+            for reserved_file_name in WINDOWS_RESERVED_FILE_NAMES[1]:
                 if pstring.equals_ignore_case(root, reserved_file_name):
                     return True
 
         elif pstring.startswith_ignore_case(root, "L"):
-            for reserved_file_name in windows_reserved_file_names[2]:
+            for reserved_file_name in WINDOWS_RESERVED_FILE_NAMES[2]:
                 if pstring.equals_ignore_case(root, reserved_file_name):
                     return True
 

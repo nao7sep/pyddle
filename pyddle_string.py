@@ -1,8 +1,9 @@
 ﻿# Created: 2024-03-05
 # This script contains string-related functions.
 
-import pyddle_debugging as pdebugging
 import re
+
+import pyddle_debugging as pdebugging
 
 leveledIndents = [
     "",
@@ -17,14 +18,14 @@ leveledIndents = [
     "                                    " # Index: 9
 ] # Length: 10
 
-def to_visible_str(str):
-    if str == None:
+def to_visible_str(str_):
+    if str_ is None:
         return "(None)"
 
-    if str == "":
+    if str_ == "":
         return "(Empty)"
 
-    return str
+    return str_
 
 # ------------------------------------------------------------------------------
 #     Equality
@@ -66,23 +67,23 @@ def equals_casefold(str1, str2):
         else:
             return True
 
-def contains(str_array, str):
+def contains(str_array, str_):
     for item in str_array:
-        if equals(item, str):
+        if equals(item, str_):
             return True
 
     return False
 
-def contains_ignore_case(str_array, str):
+def contains_ignore_case(str_array, str_):
     for item in str_array:
-        if equals_ignore_case(item, str):
+        if equals_ignore_case(item, str_):
             return True
 
     return False
 
-def contains_casefold(str_array, str):
+def contains_casefold(str_array, str_):
     for item in str_array:
-        if equals_casefold(item, str):
+        if equals_casefold(item, str_):
             return True
 
     return False
@@ -91,20 +92,20 @@ def contains_casefold(str_array, str):
 #     Partial equality
 # ------------------------------------------------------------------------------
 
-def startswith(str, prefix):
-    return str.startswith(prefix)
+def startswith(str_, prefix):
+    return str_.startswith(prefix)
 
-def startswith_ignore_case(str, prefix):
-    return str.lower().startswith(prefix.lower())
+def startswith_ignore_case(str_, prefix):
+    return str_.lower().startswith(prefix.lower())
 
-def startswith_casefold(str, prefix):
-    return str.casefold().startswith(prefix.casefold())
+def startswith_casefold(str_, prefix):
+    return str_.casefold().startswith(prefix.casefold())
 
 # I wont implement startswith_any because we usually have something to do for each substring;
 #     it would be better design to call startswith for each substring.
 
-def equals_at(str, index, substring):
-    str_length = len(str)
+def equals_at(str_, index, substring):
+    str_length = len(str_)
     substring_length = len(substring)
 
     # "".startswith("") returns True.
@@ -138,13 +139,13 @@ def equals_at(str, index, substring):
     # But technically speaking, it's more about whether comparison occurs or not.
     # If it doesnt, the zero-length substring MAY stand at the very edge of the cliff unless it falls off.
 
-    if index + substring_length > len(str):
+    if index + substring_length > len(str_):
         return False
 
-    return str[index : index + substring_length] == substring
+    return str_[index : index + substring_length] == substring
 
-def equals_at_ignore_case(str, index, substring):
-    str_length = len(str)
+def equals_at_ignore_case(str_, index, substring):
+    str_length = len(str_)
     substring_length = len(substring)
 
     if index < 0:
@@ -160,13 +161,13 @@ def equals_at_ignore_case(str, index, substring):
 
         return True
 
-    if index + substring_length > len(str):
+    if index + substring_length > len(str_):
         return False
 
-    return str[index : index + substring_length].lower() == substring.lower()
+    return str_[index : index + substring_length].lower() == substring.lower()
 
-def equals_at_casefold(str, index, substring):
-    str_length = len(str)
+def equals_at_casefold(str_, index, substring):
+    str_length = len(str_)
     substring_length = len(substring)
 
     if index < 0:
@@ -182,36 +183,36 @@ def equals_at_casefold(str, index, substring):
 
         return True
 
-    if index + substring_length > len(str):
+    if index + substring_length > len(str_):
         return False
 
-    return str[index : index + substring_length].casefold() == substring.casefold()
+    return str_[index : index + substring_length].casefold() == substring.casefold()
 
-def endswith(str, suffix):
-    return str.endswith(suffix)
+def endswith(str_, suffix):
+    return str_.endswith(suffix)
 
-def endswith_ignore_case(str, suffix):
-    return str.lower().endswith(suffix.lower())
+def endswith_ignore_case(str_, suffix):
+    return str_.lower().endswith(suffix.lower())
 
-def endswith_casefold(str, suffix):
-    return str.casefold().endswith(suffix.casefold())
+def endswith_casefold(str_, suffix):
+    return str_.casefold().endswith(suffix.casefold())
 
 # ------------------------------------------------------------------------------
 #     Searching
 # ------------------------------------------------------------------------------
 
-def index_of(str, substring):
-    return str.find(substring)
+def index_of(str_, substring):
+    return str_.find(substring)
 
-def index_of_ignore_case(str, substring):
-    return str.lower().find(substring.lower())
+def index_of_ignore_case(str_, substring):
+    return str_.lower().find(substring.lower())
 
-def index_of_casefold(str, substring):
-    return str.casefold().find(substring.casefold())
+def index_of_casefold(str_, substring):
+    return str_.casefold().find(substring.casefold())
 
-def index_of_any(str, substrings):
+def index_of_any(str_, substrings):
     # Checking for None, not caching.
-    str_length = len(str)
+    str_length = len(str_)
 
     for substring in substrings:
         if substring is None:
@@ -228,13 +229,13 @@ def index_of_any(str, substrings):
 
     for index in range(str_length):
         for substring in substrings:
-            if equals_at(str, index, substring):
+            if equals_at(str_, index, substring):
                 return index
 
     return -1
 
-def index_of_any_ignore_case(str, substrings):
-    str_length = len(str)
+def index_of_any_ignore_case(str_, substrings):
+    str_length = len(str_)
 
     for substring in substrings:
         if substring is None:
@@ -245,13 +246,13 @@ def index_of_any_ignore_case(str, substrings):
 
     for index in range(str_length):
         for substring in substrings:
-            if equals_at_ignore_case(str, index, substring):
+            if equals_at_ignore_case(str_, index, substring):
                 return index
 
     return -1
 
-def index_of_any_casefold(str, substrings):
-    str_length = len(str)
+def index_of_any_casefold(str_, substrings):
+    str_length = len(str_)
 
     for substring in substrings:
         if substring is None:
@@ -262,7 +263,7 @@ def index_of_any_casefold(str, substrings):
 
     for index in range(str_length):
         for substring in substrings:
-            if equals_at_casefold(str, index, substring):
+            if equals_at_casefold(str_, index, substring):
                 return index
 
     return -1
@@ -270,17 +271,17 @@ def index_of_any_casefold(str, substrings):
 # I thought about implementing contains_any, but we generally shouldnt implement methods
 #     that just call other methods and (partially) discard the results.
 
-def last_index_of(str, substring):
-    return str.rfind(substring)
+def last_index_of(str_, substring):
+    return str_.rfind(substring)
 
-def last_index_of_ignore_case(str, substring):
-    return str.lower().rfind(substring.lower())
+def last_index_of_ignore_case(str_, substring):
+    return str_.lower().rfind(substring.lower())
 
-def last_index_of_casefold(str, substring):
-    return str.casefold().rfind(substring.casefold())
+def last_index_of_casefold(str_, substring):
+    return str_.casefold().rfind(substring.casefold())
 
-def last_index_of_any(str, substrings):
-    str_length = len(str)
+def last_index_of_any(str_, substrings):
+    str_length = len(str_)
 
     for substring in substrings:
         if substring is None:
@@ -293,13 +294,13 @@ def last_index_of_any(str, substrings):
 
     for index in range(str_length - 1, -1, -1):
         for substring in substrings:
-            if equals_at(str, index, substring):
+            if equals_at(str_, index, substring):
                 return index
 
     return -1
 
-def last_index_of_any_ignore_case(str, substrings):
-    str_length = len(str)
+def last_index_of_any_ignore_case(str_, substrings):
+    str_length = len(str_)
 
     for substring in substrings:
         if substring is None:
@@ -310,13 +311,13 @@ def last_index_of_any_ignore_case(str, substrings):
 
     for index in range(str_length - 1, -1, -1):
         for substring in substrings:
-            if equals_at_ignore_case(str, index, substring):
+            if equals_at_ignore_case(str_, index, substring):
                 return index
 
     return -1
 
-def last_index_of_any_casefold(str, substrings):
-    str_length = len(str)
+def last_index_of_any_casefold(str_, substrings):
+    str_length = len(str_)
 
     for substring in substrings:
         if substring is None:
@@ -327,7 +328,7 @@ def last_index_of_any_casefold(str, substrings):
 
     for index in range(str_length - 1, -1, -1):
         for substring in substrings:
-            if equals_at_casefold(str, index, substring):
+            if equals_at_casefold(str_, index, substring):
                 return index
 
     return -1
@@ -343,15 +344,15 @@ def last_index_of_any_casefold(str, substrings):
 #     because there's a high chance that the developer is doing something wrong.
 # Like, startswith(None, "a") is most likely not an intended operation.
 
-def splitlines(str, trim_line_start=False, trim_line_end=True,
+def splitlines(str_, trim_line_start=False, trim_line_end=True,
                remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
     ''' A virtually harmless operation for a string that must be considered as an array of 0 or more lines. '''
 
-    if not str:
+    if not str_:
         # "".splitlines() returns an empty list.
         return []
 
-    raw_lines = str.splitlines()
+    raw_lines = str_.splitlines()
 
     if trim_line_start:
         if trim_line_end:
@@ -378,10 +379,10 @@ def splitlines(str, trim_line_start=False, trim_line_end=True,
             detected_continuous_empty_line_count += 1
 
         else:
-            if has_detected_visible_line == False: # Start part.
+            if has_detected_visible_line is False: # Start part.
                 has_detected_visible_line = True
 
-                if remove_empty_lines_at_start == False:
+                if remove_empty_lines_at_start is False:
                     for _ in range(detected_continuous_empty_line_count):
                         lines.append("")
 
@@ -399,20 +400,20 @@ def splitlines(str, trim_line_start=False, trim_line_end=True,
 
     # End part.
     if detected_continuous_empty_line_count > 0:
-        if remove_empty_lines_at_end == False:
+        if remove_empty_lines_at_end is False:
             for _ in range(detected_continuous_empty_line_count):
                 lines.append("")
 
     return lines
 
-def normalize_multiline_str(str, trim_line_start=False, trim_line_end=True,
+def normalize_multiline_str(str_, trim_line_start=False, trim_line_end=True,
                             remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
     ''' If you need to for-loop the lines, consider calling "splitlines" instead. '''
 
-    if not str:
-        return str
+    if not str_:
+        return str_
 
-    return "\n".join(splitlines(str, trim_line_start, trim_line_end,
+    return "\n".join(splitlines(str_, trim_line_start, trim_line_end,
                                 remove_empty_lines_at_start, remove_redundant_empty_lines, remove_empty_lines_at_end))
 
 # ------------------------------------------------------------------------------
@@ -458,25 +459,25 @@ compiled_regex_for_normalize_singleline_str = re.compile(r"\s+")
 
 # Use this method only in cases where normalizing mid-string whitespace increases security significantly.
 
-def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
+def normalize_singleline_str(str_, trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
     ''' Call me only if you really need me. Otherwise, call "strip" instead. '''
 
-    if not str:
-        return str
+    if not str_:
+        return str_
 
     if trim_start:
         if trim_end:
-            new_str = str.strip()
+            new_str = str_.strip()
 
         else:
-            new_str = str.lstrip()
+            new_str = str_.lstrip()
 
     else:
         if trim_end:
-            new_str = str.rstrip()
+            new_str = str_.rstrip()
 
         else:
-            new_str = str
+            new_str = str_
 
     if remove_redundant_whitespace_chars:
         return compiled_regex_for_normalize_singleline_str.sub(" ", new_str)
@@ -506,15 +507,15 @@ def normalize_singleline_str(str, trim_start=True, remove_redundant_whitespace_c
 
 compiled_regex_for_split_line_into_parts = re.compile(r"^(\s*)(.*?)(\s*)$", flags=re.DOTALL)
 
-def split_line_into_parts(str):
-    if not str:
-        return (str, str, str)
+def split_line_into_parts(str_):
+    if not str_:
+        return (str_, str_, str_)
 
-    match = compiled_regex_for_split_line_into_parts.match(str)
+    match = compiled_regex_for_split_line_into_parts.match(str_)
 
     if pdebugging.is_debugging():
         if not match:
             # Unless the "re" module is implemented incorrectly, the number of groups should always be 3.
-            raise RuntimeError(f"Line parts could not be extracted from \"{str}\".")
+            raise RuntimeError(f"Line parts could not be extracted from \"{str_}\".")
 
     return match.groups()
