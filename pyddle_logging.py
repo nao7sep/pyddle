@@ -53,7 +53,7 @@ def log(str_, indents="", end="\n", flush_=False):
         logs.append(end)
 
     if flush_:
-        flush_()
+        flush()
 
 def log_lines(str_: list[str], indents="", trailing="", end="\n", flush_=False):
     if str_:
@@ -68,7 +68,7 @@ def log_lines(str_: list[str], indents="", trailing="", end="\n", flush_=False):
                 logs.append(end)
 
     if flush_:
-        flush_()
+        flush()
 
 def flush():
     if logs:
