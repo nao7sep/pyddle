@@ -62,11 +62,11 @@ def write_utf_encoding_bom_to_file(file, encoding):
     if bom:
         file.write(bom)
 
-def detect_utf_encoding(_bytes):
+def detect_utf_encoding(bytes_):
     """ Returns (None, None) if the encoding is not detected. """
 
     for encoding, bom in UTF_ENCODINGS_AND_BOMS:
-        if _bytes.startswith(bom):
+        if bytes_.startswith(bom):
             return encoding, bom
 
     return None, None
@@ -78,8 +78,8 @@ def detect_utf_encoding_of_file(file):
     """
 
     position = file.tell()
-    _bytes = file.read(4)
-    encoding, bom = detect_utf_encoding(_bytes)
+    bytes_ = file.read(4)
+    encoding, bom = detect_utf_encoding(bytes_)
 
     if encoding:
         file.seek(position + len(bom))
@@ -161,9 +161,9 @@ def read_all_text_from_file(path, detect_encoding=True, fallback_encoding="UTF-8
         with open(path, "r", encoding=fallback_encoding) as file:
             return file.read()
 
-def write_all_bytes_to_file(path, _bytes):
+def write_all_bytes_to_file(path, bytes_):
     with open(path, "wb") as file:
-        file.write(_bytes)
+        file.write(bytes_)
 
 def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
     if write_bom:
@@ -174,9 +174,9 @@ def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
         with open(path, "w", encoding=encoding) as file:
             file.write(text)
 
-def append_all_bytes_to_file(path, _bytes):
+def append_all_bytes_to_file(path, bytes_):
     with open(path, "ab") as file:
-        file.write(_bytes)
+        file.write(bytes_)
 
 def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
     """ If the file already has content without a BOM, the BOM will NOT be written. """

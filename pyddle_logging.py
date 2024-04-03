@@ -45,19 +45,19 @@ def get_log_file_path():
 
 logs = []
 
-def log(_str, indents="", end="\n", _flush=False):
-    if _str:
-        logs.append(f"{indents}{_str}{end}")
+def log(str_, indents="", end="\n", flush_=False):
+    if str_:
+        logs.append(f"{indents}{str_}{end}")
 
     else:
         logs.append(end)
 
-    if _flush:
-        _flush()
+    if flush_:
+        flush_()
 
-def log_lines(_str: list[str], indents="", trailing="", end="\n", _flush=False):
-    if _str:
-        for line in _str:
+def log_lines(str_: list[str], indents="", trailing="", end="\n", flush_=False):
+    if str_:
+        for line in str_:
             parts = pstring.split_line_into_parts(line)
 
             if parts[1]:
@@ -67,15 +67,15 @@ def log_lines(_str: list[str], indents="", trailing="", end="\n", _flush=False):
             else:
                 logs.append(end)
 
-    if _flush:
-        _flush()
+    if flush_:
+        flush_()
 
 def flush():
     if logs:
         os.makedirs(get_logs_directory_path(), exist_ok=True)
 
         with pfs.open_file_and_write_utf_encoding_bom(get_log_file_path(), append=True) as file:
-            for _log in logs:
-                file.write(_log)
+            for log_ in logs:
+                file.write(log_)
 
         logs.clear()

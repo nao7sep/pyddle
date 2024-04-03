@@ -25,7 +25,7 @@ def test_audio():
     # Makes audio.
 
     audio_response = openai.openai_audio_speech_create(
-        _input=ENGLISH_TEXT_FOR_AUDIO,
+        input_=ENGLISH_TEXT_FOR_AUDIO,
         model=openai.OpenAiModel.TTS_1_HD,
         voice=openai.OpenAiVoice.NOVA,
         response_format=openai.OpenAiAudioFormat.MP3)
@@ -78,7 +78,7 @@ def test_audio():
     # Makes new audio from the translated transcription.
 
     translated_audio_response = openai.openai_audio_speech_create(
-        _input=translated_transcription_text,
+        input_=translated_transcription_text,
         model=openai.OpenAiModel.TTS_1_HD,
         voice=openai.OpenAiVoice.ALLOY,
         response_format=openai.OpenAiAudioFormat.MP3)

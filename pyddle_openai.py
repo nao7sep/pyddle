@@ -124,18 +124,18 @@ class OpenAiTokenCounter:
 
         return self.__encoding
 
-    def encode(self, _str):
+    def encode(self, str_):
         ''' Returns a list of tokens as integers. '''
 
-        return self.encoding.encode(_str)
+        return self.encoding.encode(str_)
 
-    def encode_to_strs(self, _str):
+    def encode_to_strs(self, str_):
         ''' Returns a list of tokens as decoded strings. OFTEN fails to decode CJK strings. '''
 
         # If we specify "ignore" or "replace" as the "errors" argument, we can avoid the UnicodeDecodeError,
         #     but the fundamental problem is that the string representation as UTF-8-decoded byte arrays are then cut into tokens with no consideration of the character boundaries,
         #     and therefore there's not much point in just making the method work when half the CJK characters anyway disappear.
-        return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(_str)]
+        return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str_)]
 
 # Lazy loading.
 __gpt_3_5_turbo_token_counter = None # pylint: disable=invalid-name
@@ -252,7 +252,7 @@ class OpenAiAudioFormat(enum.Enum):
 
 def openai_audio_speech_create(
     # Input:
-    _input,
+    input_,
 
     # Parameters:
     model: OpenAiModel,
@@ -272,7 +272,7 @@ def openai_audio_speech_create(
     # We wont support them because, in a situation where we need to specify them, we wont use one-liners.
 
     args = pcollections.PotentiallyFalsyArgs()
-    args.must_contain("input", _input)
+    args.must_contain("input", input_)
     args.must_contain_enum_value("model", model)
     args.must_contain_enum_value("voice", voice)
     args.must_contain_enum_value("response_format", response_format)

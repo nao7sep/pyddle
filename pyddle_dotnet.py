@@ -220,7 +220,7 @@ def extract_version_string_from_assembly_info_file(path):
             if match:
                 return match.group("version")
 
-def parse_version_string(_str):
+def parse_version_string(str_):
     """
         Returns a list of 4 integers.
         Raises a ValueError if the string is not a valid version string.
@@ -229,7 +229,7 @@ def parse_version_string(_str):
     # https://learn.microsoft.com/en-us/dotnet/api/system.version.parse
 
     digits = [0, 0, 0, 0]
-    parts = _str.split(".")
+    parts = str_.split(".")
 
     for index, part in enumerate(parts):
         digits[index] = int(part)
@@ -295,26 +295,26 @@ def extract_referenced_project_names_from_csproj_file(path):
 
         return referenced_project_names
 
-def is_valid_referenced_project_name(_str):
-    if '=' in _str:
+def is_valid_referenced_project_name(str_):
+    if '=' in str_:
         return False
 
     # We must keep updating the following part.
     # Fortunately, since .NET Core, .csproj files contain only what's absolutely necessary.
 
-    if pstring.equals_ignore_case(_str, "System"):
+    if pstring.equals_ignore_case(str_, "System"):
         return False
 
-    if pstring.startswith_ignore_case(_str, "System."):
+    if pstring.startswith_ignore_case(str_, "System."):
         return False
 
-    if pstring.equals_ignore_case(_str, "PresentationCore"):
+    if pstring.equals_ignore_case(str_, "PresentationCore"):
         return False
 
-    if pstring.equals_ignore_case(_str, "WindowsBase"):
+    if pstring.equals_ignore_case(str_, "WindowsBase"):
         return False
 
-    if pstring.startswith_ignore_case(_str, "Microsoft."):
+    if pstring.startswith_ignore_case(str_, "Microsoft."):
         return False
 
     return True
@@ -435,12 +435,12 @@ def update_nuget_packages_in_project(project):
             for framework in project_in_json["frameworks"]:
                 if "topLevelPackages" in framework:
                     for package in framework["topLevelPackages"]:
-                        _id = package["id"]
+                        id_ = package["id"]
                         latest_version = package["latestVersion"]
 
                         # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package
 
-                        args = [ "dotnet", "add", project.file_path, "package", _id, "--version", latest_version ]
+                        args = [ "dotnet", "add", project.file_path, "package", id_, "--version", latest_version ]
                         result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
                         messages.extend(subprocess_result_into_messages(result))
 

@@ -14,28 +14,28 @@ IMPORTANT_COLORS = [colorama.Back.BLUE, colorama.Fore.WHITE]
 WARNING_COLORS = [colorama.Back.YELLOW, colorama.Fore.BLACK]
 ERROR_COLORS = [colorama.Back.RED, colorama.Fore.WHITE]
 
-def print(_str, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
+def print(str_, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
     # A frequently used method that should almost always be called like "pconsole.print".
 
-    if _str:
+    if str_:
         if colors:
-            builtin_print(f"{indents}{"".join(colors)}{_str}{colorama.Style.RESET_ALL}", end=end)
+            builtin_print(f"{indents}{"".join(colors)}{str_}{colorama.Style.RESET_ALL}", end=end)
 
         else:
-            builtin_print(f"{indents}{_str}", end=end)
+            builtin_print(f"{indents}{str_}", end=end)
 
     else:
         builtin_print("", end=end)
 
-def print_lines(_str: list[str], indents="", colors: list[str]=None, trailing="", end="\n"):
-    if _str:
+def print_lines(str_: list[str], indents="", colors: list[str]=None, trailing="", end="\n"):
+    if str_:
         if colors:
             colors_string = "".join(colors)
 
         else:
             colors_string = None
 
-        for line in _str:
+        for line in str_:
             parts = pstring.split_line_into_parts(line)
 
             if parts[1]:
@@ -149,12 +149,12 @@ class CommandInfo:
 
         return "\n".join(lines)
 
-def parse_command_str(_str):
+def parse_command_str(str_):
     ''' Returns None if the command string is empty. '''
 
     # A smart function that recognizes a chain of any whitespace chars as one separator by default.
 
-    parts = _str.split()
+    parts = str_.split()
 
     if len(parts) > 0:
         command = parts[0]

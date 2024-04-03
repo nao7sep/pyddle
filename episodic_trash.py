@@ -72,36 +72,36 @@ class EntryInfo(ABC):
         raise RuntimeError(f"Note not found: {note.guid}")
 
 # This method can also serialize notes.
-def serialize_episode(_episode):
-    if isinstance(_episode, EpisodeInfo):
+def serialize_episode(episode_):
+    if isinstance(episode_, EpisodeInfo):
         data = {
-            "guid": str(_episode.guid),
-            "creation_utc": pdatetime.utc_to_roundtrip_string(_episode.creation_utc),
-            "code": _episode.code,
-            "title": _episode.title
+            "guid": str(episode_.guid),
+            "creation_utc": pdatetime.utc_to_roundtrip_string(episode_.creation_utc),
+            "code": episode_.code,
+            "title": episode_.title
         }
 
-        if _episode.notes:
-            data["notes"] = [serialize_episode(note) for note in sorted(_episode.notes, key=lambda note: note.creation_utc)]
+        if episode_.notes:
+            data["notes"] = [serialize_episode(note) for note in sorted(episode_.notes, key=lambda note: note.creation_utc)]
 
         return data
 
-    elif isinstance(_episode, NoteInfo):
+    elif isinstance(episode_, NoteInfo):
         data = {
-            "guid": str(_episode.guid),
-            "creation_utc": pdatetime.utc_to_roundtrip_string(_episode.creation_utc),
-            "code": _episode.code,
+            "guid": str(episode_.guid),
+            "creation_utc": pdatetime.utc_to_roundtrip_string(episode_.creation_utc),
+            "code": episode_.code,
             # "parent" and "parent_type" will be restored based on the JSON file's structure.
-            "content": pstring.splitlines(_episode.content)
+            "content": pstring.splitlines(episode_.content)
         }
 
-        if _episode.notes:
-            data["notes"] = [serialize_episode(note) for note in sorted(_episode.notes, key=lambda note: note.creation_utc)]
+        if episode_.notes:
+            data["notes"] = [serialize_episode(note) for note in sorted(episode_.notes, key=lambda note: note.creation_utc)]
 
         return data
 
     else:
-        raise RuntimeError(f"Unsupported type: {type(_episode)}")
+        raise RuntimeError(f"Unsupported type: {type(episode_)}")
 
 def deserialize_notes(parent, notes_of_parent, note_data):
     for note_data_item in note_data:
@@ -165,54 +165,54 @@ class NoteInfo(EntryInfo):
         # Calls the parent's save method recursively until it reaches the episode.
         self.parent.save()
 
-def generate_random_code(_episodes):
+def generate_random_code(episodes_):
     while True:
-        _code = (random.choice(string.ascii_uppercase) +
+        code_ = (random.choice(string.ascii_uppercase) +
                 random.choice(string.ascii_uppercase) +
                 random.choice(string.digits) +
                 random.choice(string.digits))
 
-        if get_episode(_episodes, _code):
+        if get_episode(episodes_, code_):
             continue
 
         is_note_found = False
 
-        for _episode in _episodes:
-            if get_note(_episode.notes, _code):
+        for episode_ in episodes_:
+            if get_note(episode_.notes, code_):
                 is_note_found = True
                 break
 
         if is_note_found:
             continue
 
-        return _code
+        return code_
 
 # Safer to separate the following 2 functions.
 
-def get_episode(_episodes, _code):
-    for _episode in _episodes:
-        if pstring.equals_ignore_case(_episode.code, _code):
-            return _episode
+def get_episode(episodes_, code_):
+    for episode_ in episodes_:
+        if pstring.equals_ignore_case(episode_.code, code_):
+            return episode_
 
     return None
 
-def get_note(notes, _code):
+def get_note(notes, code_):
     for note in notes:
-        if pstring.equals_ignore_case(note.code, _code):
+        if pstring.equals_ignore_case(note.code, code_):
             return note
 
         if note.notes:
-            found_note = get_note(note.notes, _code)
+            found_note = get_note(note.notes, code_)
 
             if found_note:
                 return found_note
 
     return None
 
-def generate_file_name(_code, _title):
+def generate_file_name(code_, title_):
     # I initially thought about validating the characters in the title,
     #     but nobody else would use this script and I would always know what characters to avoid. :)
-    return f"{_code} {_title}.json"
+    return f"{code_} {title_}.json"
 
 # ------------------------------------------------------------------------------
 #     Commands
@@ -243,16 +243,16 @@ def notes_help_command():
     pconsole.print("delete <code>", indents=pstring.LEVELED_INDENTS[1])
     pconsole.print("close", indents=pstring.LEVELED_INDENTS[1])
 
-def episodes_list_command(_episodes):
+def episodes_list_command(episodes_):
     pconsole.print("Episodes:")
 
-    if not _episodes:
+    if not episodes_:
         pconsole.print("No episodes found.", indents=pstring.LEVELED_INDENTS[1])
         return
 
     # Sorted like a directory's file list.
-    for _episode in sorted(_episodes, key=lambda episode: episode.title.lower()):
-        pconsole.print(f"{_episode.code} {_episode.title}", indents=pstring.LEVELED_INDENTS[1])
+    for episode_ in sorted(episodes_, key=lambda episode: episode.title.lower()):
+        pconsole.print(f"{episode_.code} {episode_.title}", indents=pstring.LEVELED_INDENTS[1])
 
 def notes_list_command(notes, depth):
     if depth == 0:
@@ -269,27 +269,27 @@ def notes_list_command(notes, depth):
         if note.notes:
             notes_list_command(note.notes, depth + 1)
 
-def episodes_open_command(_episodes, _command):
-    _code = _command.get_arg_or_default(0, None)
+def episodes_open_command(episodes_, command_):
+    code_ = command_.get_arg_or_default(0, None)
 
-    if _code:
-        _episode = get_episode(_episodes, _code)
+    if code_:
+        episode_ = get_episode(episodes_, code_)
 
-        if _episode:
-            if not _episode.notes:
+        if episode_:
+            if not episode_.notes:
                 notes_help_command()
 
             while True:
-                notes_list_command(_episode.notes, depth=0)
+                notes_list_command(episode_.notes, depth=0)
 
-                _command = pconsole.input_command(f"Episode {_episode.code}: ")
+                command_ = pconsole.input_command(f"Episode {episode_.code}: ")
 
-                if _command:
-                    if pstring.equals_ignore_case(_command.command, "help"):
+                if command_:
+                    if pstring.equals_ignore_case(command_.command, "help"):
                         notes_help_command()
 
-                    elif pstring.equals_ignore_case(_command.command, "create"):
-                        content = pstring.normalize_singleline_str(_command.get_remaining_args_as_str(0))
+                    elif pstring.equals_ignore_case(command_.command, "create"):
+                        content = pstring.normalize_singleline_str(command_.get_remaining_args_as_str(0))
 
                         if pstring.equals_ignore_case(content, "copy"):
                             try:
@@ -303,13 +303,13 @@ def episodes_open_command(_episodes, _command):
                             note = NoteInfo()
                             note.guid = uuid.uuid4()
                             note.creation_utc = pdatetime.get_utc_now()
-                            note.code = generate_random_code(_episodes)
-                            note.parent = _episode
+                            note.code = generate_random_code(episodes_)
+                            note.parent = episode_
                             note.parent_type = ParentType.EPISODE
                             note.content = content
 
                             try:
-                                _episode.create_note(note)
+                                episode_.create_note(note)
 
                             except Exception: # pylint: disable=broad-except
                                 pconsole.print("Failed to create note.", colors=pconsole.ERROR_COLORS)
@@ -320,14 +320,14 @@ def episodes_open_command(_episodes, _command):
                         else:
                             pconsole.print("Content is required.", colors=pconsole.ERROR_COLORS)
 
-                    elif pstring.equals_ignore_case(_command.command, "child"):
-                        parent_code = _command.get_arg_or_default(0, None)
+                    elif pstring.equals_ignore_case(command_.command, "child"):
+                        parent_code = command_.get_arg_or_default(0, None)
 
                         if parent_code:
-                            parent_note = get_note(_episode.notes, parent_code)
+                            parent_note = get_note(episode_.notes, parent_code)
 
                             if parent_note:
-                                content = pstring.normalize_singleline_str(_command.get_remaining_args_as_str(1))
+                                content = pstring.normalize_singleline_str(command_.get_remaining_args_as_str(1))
 
                                 if pstring.equals_ignore_case(content, "copy"):
                                     try:
@@ -341,7 +341,7 @@ def episodes_open_command(_episodes, _command):
                                     note = NoteInfo()
                                     note.guid = uuid.uuid4()
                                     note.creation_utc = pdatetime.get_utc_now()
-                                    note.code = generate_random_code(_episodes)
+                                    note.code = generate_random_code(episodes_)
                                     note.parent = parent_note
                                     note.parent_type = ParentType.NOTE
                                     note.content = content
@@ -364,14 +364,14 @@ def episodes_open_command(_episodes, _command):
                         else:
                             pconsole.print("Parent code is required.", colors=pconsole.ERROR_COLORS)
 
-                    elif pstring.equals_ignore_case(_command.command, "list"):
-                        notes_list_command(_episode.notes, depth=0)
+                    elif pstring.equals_ignore_case(command_.command, "list"):
+                        notes_list_command(episode_.notes, depth=0)
 
-                    elif pstring.equals_ignore_case(_command.command, "read"):
-                        _code = _command.get_arg_or_default(0, None)
+                    elif pstring.equals_ignore_case(command_.command, "read"):
+                        code_ = command_.get_arg_or_default(0, None)
 
-                        if _code:
-                            note = get_note(_episode.notes, _code)
+                        if code_:
+                            note = get_note(episode_.notes, code_)
 
                             if note:
                                 pconsole.print("Content:")
@@ -385,17 +385,17 @@ def episodes_open_command(_episodes, _command):
                         else:
                             pconsole.print("Code is required.", colors=pconsole.ERROR_COLORS)
 
-                    elif pstring.equals_ignore_case(_command.command, "parent"):
-                        _code = _command.get_arg_or_default(0, None)
+                    elif pstring.equals_ignore_case(command_.command, "parent"):
+                        code_ = command_.get_arg_or_default(0, None)
 
-                        if _code:
-                            note = get_note(_episode.notes, _code)
+                        if code_:
+                            note = get_note(episode_.notes, code_)
 
                             if note:
-                                parent_code = _command.get_arg_or_default(1, None)
+                                parent_code = command_.get_arg_or_default(1, None)
 
                                 if parent_code:
-                                    parent_note = get_note(_episode.notes, parent_code)
+                                    parent_note = get_note(episode_.notes, parent_code)
 
                                     if parent_note:
                                         old_parent = note.parent
@@ -439,14 +439,14 @@ def episodes_open_command(_episodes, _command):
                         else:
                             pconsole.print("Code is required.", colors=pconsole.ERROR_COLORS)
 
-                    elif pstring.equals_ignore_case(_command.command, "content"):
-                        _code = _command.get_arg_or_default(0, None)
+                    elif pstring.equals_ignore_case(command_.command, "content"):
+                        code_ = command_.get_arg_or_default(0, None)
 
-                        if _code:
-                            note = get_note(_episode.notes, _code)
+                        if code_:
+                            note = get_note(episode_.notes, code_)
 
                             if note:
-                                content = pstring.normalize_singleline_str(_command.get_remaining_args_as_str(1))
+                                content = pstring.normalize_singleline_str(command_.get_remaining_args_as_str(1))
 
                                 if pstring.equals_ignore_case(content, "copy"):
                                     try:
@@ -479,11 +479,11 @@ def episodes_open_command(_episodes, _command):
                         else:
                             pconsole.print("Code is required.", colors=pconsole.ERROR_COLORS)
 
-                    elif pstring.equals_ignore_case(_command.command, "delete"):
-                        _code = _command.get_arg_or_default(0, None)
+                    elif pstring.equals_ignore_case(command_.command, "delete"):
+                        code_ = command_.get_arg_or_default(0, None)
 
-                        if _code:
-                            note = get_note(_episode.notes, _code)
+                        if code_:
+                            note = get_note(episode_.notes, code_)
 
                             if note:
                                 try:
@@ -501,7 +501,7 @@ def episodes_open_command(_episodes, _command):
                         else:
                             pconsole.print("Code is required.", colors=pconsole.ERROR_COLORS)
 
-                    elif pstring.equals_ignore_case(_command.command, "close"):
+                    elif pstring.equals_ignore_case(command_.command, "close"):
                         break
 
                     else:

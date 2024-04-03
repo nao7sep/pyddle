@@ -11,8 +11,8 @@ def utc_to_roundtrip_string(utc):
 
     return utc.isoformat()
 
-def roundtrip_string_to_utc(_str):
-    return datetime.datetime.fromisoformat(_str)
+def roundtrip_string_to_utc(str_):
+    return datetime.datetime.fromisoformat(str_)
 
 # In .NET, I use code like ToString ("yyyyMMdd'T'HHmmss'-'fffffffK", CultureInfo.InvariantCulture) to generate an UTC timestamp that is able to roundtrip.
 # I get strings like: "20240307T074742-5919023Z".
