@@ -11,7 +11,10 @@ import xml.etree.ElementTree
 
 import pyddle_debugging as pdebugging
 import pyddle_file_system as pfs
+import pyddle_global as pglobal
 import pyddle_string as pstring
+
+pglobal.set_main_script_file_path(__file__)
 
 # Initialize variables of frequently used types.
 

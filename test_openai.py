@@ -9,8 +9,11 @@ import PIL.ImageDraw
 import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
 import pyddle_file_system as pfs
+import pyddle_global as pglobal
 import pyddle_openai as openai
 import pyddle_string as pstring
+
+pglobal.set_main_script_file_path(__file__)
 
 pfs.make_and_move_to_output_subdirectory("openai")
 
