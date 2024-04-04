@@ -15,6 +15,7 @@ import pyddle_collections as pcollections
 import pyddle_json_based_kvs as pkvs
 import pyddle_file_system as pfs
 import pyddle_path as ppath
+import pyddle_utility as putility
 import pyddle_web as pweb
 
 # This script contains some one-liners.
@@ -282,15 +283,12 @@ def openai_audio_speech_create(
     args.must_contain_enum_value("response_format", response_format)
     args.may_contain("speed", speed)
 
-    if not client:
-        client = get_openai_client()
-
     if timeout:
         args.must_contain("timeout", timeout)
 
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    return client.audio.speech.create(**args.args) # pylint: disable=missing-kwoa
+    return putility.get_not_none_or_call_func(get_openai_client, client).audio.speech.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_save_audio(file_path, response):
     pfs.create_parent_directory(file_path)
@@ -413,13 +411,10 @@ def openai_audio_transcriptions_create(
         args.may_contain("temperature", temperature)
         args.may_contain("timestamp_granularities", timestamp_granularities)
 
-        if not client:
-            client = get_openai_client()
-
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return client.audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_client, client).audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_audio_translations_create(
     # Input:
@@ -449,13 +444,10 @@ def openai_audio_translations_create(
         args.may_contain("prompt", prompt)
         args.may_contain("temperature", temperature)
 
-        if not client:
-            client = get_openai_client()
-
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return client.audio.translations.create(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_client, client).audio.translations.create(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Chat
@@ -524,9 +516,6 @@ def openai_chat_completions_create(
     args.may_contain("top_p", top_p)
     args.may_contain("user", user)
 
-    if not client:
-        client = get_openai_client()
-
     if timeout:
         args.must_contain("timeout", timeout)
 
@@ -534,7 +523,7 @@ def openai_chat_completions_create(
         if stream:
             args.must_contain("timeout", httpx.Timeout(timeout=pweb.DEFAULT_TIMEOUT, read=DEFAULT_CHUNK_TIMEOUT))
 
-    return client.chat.completions.create(**args.args)
+    return putility.get_not_none_or_call_func(get_openai_client, client).chat.completions.create(**args.args)
 
 class OpenAiChatSettings:
     def __init__(self, model: OpenAiModel):
@@ -808,9 +797,6 @@ def openai_images_generate(
     args.may_contain_enum_value("style", style)
     args.may_contain("user", user)
 
-    if not client:
-        client = get_openai_client()
-
     if timeout:
         args.must_contain("timeout", timeout)
 
@@ -818,7 +804,7 @@ def openai_images_generate(
     # It takes care of saving the images as well.
     args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-    return client.images.generate(**args.args) # pylint: disable=missing-kwoa
+    return putility.get_not_none_or_call_func(get_openai_client, client).images.generate(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -857,9 +843,6 @@ def openai_images_edit(
         args.may_contain_enum_value("size", size)
         args.may_contain("user", user)
 
-        if not client:
-            client = get_openai_client()
-
         if timeout:
             args.must_contain("timeout", timeout)
 
@@ -869,10 +852,10 @@ def openai_images_edit(
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                return client.images.edit(**args.args) # pylint: disable=missing-kwoa
+                return putility.get_not_none_or_call_func(get_openai_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
 
         else:
-            return client.images.edit(**args.args) # pylint: disable=missing-kwoa
+            return putility.get_not_none_or_call_func(get_openai_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -908,12 +891,9 @@ def openai_images_create_variation(
         args.may_contain_enum_value("size", size)
         args.may_contain("user", user)
 
-        if not client:
-            client = get_openai_client()
-
         if timeout:
             args.must_contain("timeout", timeout)
 
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-        return client.images.create_variation(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_client, client).images.create_variation(**args.args) # pylint: disable=missing-kwoa
