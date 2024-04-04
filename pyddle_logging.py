@@ -43,14 +43,14 @@ def get_log_file_path():
 
     return __log_file_path
 
-logs = []
+pending_logs = []
 
-def log(str_, indents="", end="\n", flush_=False):
+def log(str_: str, indents="", end="\n", flush_=False):
     if str_:
-        logs.append(f"{indents}{str_}{end}")
+        pending_logs.append(f"{indents}{str_}{end}")
 
     else:
-        logs.append(end)
+        pending_logs.append(end)
 
     if flush_:
         flush()
@@ -62,20 +62,20 @@ def log_lines(str_: list[str], indents="", trailing="", end="\n", flush_=False):
 
             if parts[1]:
                 # Using the original string of the line.
-                logs.append(f"{indents}{line}{trailing}{end}")
+                pending_logs.append(f"{indents}{line}{trailing}{end}")
 
             else:
-                logs.append(end)
+                pending_logs.append(end)
 
     if flush_:
         flush()
 
 def flush():
-    if logs:
+    if pending_logs:
         os.makedirs(get_logs_directory_path(), exist_ok=True)
 
         with pfs.open_file_and_write_utf_encoding_bom(get_log_file_path(), append=True) as file:
-            for log_ in logs:
+            for log_ in pending_logs:
                 file.write(log_)
 
-        logs.clear()
+        pending_logs.clear()

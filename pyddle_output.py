@@ -8,7 +8,7 @@ import pyddle_logging as plogging
 # If "str" is falsy, "indents" wont be output, but "end" will be.
 # "indents" and "end" will never be colored.
 
-def print_and_log(str_, indents="", colors="", end="\n", flush=False):
+def print_and_log(str_: str, indents="", colors="", end="\n", flush=False):
     pconsole.print(str_, indents=indents, colors=colors, end=end)
     plogging.log(str_, indents=indents, end=end, flush_=flush)
 

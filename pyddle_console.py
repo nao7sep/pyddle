@@ -14,7 +14,7 @@ IMPORTANT_COLORS = [colorama.Back.BLUE, colorama.Fore.WHITE]
 WARNING_COLORS = [colorama.Back.YELLOW, colorama.Fore.BLACK]
 ERROR_COLORS = [colorama.Back.RED, colorama.Fore.WHITE]
 
-def print(str_, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
+def print(str_: str, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
     # A frequently used method that should almost always be called like "pconsole.print".
 
     if str_:
@@ -40,6 +40,7 @@ def print_lines(str_: list[str], indents="", colors: list[str]=None, trailing=""
 
             if parts[1]:
                 if colors_string:
+                    # Colors are applied only to the visible content.
                     builtin_print(f"{indents}{parts[0]}{colors_string}{parts[1]}{colorama.Style.RESET_ALL}{parts[2]}{trailing}", end=end)
 
                 else:
@@ -47,6 +48,14 @@ def print_lines(str_: list[str], indents="", colors: list[str]=None, trailing=""
 
             else:
                 builtin_print("", end=end)
+
+    # When the output is like:
+    #     Values:
+    #         Value 1: ...
+    #         Value 2: ...
+    # If the list containing the values is empty, the "Values:" line shouldnt be output.
+    # Technically, calling this method on an empty list is pointless
+    #     and therefore its behavior could be considered "undefined" even though we know exactly what will happen.
 
 # ------------------------------------------------------------------------------
 #     Typical output/input operations

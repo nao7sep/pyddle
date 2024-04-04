@@ -344,31 +344,44 @@ def last_index_of_any_casefold(str_, substrings):
 #     because there's a high chance that the developer is doing something wrong.
 # Like, startswith(None, "a") is most likely not an intended operation.
 
-def splitlines(str_, trim_line_start=False, trim_line_end=True,
+def splitlines(str_: str, trim_line_start=False, trim_line_end=True,
                remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
-    ''' A virtually harmless operation for a string that must be considered as an array of 0 or more lines. '''
+    ''' Splits a multiline string into lines and normalizes them. '''
 
     if not str_:
         # "".splitlines() returns an empty list.
         return []
 
-    raw_lines = str_.splitlines()
+    return normalize_lines(str_.splitlines(), trim_line_start=trim_line_start, trim_line_end=trim_line_end,
+                           remove_empty_lines_at_start=remove_empty_lines_at_start, remove_redundant_empty_lines=remove_redundant_empty_lines, remove_empty_lines_at_end=remove_empty_lines_at_end)
+
+# The method below was originally a part of the "splitlines" method.
+# As Python doesnt have C#'s StringBuilder and such mechanisms may not be efficient,
+#     I expect there'll be situations where strings are built line by line.
+
+def normalize_lines(lines: list[str], trim_line_start=False, trim_line_end=True,
+               remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
+    ''' Normalizes a list of lines by trimming them and removing empty lines. '''
+
+    if not lines:
+        # We dont need to raise an error just because "lines" is None.
+        return []
 
     if trim_line_start:
         if trim_line_end:
-            stripped_lines = [raw_line.strip() for raw_line in raw_lines]
+            stripped_lines = [line.strip() for line in lines]
 
         else:
-            stripped_lines = [raw_line.lstrip() for raw_line in raw_lines]
+            stripped_lines = [line.lstrip() for line in lines]
 
     else:
         if trim_line_end:
-            stripped_lines = [raw_line.rstrip() for raw_line in raw_lines]
+            stripped_lines = [line.rstrip() for line in lines]
 
         else:
-            stripped_lines = raw_lines
+            stripped_lines = lines
 
-    lines = []
+    new_lines = []
 
     has_detected_visible_line = False # Whether at least one visible line has ever been detected.
     detected_continuous_empty_line_count = 0
@@ -384,31 +397,31 @@ def splitlines(str_, trim_line_start=False, trim_line_end=True,
 
                 if remove_empty_lines_at_start is False:
                     for _ in range(detected_continuous_empty_line_count):
-                        lines.append("")
+                        new_lines.append("")
 
             else: # Middle part.
                 if detected_continuous_empty_line_count > 0:
                     if remove_redundant_empty_lines:
-                        lines.append("")
+                        new_lines.append("")
 
                     else:
                         for _ in range(detected_continuous_empty_line_count):
-                            lines.append("")
+                            new_lines.append("")
 
             detected_continuous_empty_line_count = 0
-            lines.append(stripped_line)
+            new_lines.append(stripped_line)
 
     # End part.
     if detected_continuous_empty_line_count > 0:
         if remove_empty_lines_at_end is False:
             for _ in range(detected_continuous_empty_line_count):
-                lines.append("")
+                new_lines.append("")
 
-    return lines
+    return new_lines
 
 def normalize_multiline_str(str_, trim_line_start=False, trim_line_end=True,
                             remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
-    ''' If you need to for-loop the lines, consider calling "splitlines" instead. '''
+    ''' Splits a multiline string into lines, normalizes them and joins them back. '''
 
     if not str_:
         return str_
