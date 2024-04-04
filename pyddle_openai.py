@@ -299,6 +299,76 @@ def openai_save_audio(file_path, response):
 # https://github.com/openai/openai-python/blob/main/src/openai/resources/audio/transcriptions.py
 # https://github.com/openai/openai-python/blob/main/src/openai/resources/audio/translations.py
 
+# Below is a list of supported languages by Whisper, NOT the GPT models.
+# Whisper is a "general-purpose speech recognition model".
+# As of 2024-04-04, I cant seem to find any official list for the GPT models.
+# As major languages are in the list and the names seem to be consistent with the ISO 639-1 codes,
+#     it shouldnt hurt to use the enum values for the GPT models as well.
+# https://platform.openai.com/docs/guides/text-to-speech
+# https://github.com/openai/whisper#available-models-and-languages
+# https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
+
+# The rest of the comments have become "episodic" and been moved to: RK32 OpenAI Supported Languages.json
+
+class OpenAiLanguage(enum.Enum):
+    AFRIKAANS = "afrikaans"
+    ARABIC = "arabic"
+    ARMENIAN = "armenian"
+    AZERBAIJANI = "azerbaijani"
+    BELARUSIAN = "belarusian"
+    BOSNIAN = "bosnian"
+    BULGARIAN = "bulgarian"
+    CATALAN = "catalan"
+    CHINESE = "chinese"
+    CROATIAN = "croatian"
+    CZECH = "czech"
+    DANISH = "danish"
+    DUTCH = "dutch"
+    ENGLISH = "english"
+    ESTONIAN = "estonian"
+    FINNISH = "finnish"
+    FRENCH = "french"
+    GALICIAN = "galician"
+    GERMAN = "german"
+    GREEK = "greek"
+    HEBREW = "hebrew"
+    HINDI = "hindi"
+    HUNGARIAN = "hungarian"
+    ICELANDIC = "icelandic"
+    INDONESIAN = "indonesian"
+    ITALIAN = "italian"
+    JAPANESE = "japanese"
+    KANNADA = "kannada"
+    KAZAKH = "kazakh"
+    KOREAN = "korean"
+    LATVIAN = "latvian"
+    LITHUANIAN = "lithuanian"
+    MACEDONIAN = "macedonian"
+    MALAY = "malay"
+    MARATHI = "marathi"
+    MAORI = "maori"
+    NEPALI = "nepali"
+    NORWEGIAN = "norwegian"
+    PERSIAN = "persian"
+    POLISH = "polish"
+    PORTUGUESE = "portuguese"
+    ROMANIAN = "romanian"
+    RUSSIAN = "russian"
+    SERBIAN = "serbian"
+    SLOVAK = "slovak"
+    SLOVENIAN = "slovenian"
+    SPANISH = "spanish"
+    SWAHILI = "swahili"
+    SWEDISH = "swedish"
+    TAGALOG = "tagalog"
+    TAMIL = "tamil"
+    THAI = "thai"
+    TURKISH = "turkish"
+    UKRAINIAN = "ukrainian"
+    URDU = "urdu"
+    VIETNAMESE = "vietnamese"
+    WELSH = "welsh"
+
 class OpenAiTranscriptFormat(enum.Enum):
     JSON = "json"
     SRT = "srt"
