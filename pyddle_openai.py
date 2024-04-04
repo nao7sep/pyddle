@@ -557,31 +557,49 @@ def openai_chat_completions_create_with_settings(
         user=settings.user,
         timeout=timeout)
 
-def openai_add_system_message(messages, system_message):
-    messages.append({
+def openai_add_system_message(messages, system_message, name=None):
+    message = {
         "role": OpenAiRole.SYSTEM.value,
         "content": system_message
-    })
+    }
 
-def openai_add_user_message(messages, user_message):
-    messages.append({
+    # If we sort the items meaningfully, "name" would come first.
+    # But it's optional and therefore should come last.
+
+    if name:
+        message["name"] = name
+
+    messages.append(message)
+
+def openai_add_user_message(messages, user_message, name=None):
+    message = {
         "role": OpenAiRole.USER.value,
         "content": user_message
-    })
+    }
 
-def openai_add_assistant_message(messages, assistant_message):
-    messages.append({
+    if name:
+        message["name"] = name
+
+    messages.append(message)
+
+def openai_add_assistant_message(messages, assistant_message, name=None):
+    message = {
         "role": OpenAiRole.ASSISTANT.value,
         "content": assistant_message
-    })
+    }
 
-def openai_build_messages(user_message, system_message=None):
+    if name:
+        message["name"] = name
+
+    messages.append(message)
+
+def openai_build_messages(user_message, user_message_name=None, system_message=None, system_message_name=None):
     messages = []
 
     if system_message:
-        openai_add_system_message(messages, system_message)
+        openai_add_system_message(messages, system_message, system_message_name)
 
-    openai_add_user_message(messages, user_message)
+    openai_add_user_message(messages, user_message, user_message_name)
 
     return messages
 
@@ -659,6 +677,7 @@ class OpenAiImageQuality(enum.Enum):
     STANDARD = "standard"
 
 class OpenAiImageSize(enum.Enum):
+    # The only way to start the names with numbers without adding meanings.
     _256X256 = "256x256"
     _512X512 = "512x512"
     _1024X1024 = "1024x1024"
