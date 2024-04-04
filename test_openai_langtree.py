@@ -14,9 +14,6 @@ import pyddle_string as pstring
 pglobal.set_main_script_file_path(__file__)
 
 try:
-    # todo: Change to GPT-4 after initial testing.
-    chat_settings = popenai.OpenAiChatSettings(popenai.OpenAiModel.GPT_3_5_TURBO)
-
     root_message = plangtree.LangTreeMessage(
         user_role=popenai.OpenAiRole.SYSTEM,
         content="You are a helpful assistant."
