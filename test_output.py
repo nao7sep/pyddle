@@ -37,6 +37,7 @@ poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE, colors=pconsole
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE, end="")
 poutput.print_and_log("b") # Makes sure "end" was effective.
+# => We get "    a    b" in one line.
 
 # One pair of parameters.
 # Probably, this is the only meaningful pair.
@@ -56,9 +57,9 @@ NORMALIZED_MULTILINE_LIST = pstring.normalize_lines(MULTILINE_LIST)
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(None)
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines([None])
+poutput.print_and_log_lines([None]) # => One empty line.
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines([""])
+poutput.print_and_log_lines([""]) # => One empty line.
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(SINGLELINE_LIST)
 poutput.print_and_log(BORDERLINE)
@@ -78,6 +79,7 @@ poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, trailing=LINE_W
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, end="")
 poutput.print_and_log("b") # Makes sure "end" was effective.
+# => We get "    a        a    b" in one line.
 # As "end" doesnt affect other parameters, we wont be testing it any more.
 
 # One pair of parameters.
