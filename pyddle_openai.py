@@ -38,10 +38,11 @@ KVS_KEY_PREFIX = "pyddle_openai/"
 # https://platform.openai.com/docs/guides/production-best-practices
 
 class OpenAiSettings:
-    def __init__(self, kvs_data=None, kvs_key_prefix=None):
+    def __init__(self, kvs_data, kvs_key_prefix):
         self.kvs_data = kvs_data
         self.kvs_key_prefix = kvs_key_prefix
 
+        # Optional:
         self.__api_key = None
         self.__organization = None
         self.__base_url = None
@@ -217,12 +218,7 @@ def create_openai_client(api_key=None, organization=None, base_url=None, timeout
 # Lazy loading.
 __openai_client = None # pylint: disable=invalid-name
 
-def get_openai_client(client: openai.OpenAI=None):
-    ''' The default client is returned only if "client" is falsy. '''
-
-    if client:
-        return client
-
+def get_openai_client():
     global __openai_client # pylint: disable=global-statement
 
     if __openai_client is None:
@@ -286,12 +282,15 @@ def openai_audio_speech_create(
     args.must_contain_enum_value("response_format", response_format)
     args.may_contain("speed", speed)
 
+    if not client:
+        client = get_openai_client()
+
     if timeout:
         args.must_contain("timeout", timeout)
 
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    return get_openai_client(client=client).audio.speech.create(**args.args) # pylint: disable=missing-kwoa
+    return client.audio.speech.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_save_audio(file_path, response):
     pfs.create_parent_directory(file_path)
@@ -414,10 +413,13 @@ def openai_audio_transcriptions_create(
         args.may_contain("temperature", temperature)
         args.may_contain("timestamp_granularities", timestamp_granularities)
 
+        if not client:
+            client = get_openai_client()
+
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return get_openai_client(client=client).audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
+        return client.audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_audio_translations_create(
     # Input:
@@ -447,10 +449,13 @@ def openai_audio_translations_create(
         args.may_contain("prompt", prompt)
         args.may_contain("temperature", temperature)
 
+        if not client:
+            client = get_openai_client()
+
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return get_openai_client(client=client).audio.translations.create(**args.args) # pylint: disable=missing-kwoa
+        return client.audio.translations.create(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Chat
@@ -519,6 +524,9 @@ def openai_chat_completions_create(
     args.may_contain("top_p", top_p)
     args.may_contain("user", user)
 
+    if not client:
+        client = get_openai_client()
+
     if timeout:
         args.must_contain("timeout", timeout)
 
@@ -526,10 +534,10 @@ def openai_chat_completions_create(
         if stream:
             args.must_contain("timeout", httpx.Timeout(timeout=pweb.DEFAULT_TIMEOUT, read=DEFAULT_CHUNK_TIMEOUT))
 
-    return get_openai_client(client=client).chat.completions.create(**args.args)
+    return client.chat.completions.create(**args.args)
 
 class OpenAiChatSettings:
-    def __init__(self, model: OpenAiModel = None):
+    def __init__(self, model: OpenAiModel):
         self.model: OpenAiModel = model
 
         # Optional:
@@ -547,6 +555,28 @@ class OpenAiChatSettings:
         self.temperature = None
         self.top_p = None
         self.user = None
+
+# Let's go for the model we'd normally choose if we could choose any.
+
+# As of 2024-04-04, GPT 3.5 Turbo is the one used in the example in the API reference,
+#     and it's inexpensive and just enough for many kinds of work,
+#     but the training data is from 2021 and the context window is limited.
+# https://platform.openai.com/docs/api-reference/chat/create
+
+# When we use a GPT model for work, we usually care about quality rather than quantity.
+
+DEFAULT_GPT_MODEL = OpenAiModel.GPT_4_TURBO
+
+# Lazy loading.
+__openai_chat_settings = None # pylint: disable=invalid-name
+
+def get_openai_chat_settings():
+    global __openai_chat_settings # pylint: disable=global-statement
+
+    if __openai_chat_settings is None:
+        __openai_chat_settings = OpenAiChatSettings(model=DEFAULT_GPT_MODEL)
+
+    return __openai_chat_settings
 
 def openai_chat_completions_create_with_settings(
     settings: OpenAiChatSettings,
@@ -577,38 +607,36 @@ def openai_chat_completions_create_with_settings(
         timeout=timeout)
 
 def openai_add_system_message(messages, system_message, name=None):
-    message = {
-        "role": OpenAiRole.SYSTEM.value,
-        "content": system_message
-    }
-
-    # If we sort the items meaningfully, "name" would come first.
-    # But it's "optional" in the API reference and therefore should come last.
+    message = {}
 
     if name:
+        # "name" is optional, but it'd be more intuitive to have it in this order.
         message["name"] = name
+
+    message["role"] = OpenAiRole.SYSTEM.value
+    message["content"] = system_message
 
     messages.append(message)
 
 def openai_add_user_message(messages, user_message, name=None):
-    message = {
-        "role": OpenAiRole.USER.value,
-        "content": user_message
-    }
+    message = {}
 
     if name:
         message["name"] = name
+
+    message["role"] = OpenAiRole.USER.value
+    message["content"] = user_message
 
     messages.append(message)
 
 def openai_add_assistant_message(messages, assistant_message, name=None):
-    message = {
-        "role": OpenAiRole.ASSISTANT.value,
-        "content": assistant_message
-    }
+    message = {}
 
     if name:
         message["name"] = name
+
+    message["role"] = OpenAiRole.ASSISTANT.value
+    message["content"] = assistant_message
 
     messages.append(message)
 
@@ -780,6 +808,9 @@ def openai_images_generate(
     args.may_contain_enum_value("style", style)
     args.may_contain("user", user)
 
+    if not client:
+        client = get_openai_client()
+
     if timeout:
         args.must_contain("timeout", timeout)
 
@@ -787,7 +818,7 @@ def openai_images_generate(
     # It takes care of saving the images as well.
     args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-    return get_openai_client(client=client).images.generate(**args.args) # pylint: disable=missing-kwoa
+    return client.images.generate(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -826,6 +857,9 @@ def openai_images_edit(
         args.may_contain_enum_value("size", size)
         args.may_contain("user", user)
 
+        if not client:
+            client = get_openai_client()
+
         if timeout:
             args.must_contain("timeout", timeout)
 
@@ -835,10 +869,10 @@ def openai_images_edit(
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                return get_openai_client(client=client).images.edit(**args.args) # pylint: disable=missing-kwoa
+                return client.images.edit(**args.args) # pylint: disable=missing-kwoa
 
         else:
-            return get_openai_client(client=client).images.edit(**args.args) # pylint: disable=missing-kwoa
+            return client.images.edit(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -874,9 +908,12 @@ def openai_images_create_variation(
         args.may_contain_enum_value("size", size)
         args.may_contain("user", user)
 
+        if not client:
+            client = get_openai_client()
+
         if timeout:
             args.must_contain("timeout", timeout)
 
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-        return get_openai_client(client=client).images.create_variation(**args.args) # pylint: disable=missing-kwoa
+        return client.images.create_variation(**args.args) # pylint: disable=missing-kwoa
