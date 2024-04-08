@@ -507,59 +507,30 @@ class LangTreeContextBuilder:
     def __init__(
         self,
 
-        max_number_of_first_system_messages=0,
-        max_number_of_first_system_message_summaries=0,
-        max_number_of_last_system_messages=4649,
-        max_number_of_last_system_message_summaries=0,
+        max_number_of_system_messages=None,
+        max_number_of_system_message_summaries=0,
 
-        max_number_of_first_user_messages=0,
-        max_number_of_first_user_message_summaries=0,
-        max_number_of_last_user_messages=2,
-        max_number_of_last_user_message_summaries=2,
+        max_number_of_user_messages=2,
+        max_number_of_user_message_summaries=2,
 
-        max_number_of_first_assistant_messages=0,
-        max_number_of_first_assistant_message_summaries=0,
-        max_number_of_last_assistant_messages=1,
-        max_number_of_last_assistant_message_summaries=2):
+        max_number_of_assistant_messages=1,
+        max_number_of_assistant_message_summaries=2):
 
-        self.max_number_of_first_system_messages = max_number_of_first_system_messages
-        self.max_number_of_first_system_message_summaries = max_number_of_first_system_message_summaries
-        self.max_number_of_last_system_messages = max_number_of_last_system_messages
-        self.max_number_of_last_system_message_summaries = max_number_of_last_system_message_summaries
+        self.max_number_of_system_messages = max_number_of_system_messages
+        self.max_number_of_system_message_summaries = max_number_of_system_message_summaries
 
-        self.max_number_of_first_user_messages = max_number_of_first_user_messages
-        self.max_number_of_first_user_message_summaries = max_number_of_first_user_message_summaries
-        self.max_number_of_last_user_messages = max_number_of_last_user_messages
-        self.max_number_of_last_user_message_summaries = max_number_of_last_user_message_summaries
+        self.max_number_of_user_messages = max_number_of_user_messages
+        self.max_number_of_user_message_summaries = max_number_of_user_message_summaries
 
-        self.max_number_of_first_assistant_messages = max_number_of_first_assistant_messages
-        self.max_number_of_first_assistant_message_summaries = max_number_of_first_assistant_message_summaries
-        self.max_number_of_last_assistant_messages = max_number_of_last_assistant_messages
-        self.max_number_of_last_assistant_message_summaries = max_number_of_last_assistant_message_summaries
+        self.max_number_of_assistant_messages = max_number_of_assistant_messages
+        self.max_number_of_assistant_message_summaries = max_number_of_assistant_message_summaries
 
     def build_messages(self, message: LangTreeMessage):
         messages = []
 
-        # todo: temp code for testing
-
-        element = message
-
-        while True:
-            messages.append(
-                popenai.openai_build_message(
-                    role=element.user_role,
-                    content=element.content,
-                    name=element.user_name)
-            )
-
-            if not element.parent_element:
-                break
-
-            element = element.parent_element
-
         return messages
 
-# Lazy loading.
+# Lazy loading:
 __langtree_default_context_builder = None # pylint: disable=invalid-name
 
 def get_langtree_default_context_builder():

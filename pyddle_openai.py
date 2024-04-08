@@ -77,7 +77,7 @@ class OpenAiSettings:
 
         return self.__base_url
 
-# Lazy loading.
+# Lazy loading:
 __openai_default_settings = None # pylint: disable=invalid-name
 
 def get_openai_default_settings():
@@ -139,7 +139,7 @@ class OpenAiTokenCounter:
         #     and therefore there's not much point in just making the method work when half the CJK characters anyway disappear.
         return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str_)]
 
-# Lazy loading.
+# Lazy loading:
 __gpt_3_5_turbo_token_counter = None # pylint: disable=invalid-name
 
 def get_gpt_3_5_turbo_token_counter():
@@ -150,7 +150,7 @@ def get_gpt_3_5_turbo_token_counter():
 
     return __gpt_3_5_turbo_token_counter
 
-# Lazy loading.
+# Lazy loading:
 __gpt_4_token_counter = None # pylint: disable=invalid-name
 
 def get_gpt_4_token_counter():
@@ -161,7 +161,7 @@ def get_gpt_4_token_counter():
 
     return __gpt_4_token_counter
 
-# Lazy loading.
+# Lazy loading:
 __gpt_4_turbo_token_counter = None # pylint: disable=invalid-name
 
 def get_gpt_4_turbo_token_counter():
@@ -172,7 +172,7 @@ def get_gpt_4_turbo_token_counter():
 
     return __gpt_4_turbo_token_counter
 
-# Lazy loading.
+# Lazy loading:
 # May be unnecessary.
 __gpt_4_vision_token_counter = None # pylint: disable=invalid-name
 
@@ -216,7 +216,7 @@ def create_openai_client(api_key=None, organization=None, base_url=None, timeout
 
     return openai.OpenAI(**args.args)
 
-# Lazy loading.
+# Lazy loading:
 __openai_default_client = None # pylint: disable=invalid-name
 
 def get_openai_default_client():
@@ -556,7 +556,7 @@ class OpenAiChatSettings:
 
 DEFAULT_GPT_MODEL = OpenAiModel.GPT_4_TURBO
 
-# Lazy loading.
+# Lazy loading:
 __openai_default_chat_settings = None # pylint: disable=invalid-name
 
 def get_openai_default_chat_settings():

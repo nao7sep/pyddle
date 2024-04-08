@@ -13,7 +13,7 @@ import pyddle_string as pstring
 # Requires the developer to call pyddle_global.set_main_script_file_path() before using this module.
 # I think it's OK; it's quick, runs at negligible cost and certainly improves the usability of the log file.
 
-# Lazy loading.
+# Lazy loading:
 __logs_directory_path = None # pylint: disable=invalid-name
 
 def get_logs_directory_path():
@@ -30,7 +30,7 @@ def get_logs_directory_path():
 # In Python, I consider script file names are also module names and the underscores in them are no more special than alphabets and digits; they are NOT separators.
 # The following file name format is reasonable as the script file name may not contain hyphens while file name elements should be separated by hyphens.
 
-# Lazy loading.
+# Lazy loading:
 __log_file_path = None # pylint: disable=invalid-name
 
 def get_log_file_path():

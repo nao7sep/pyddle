@@ -10,7 +10,7 @@ import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_path as ppath
 
-# Lazy loading.
+# Lazy loading:
 __executing_script_files_directory_path = None # pylint: disable=invalid-name
 
 def get_executing_script_files_directory_path():
@@ -21,7 +21,7 @@ def get_executing_script_files_directory_path():
 
     return __executing_script_files_directory_path
 
-# Lazy loading.
+# Lazy loading:
 __first_kvs_file_path = None # pylint: disable=invalid-name
 
 def get_first_kvs_file_path():
@@ -32,7 +32,7 @@ def get_first_kvs_file_path():
 
     return __first_kvs_file_path
 
-# Lazy loading.
+# Lazy loading:
 __second_kvs_file_path = None # pylint: disable=invalid-name
 
 def get_second_kvs_file_path():
@@ -44,7 +44,7 @@ def get_second_kvs_file_path():
 
     return __second_kvs_file_path
 
-# Lazy loading.
+# Lazy loading:
 __first_kvs_data = None # pylint: disable=invalid-name
 
 def get_first_kvs_data():
@@ -59,7 +59,7 @@ def get_first_kvs_data():
 
     return __first_kvs_data
 
-# Lazy loading.
+# Lazy loading:
 __second_kvs_data = None # pylint: disable=invalid-name
 
 def get_second_kvs_data():
@@ -74,7 +74,7 @@ def get_second_kvs_data():
 
     return __second_kvs_data
 
-# Lazy loading.
+# Lazy loading:
 __merged_kvs_data = None # pylint: disable=invalid-name
 
 def get_merged_kvs_data():
