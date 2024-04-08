@@ -8,6 +8,7 @@ import openai
 
 import pyddle_datetime as pdatetime
 import pyddle_openai as popenai
+import pyddle_type as ptype
 
 # Some common practice for this module:
 #     * Required fields are included in the constructor (even if they are inherited; for clarity)
@@ -63,6 +64,63 @@ class LangTreeElement:
         self.chat_settings: popenai.OpenAiChatSettings = None
         self.timeout = None
 
+    def get_root_element(self):
+        element = self
+
+        while element.parent_element:
+            element = element.parent_element
+
+        return element
+
+    def create_attribute(self, name, value):
+        attribute = LangTreeAttribute(
+            name=name,
+            value=value
+        )
+
+        attribute.parent_element_guid = self.guid
+        attribute.parent_element = self
+
+        attribute.client = self.client
+        attribute.chat_settings = self.chat_settings
+        attribute.timeout = self.timeout
+
+        self.attributes[attribute.name] = attribute
+
+        return attribute
+
+    def create_translation(self, language: typing.Union[popenai.OpenAiLanguage, str], content):
+        translation = LangTreeTranslation(
+            language=language,
+            content=content
+        )
+
+        translation.parent_element_guid = self.guid
+        translation.parent_element = self
+
+        translation.client = self.client
+        translation.chat_settings = self.chat_settings
+        translation.timeout = self.timeout
+
+        self.translations[translation.language] = translation
+
+        return translation
+
+    # Moves "attributes" and "translations" to the end of the dictionary.
+    # Since Python 3.7, dictionaries are ordered by insertion order.
+
+    @staticmethod
+    def _update_key_order(dictionary):
+        if "attributes" in dictionary:
+            attributes = dictionary["attributes"]
+            del dictionary["attributes"]
+            dictionary["attributes"] = attributes
+
+        if "translations" in dictionary:
+            translations = dictionary["translations"]
+            del dictionary["translations"]
+            dictionary["translations"] = translations
+
     def serialize_to_dict(self):
         dictionary = {}
 
@@ -94,6 +152,42 @@ class LangTreeElement:
 
         return dictionary
 
+    @staticmethod
+    def _deserialize_common_fields(element, dictionary):
+        if "parent_element_guid" in dictionary:
+            element.parent_element_guid = uuid.UUID(dictionary["parent_element_guid"])
+
+        if "attributes" in dictionary:
+            for attribute_dict in dictionary["attributes"]:
+                attribute = LangTreeAttribute.deserialize_from_dict(attribute_dict)
+
+                # attribute.parent_element_guid = element.guid
+                attribute.parent_element = element
+
+                element.attributes[attribute.name] = attribute
+
+        if "translations" in dictionary:
+            for translation_dict in dictionary["translations"]:
+                translation = LangTreeTranslation.deserialize_from_dict(translation_dict)
+
+                # translation.parent_element_guid = element.guid
+                translation.parent_element = element
+
+                element.translations[translation.language] = translation
+
+        return element
+
+    @staticmethod
+    def deserialize_from_dict(dictionary):
+        element = LangTreeElement(
+            guid=uuid.UUID(dictionary["guid"]),
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
+        )
+
+        LangTreeElement._deserialize_common_fields(element, dictionary)
+
+        return element
+
 class LangTreeMessage(LangTreeElement):
     def __init__(
             self,
@@ -120,6 +214,25 @@ class LangTreeMessage(LangTreeElement):
         self.child_messages: list[LangTreeMessage] = []
         # The items are loosely expected to be ordered by "creation_utc".
 
+    def create_child_message(self, user_role: popenai.OpenAiRole, content, user_name=None):
+        child_message = LangTreeMessage(
+            user_role=user_role,
+            content=content
+        )
+
+        child_message.user_name = user_name
+
+        child_message.parent_element_guid = self.guid
+        child_message.parent_element = self
+
+        child_message.client = self.client
+        child_message.chat_settings = self.chat_settings
+        child_message.timeout = self.timeout
+
+        self.child_messages.append(child_message)
+
+        return child_message
+
     def serialize_to_dict(self):
         dictionary = {}
 
@@ -141,7 +254,35 @@ class LangTreeMessage(LangTreeElement):
         if self.child_messages:
             dictionary["child_messages"] = [child_message.serialize_to_dict() for child_message in sorted(self.child_messages, key=lambda child_message: child_message.creation_utc)]
 
+        LangTreeElement._update_key_order(dictionary)
+
         return dictionary
+
+    @staticmethod
+    def deserialize_from_dict(dictionary):
+        message = LangTreeMessage(
+            user_role=popenai.OpenAiRole(dictionary["user_role"]),
+            content=dictionary["content"],
+
+            guid=uuid.UUID(dictionary["guid"]),
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
+        )
+
+        LangTreeElement._deserialize_common_fields(message, dictionary)
+
+        if "user_name" in dictionary:
+            message.user_name = dictionary["user_name"]
+
+        if "child_messages" in dictionary:
+            for child_message_dict in dictionary["child_messages"]:
+                child_message = LangTreeMessage.deserialize_from_dict(child_message_dict)
+
+                # child_message.parent_element_guid = message.guid
+                child_message.parent_element = message
+
+                message.child_messages.append(child_message)
+
+        return message
 
 class LangTreeAttribute(LangTreeElement):
     def __init__(
@@ -173,7 +314,23 @@ class LangTreeAttribute(LangTreeElement):
         dictionary["value"] = self.value
         # Can be none, but the key should be present.
 
+        LangTreeElement._update_key_order(dictionary)
+
         return dictionary
+
+    @staticmethod
+    def deserialize_from_dict(dictionary):
+        attribute = LangTreeAttribute(
+            name=dictionary["name"],
+            value=dictionary["value"],
+
+            guid=uuid.UUID(dictionary["guid"]),
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
+        )
+
+        LangTreeElement._deserialize_common_fields(attribute, dictionary)
+
+        return attribute
 
 class LangTreeTranslation(LangTreeElement):
     def __init__(
@@ -209,4 +366,25 @@ class LangTreeTranslation(LangTreeElement):
         dictionary["language"] = self.language_str
         dictionary["content"] = self.content
 
+        LangTreeElement._update_key_order(dictionary)
+
         return dictionary
+
+    @staticmethod
+    def deserialize_from_dict(dictionary):
+        language = ptype.str_to_enum_by_str_value(dictionary["language"], popenai.OpenAiLanguage, ignore_case=True)
+
+        if language is None:
+            language = dictionary["language"]
+
+        translation = LangTreeTranslation(
+            language=language,
+            content=dictionary["content"],
+
+            guid=uuid.UUID(dictionary["guid"]),
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
+        )
+
+        LangTreeElement._deserialize_common_fields(translation, dictionary)
+
+        return translation
