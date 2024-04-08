@@ -74,6 +74,7 @@ class LangTreeElement:
 
         if self.parent_element_guid:
             dictionary["parent_element_guid"] = str(self.parent_element_guid)
+            # The root element wont have this key present.
 
         # "parent_element" is not serialized to prevent circular references.
 
@@ -128,6 +129,8 @@ class LangTreeMessage(LangTreeElement):
 
         if self.user_name:
             dictionary["user_name"] = self.user_name
+            # If the value is None, the key wont be present.
+            # In a single user scenario, this might always be None.
 
         # Required, not nullable:
         dictionary["user_role"] = self.user_role.value
