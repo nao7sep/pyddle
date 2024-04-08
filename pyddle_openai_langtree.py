@@ -1,6 +1,7 @@
-﻿# Created: 2024-04-08
+# Created: 2024-04-08
 # A module that helps us organize knowledge in a tree structure.
 
+from __future__ import annotations
 import typing
 import uuid
 
@@ -9,6 +10,7 @@ import openai
 import pyddle_datetime as pdatetime
 import pyddle_openai as popenai
 import pyddle_type as ptype
+import pyddle_utility as putility
 
 # Some common practice for this module:
 #     * Required fields are included in the constructor (even if they are inherited; for clarity)
@@ -40,10 +42,10 @@ import pyddle_type as ptype
 
 class LangTreeElement:
     def __init__(
-            self,
+        self,
 
-            guid=None,
-            creation_utc=None):
+        guid=None,
+        creation_utc=None):
 
         # Required, not nullable, auto-initialized:
         self.guid = guid if guid is not None else uuid.uuid4()
@@ -105,6 +107,66 @@ class LangTreeElement:
         self.translations[translation.language] = translation
 
         return translation
+
+    def _get_client(self, client: openai.OpenAI):
+        return putility.get_not_none_or_call_func(
+            popenai.get_openai_default_client,
+            client,
+            self.client)
+
+    def _get_chat_settings(self, chat_settings: popenai.OpenAiChatSettings):
+        return putility.get_not_none_or_call_func(
+            popenai.get_openai_default_chat_settings,
+            chat_settings,
+            self.chat_settings)
+
+    def _get_response_timeout(self, timeout):
+        return putility.get_not_none(
+            timeout,
+            self.timeout,
+            popenai.DEFAULT_RESPONSE_TIMEOUT)
+
+    def generate_attribute_with_prompt(
+        self,
+
+        name,
+        prompt,
+
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        response = popenai.openai_chat_completions_create_with_settings(
+            settings=self._get_chat_settings(chat_settings),
+            messages=popenai.openai_build_messages(prompt),
+            client=self._get_client(client),
+            timeout=self._get_response_timeout(timeout)
+        )
+
+        value = popenai.openai_extract_first_message(response)
+
+        return self.create_attribute(name, value)
+
+    def generate_translation_with_prompt(
+        self,
+
+        language: typing.Union[popenai.OpenAiLanguage, str],
+        prompt,
+
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        response = popenai.openai_chat_completions_create_with_settings(
+            settings=self._get_chat_settings(chat_settings),
+            messages=popenai.openai_build_messages(prompt),
+            client=self._get_client(client),
+            timeout=self._get_response_timeout(timeout)
+        )
+
+        content = popenai.openai_extract_first_message(response)
+
+        return self.create_translation(language, content)
 
     # Moves "attributes" and "translations" to the end of the dictionary.
     # Since Python 3.7, dictionaries are ordered by insertion order.
@@ -190,14 +252,14 @@ class LangTreeElement:
 
 class LangTreeMessage(LangTreeElement):
     def __init__(
-            self,
+        self,
 
-            # "user_name" is optional.
-            user_role: popenai.OpenAiRole,
-            content,
+        # "user_name" is optional.
+        user_role: popenai.OpenAiRole,
+        content,
 
-            guid=None,
-            creation_utc=None):
+        guid=None,
+        creation_utc=None):
 
         super().__init__(
             guid=guid,
@@ -232,6 +294,60 @@ class LangTreeMessage(LangTreeElement):
         self.child_messages.append(child_message)
 
         return child_message
+
+    def generate_child_message_with_messages(
+        self,
+
+        messages,
+
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        response = popenai.openai_chat_completions_create_with_settings(
+            settings=self._get_chat_settings(chat_settings),
+            messages=messages,
+            client=self._get_client(client),
+            timeout=self._get_response_timeout(timeout)
+        )
+
+        content = popenai.openai_extract_first_message(response)
+
+        return self.create_child_message(
+            user_role=popenai.OpenAiRole.SYSTEM,
+            content=content)
+
+    def generate_child_message_with_context_builder(
+        self,
+
+        context_builder: LangTreeContextBuilder,
+
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        messages =
+
+        return self.generate_child_message_with_messages(
+            context_builder.build_messages(self),
+
+            client=client,
+            chat_settings=chat_settings,
+            timeout=timeout)
+
+    def generate_child_message(
+        self,
+
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        return self.generate_child_message_with_context_builder(
+            context_builder=get_langtree_default_context_builder(),
+
+            client=client,
+            chat_settings=chat_settings,
+            timeout=timeout)
 
     def serialize_to_dict(self):
         dictionary = {}
@@ -286,13 +402,13 @@ class LangTreeMessage(LangTreeElement):
 
 class LangTreeAttribute(LangTreeElement):
     def __init__(
-            self,
+        self,
 
-            name,
-            value,
+        name,
+        value,
 
-            guid=None,
-            creation_utc=None):
+        guid=None,
+        creation_utc=None):
 
         super().__init__(
             guid=guid,
@@ -334,13 +450,13 @@ class LangTreeAttribute(LangTreeElement):
 
 class LangTreeTranslation(LangTreeElement):
     def __init__(
-            self,
+        self,
 
-            language: typing.Union[popenai.OpenAiLanguage, str],
-            content,
+        language: typing.Union[popenai.OpenAiLanguage, str],
+        content,
 
-            guid=None,
-            creation_utc=None):
+        guid=None,
+        creation_utc=None):
 
         super().__init__(
             guid=guid,

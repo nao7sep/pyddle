@@ -217,15 +217,15 @@ def create_openai_client(api_key=None, organization=None, base_url=None, timeout
     return openai.OpenAI(**args.args)
 
 # Lazy loading.
-__openai_client = None # pylint: disable=invalid-name
+__openai_default_client = None # pylint: disable=invalid-name
 
-def get_openai_client():
-    global __openai_client # pylint: disable=global-statement
+def get_openai_default_client():
+    global __openai_default_client # pylint: disable=global-statement
 
-    if __openai_client is None:
-        __openai_client = create_openai_client()
+    if __openai_default_client is None:
+        __openai_default_client = create_openai_client()
 
-    return __openai_client
+    return __openai_default_client
 
 # ------------------------------------------------------------------------------
 #     Text to speech
@@ -288,7 +288,7 @@ def openai_audio_speech_create(
 
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    return putility.get_not_none_or_call_func(get_openai_client, client).audio.speech.create(**args.args) # pylint: disable=missing-kwoa
+    return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.speech.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_save_audio(file_path, response):
     pfs.create_parent_directory(file_path)
@@ -414,7 +414,7 @@ def openai_audio_transcriptions_create(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return putility.get_not_none_or_call_func(get_openai_client, client).audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
 
 def openai_audio_translations_create(
     # Input:
@@ -447,7 +447,7 @@ def openai_audio_translations_create(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return putility.get_not_none_or_call_func(get_openai_client, client).audio.translations.create(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.translations.create(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Chat
@@ -523,7 +523,7 @@ def openai_chat_completions_create(
         if stream:
             args.must_contain("timeout", httpx.Timeout(timeout=pweb.DEFAULT_TIMEOUT, read=DEFAULT_CHUNK_TIMEOUT))
 
-    return putility.get_not_none_or_call_func(get_openai_client, client).chat.completions.create(**args.args)
+    return putility.get_not_none_or_call_func(get_openai_default_client, client).chat.completions.create(**args.args)
 
 class OpenAiChatSettings:
     def __init__(self, model: OpenAiModel):
@@ -557,15 +557,15 @@ class OpenAiChatSettings:
 DEFAULT_GPT_MODEL = OpenAiModel.GPT_4_TURBO
 
 # Lazy loading.
-__openai_chat_settings = None # pylint: disable=invalid-name
+__openai_default_chat_settings = None # pylint: disable=invalid-name
 
-def get_openai_chat_settings():
-    global __openai_chat_settings # pylint: disable=global-statement
+def get_openai_default_chat_settings():
+    global __openai_default_chat_settings # pylint: disable=global-statement
 
-    if __openai_chat_settings is None:
-        __openai_chat_settings = OpenAiChatSettings(model=DEFAULT_GPT_MODEL)
+    if __openai_default_chat_settings is None:
+        __openai_default_chat_settings = OpenAiChatSettings(model=DEFAULT_GPT_MODEL)
 
-    return __openai_chat_settings
+    return __openai_default_chat_settings
 
 def openai_chat_completions_create_with_settings(
     settings: OpenAiChatSettings,
@@ -595,39 +595,29 @@ def openai_chat_completions_create_with_settings(
         client=client,
         timeout=timeout)
 
-def openai_add_system_message(messages, system_message, name=None):
+def openai_build_message(role: OpenAiRole, content, name=None):
     message = {}
 
     if name:
         # "name" is optional, but it'd be more intuitive to have it in this order.
         message["name"] = name
 
-    message["role"] = OpenAiRole.SYSTEM.value
-    message["content"] = system_message
+    message["role"] = role.value
+    message["content"] = content
 
-    messages.append(message)
+    return message
+
+def openai_add_message(messages, role: OpenAiRole, content, name=None):
+    messages.append(openai_build_message(role=role, content=content, name=name))
+
+def openai_add_system_message(messages, system_message, name=None):
+    openai_add_message(messages, role=OpenAiRole.SYSTEM, content=system_message, name=name)
 
 def openai_add_user_message(messages, user_message, name=None):
-    message = {}
-
-    if name:
-        message["name"] = name
-
-    message["role"] = OpenAiRole.USER.value
-    message["content"] = user_message
-
-    messages.append(message)
+    openai_add_message(messages, role=OpenAiRole.USER, content=user_message, name=name)
 
 def openai_add_assistant_message(messages, assistant_message, name=None):
-    message = {}
-
-    if name:
-        message["name"] = name
-
-    message["role"] = OpenAiRole.ASSISTANT.value
-    message["content"] = assistant_message
-
-    messages.append(message)
+    openai_add_message(messages, role=OpenAiRole.ASSISTANT, content=assistant_message, name=name)
 
 def openai_build_messages(user_message, user_message_name=None, system_message=None, system_message_name=None):
     messages = []
@@ -804,7 +794,7 @@ def openai_images_generate(
     # It takes care of saving the images as well.
     args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-    return putility.get_not_none_or_call_func(get_openai_client, client).images.generate(**args.args) # pylint: disable=missing-kwoa
+    return putility.get_not_none_or_call_func(get_openai_default_client, client).images.generate(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -852,10 +842,10 @@ def openai_images_edit(
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                return putility.get_not_none_or_call_func(get_openai_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
+                return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
 
         else:
-            return putility.get_not_none_or_call_func(get_openai_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
+            return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -896,4 +886,4 @@ def openai_images_create_variation(
 
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-        return putility.get_not_none_or_call_func(get_openai_client, client).images.create_variation(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_default_client, client).images.create_variation(**args.args) # pylint: disable=missing-kwoa

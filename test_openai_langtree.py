@@ -27,6 +27,15 @@ try:
     user_message.create_attribute("title", "Greeting").create_translation(popenai.OpenAiLanguage.JAPANESE, "挨拶")
     user_message.create_translation(popenai.OpenAiLanguage.JAPANESE, "こんにちは！").create_attribute("title", "Greeting in Japanese")
 
+    assistant_message = user_message.generate_child_message()
+
+    new_user_message = assistant_message.create_child_message(
+        user_role=popenai.OpenAiRole.USER,
+        content="How are you?"
+    )
+
+    new_assistant_message = new_user_message.generate_child_message()
+
     json_str = json.dumps(root_message.serialize_to_dict(), ensure_ascii=False, indent=4)
 
     pconsole.print("Serialized root message:")
