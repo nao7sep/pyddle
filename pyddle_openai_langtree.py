@@ -1,4 +1,4 @@
-﻿# Created:
+﻿# Created: 2024-04-08
 # A module that helps us organize knowledge in a tree structure.
 
 import typing
