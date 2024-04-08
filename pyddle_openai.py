@@ -78,17 +78,17 @@ class OpenAiSettings:
         return self.__base_url
 
 # Lazy loading.
-__openai_settings = None # pylint: disable=invalid-name
+__openai_default_settings = None # pylint: disable=invalid-name
 
-def get_openai_settings():
-    global __openai_settings # pylint: disable=global-statement
+def get_openai_default_settings():
+    global __openai_default_settings # pylint: disable=global-statement
 
-    if __openai_settings is None:
-        __openai_settings = OpenAiSettings(
+    if __openai_default_settings is None:
+        __openai_default_settings = OpenAiSettings(
             kvs_data=pkvs.get_merged_kvs_data(),
             kvs_key_prefix=KVS_KEY_PREFIX)
 
-    return __openai_settings
+    return __openai_default_settings
 
 # ------------------------------------------------------------------------------
 #     Models
@@ -191,16 +191,16 @@ def get_gpt_4_vision_token_counter():
 # https://github.com/openai/openai-python/blob/main/src/openai/_client.py
 
 def create_openai_client(api_key=None, organization=None, base_url=None, timeout=None):
-    ''' If the arguments are falsy and cant be retrieved from "openai_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
+    ''' If the arguments are falsy and cant be retrieved from "get_openai_default_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
 
     if not api_key:
-        api_key = get_openai_settings().api_key
+        api_key = get_openai_default_settings().api_key
 
     if not organization:
-        organization = get_openai_settings().organization
+        organization = get_openai_default_settings().organization
 
     if not base_url:
-        base_url = get_openai_settings().base_url
+        base_url = get_openai_default_settings().base_url
 
     args = pcollections.PotentiallyFalsyArgs()
     args.may_contain("api_key", api_key)
