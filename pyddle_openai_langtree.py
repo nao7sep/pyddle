@@ -540,7 +540,22 @@ class LangTreeContextBuilder:
     def build_messages(self, message: LangTreeMessage):
         messages = []
 
-        # todo
+        # todo: temp code for testing
+
+        element = message
+
+        while True:
+            messages.append(
+                popenai.openai_build_message(
+                    role=element.user_role,
+                    content=element.content,
+                    name=element.user_name)
+            )
+
+            if not element.parent_element:
+                break
+
+            element = element.parent_element
 
         return messages
 
