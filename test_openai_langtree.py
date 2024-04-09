@@ -8,26 +8,41 @@ import traceback
 import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
 import pyddle_global as pglobal
+import pyddle_logging as plogging
 import pyddle_openai as popenai
 import pyddle_openai_langtree as plangtree
 import pyddle_string as pstring
 
 pglobal.set_main_script_file_path(__file__)
 
+SUMMARY_GENERATION_PROMPT = "Please condense the following text into one short paragraph:\n\n{}"
+JAPANESE_TRANSLATION_GENERATION_PROMPT = "Please translate the following text into Japanese:\n\n{}"
+
 def generate_summary_attribute_or_japanese_translation(element: plangtree.LangTreeMessage, is_attribute):
     client = popenai.create_openai_client()
 
     if is_attribute:
-        element.generate_attribute_with_prompt(
+        attribute = element.generate_attribute_with_prompt(
             name="summary",
-            prompt=f"Please summarize the following text:\n\n{element.content}",
+            prompt=SUMMARY_GENERATION_PROMPT.format(element.content),
             client=client)
 
-    else:
-        element.generate_translation_with_prompt(
+        plogging.log(f"[Summary]\n{attribute.value}", end="\n\n", flush_=True)
+
+        translation = attribute.generate_translation_with_prompt(
             language=popenai.OpenAiLanguage.JAPANESE,
-            prompt=f"Please translate the following text to Japanese:\n\n{element.content}",
+            prompt=JAPANESE_TRANSLATION_GENERATION_PROMPT.format(attribute.value),
             client=client)
+
+        plogging.log(f"[Japanese Translation of Summary]\n{translation.content}", end="\n\n", flush_=True)
+
+    else:
+        translation = element.generate_translation_with_prompt(
+            language=popenai.OpenAiLanguage.JAPANESE,
+            prompt=JAPANESE_TRANSLATION_GENERATION_PROMPT.format(element.content),
+            client=client)
+
+        plogging.log(f"[Japanese Translation]\n{translation.content}", end="\n\n", flush_=True)
 
 try:
     current_message = None # pylint: disable=invalid-name
@@ -36,7 +51,10 @@ try:
     while True:
         command = pconsole.input_command("Command: ")
 
-        if command:
+        if not command:
+            pconsole.print("Invalid command.", colors=pconsole.ERROR_COLORS)
+
+        else:
             if (pstring.equals_ignore_case(command.command, "system") or
                 pstring.equals_ignore_case(command.command, "user")):
 
@@ -57,8 +75,31 @@ try:
                 threads.append(thread2)
                 thread2.start()
 
+                if len(command.command) == 4:
+                    context_builder = plangtree.get_langtree_default_context_builder()
+                    messages = context_builder.build_messages(current_message)
+
+                    messages_json_str = json.dumps(messages, ensure_ascii=False, indent=4)
+                    plogging.log(f"[Messages]\n{messages_json_str}", end="\n\n", flush_=True)
+
+                    current_message = current_message.generate_child_message_with_messages(messages)
+
+                    pconsole.print("Response:")
+                    pconsole.print_lines(pstring.splitlines(current_message.content), indents=pstring.LEVELED_INDENTS[1])
+
+                    thread3 = threading.Thread(target=generate_summary_attribute_or_japanese_translation, args=(current_message, True))
+                    threads.append(thread3)
+                    thread3.start()
+
+                    thread4 = threading.Thread(target=generate_summary_attribute_or_japanese_translation, args=(current_message, False))
+                    threads.append(thread4)
+                    thread4.start()
+
             elif pstring.equals_ignore_case(command.command, "exit"):
                 break
+
+            else:
+                pconsole.print("Invalid command.", colors=pconsole.ERROR_COLORS)
 
     for thread in threads:
         thread.join()

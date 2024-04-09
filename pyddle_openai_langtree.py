@@ -143,25 +143,25 @@ class LangTreeElement:
 
         return self.create_translation(language, content)
 
-    # Moves "attributes" and "translations" to the end of the dictionary.
+    # Moves "attributes", "translations" and "child_messages" to the end of the dictionary for better readability.
     # Since Python 3.7, dictionaries are ordered by insertion order.
-
-    # Added: When we read a JSON file to roughly understand the conversation, we dont need "attributes" or "translations" before "child_messages".
-    # But if we move them after "child_messages", they will be so far apart from their parent elements and can no longer be useful to human readers.
 
     @staticmethod
     def _update_key_order(dictionary):
-        pass
+        if "attributes" in dictionary:
+            attributes = dictionary["attributes"]
+            del dictionary["attributes"]
+            dictionary["attributes"] = attributes
 
-        # if "attributes" in dictionary:
-        #     attributes = dictionary["attributes"]
-        #     del dictionary["attributes"]
-        #     dictionary["attributes"] = attributes
+        if "translations" in dictionary:
+            translations = dictionary["translations"]
+            del dictionary["translations"]
+            dictionary["translations"] = translations
 
-        # if "translations" in dictionary:
-        #     translations = dictionary["translations"]
-        #     del dictionary["translations"]
-        #     dictionary["translations"] = translations
+        if "child_messages" in dictionary:
+            child_messages = dictionary["child_messages"]
+            del dictionary["child_messages"]
+            dictionary["child_messages"] = child_messages
 
     def serialize_to_dict(self):
         dictionary = {}
@@ -294,7 +294,7 @@ class LangTreeMessage(LangTreeElement):
         content = popenai.openai_extract_first_message(response)
 
         return self.create_child_message(
-            user_role=popenai.OpenAiRole.SYSTEM,
+            user_role=popenai.OpenAiRole.ASSISTANT,
             content=content)
 
     def generate_child_message_with_context_builder(
