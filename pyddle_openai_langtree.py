@@ -12,33 +12,8 @@ import pyddle_openai as popenai
 import pyddle_type as ptype
 import pyddle_utility as putility
 
-# Some common practice for this module:
-#     * Required fields are included in the constructor (even if they are inherited; for clarity)
-#     * Some required fields have None as a default value,
-#           indicating they will be initialized internally OR default instances will be used
-#     * For "client", "chat_settings" and "timeout",
-#           1) Parameter values, 2) Class field values, 3) Default values (some of which are lazy loaded) are used in this order
-#     * The classes are far from thread-safe, but each element, if accessed exclusively, should be thread-safe
-#           => Meaning we should be able to auto-generate attributes and translations in parallel
-#     * Methods that access the AI to have things generated,
-#           must NOT damage the data structure if the operation fails and an exception is raised
-#           => Fields must be updated only at the very end of the operation
-#     * As nobody wants to wait for every API call to generate the entire response,
-#           1) For messages, we implement waiting (slow) methods and chunk streaming methods,
-#           2) For attributes and translations, we keep the classes open and leave room for future async methods
-#     * Attributes must be extensible => Explained later
-#     * Class fields that would cause circular references are not serialized
-
-# I initially thought about "title" and "description" or "summary" as required attributes.
-# But if I do so and occasionally require the latter to construct the context for each API call,
-#     these fields will have to coexist with what we will add later, making the design less flexible.
-# That is also why, not a single prompt is embedded in any of the classes.
-# This module must be no more than an open data structure with some utility methods.
-# Extensibility is my primary goal here.
-
-# Maybe all this should be more properly documented somewhere else, but I wont be implementing a group of classes that have:
-#     inheritance, flexible default values, partial thread-safeness, open design for async methods, etc every weekend.
-# For now, I will keep it as-is here.
+# The comments regarding this module werent particularly "episodic",
+#     but they were moved to BX24 in SH77 langtree-related Comments.json.
 
 class LangTreeElement:
     def __init__(
@@ -503,9 +478,13 @@ class LangTreeTranslation(LangTreeElement):
 
         return translation
 
+# Episodic comments available: GL84 in SH77 langtree-related Comments.json
+
 class LangTreeContextBuilder:
     def __init__(
         self,
+
+        # Refer to the episodic comments regarding the default values.
 
         max_number_of_system_messages=None,
         max_number_of_system_message_summaries=0,
@@ -526,7 +505,60 @@ class LangTreeContextBuilder:
         self.max_number_of_assistant_message_summaries = max_number_of_assistant_message_summaries
 
     def build_messages(self, message: LangTreeMessage):
+        elements_with_contents = []
+
+        # With C#'s "ref" or maintaining a list of max numbers, the following code could be shorter.
+
+        number_of_system_messages = 0
+        number_of_system_message_summaries = 0
+        number_of_user_messages = 0
+        number_of_user_message_summaries = 0
+        number_of_assistant_messages = 0
+        number_of_assistant_message_summaries = 0
+
+        element = message
+
+        while True:
+            if element.user_role == popenai.OpenAiRole.SYSTEM:
+                if self.max_number_of_system_messages is None or number_of_system_messages < self.max_number_of_system_messages:
+                    elements_with_contents.append((element, element.content)) # Tuple of (element, full content)
+                    number_of_system_messages += 1
+
+                elif self.max_number_of_system_message_summaries is None or number_of_system_message_summaries < self.max_number_of_system_message_summaries:
+                    elements_with_contents.append((element, element.attributes["summary"].value)) # If the summary is not available, this should raise an exception.
+                    number_of_system_message_summaries += 1
+
+            elif element.user_role == popenai.OpenAiRole.USER:
+                if self.max_number_of_user_messages is None or number_of_user_messages < self.max_number_of_user_messages:
+                    elements_with_contents.append((element, element.content))
+                    number_of_user_messages += 1
+
+                elif self.max_number_of_user_message_summaries is None or number_of_user_message_summaries < self.max_number_of_user_message_summaries:
+                    elements_with_contents.append((element, element.attributes["summary"].value))
+                    number_of_user_message_summaries += 1
+
+            elif element.user_role == popenai.OpenAiRole.ASSISTANT:
+                if self.max_number_of_assistant_messages is None or number_of_assistant_messages < self.max_number_of_assistant_messages:
+                    elements_with_contents.append((element, element.content))
+                    number_of_assistant_messages += 1
+
+                elif self.max_number_of_assistant_message_summaries is None or number_of_assistant_message_summaries < self.max_number_of_assistant_message_summaries:
+                    elements_with_contents.append((element, element.attributes["summary"].value))
+                    number_of_assistant_message_summaries += 1
+
+            else:
+                raise RuntimeError(f"Unknown user role: {element.user_role}")
+
+            if element.parent_element:
+                element = element.parent_element
+
+            else:
+                break
+
         messages = []
+
+        for element, content in sorted(elements_with_contents, key=lambda element_with_content: element_with_content[0].creation_utc):
+            messages.append(popenai.openai_build_message(element.user_role, content, name=element.user_name)) # Supports multi-user scenarios.
 
         return messages
 
