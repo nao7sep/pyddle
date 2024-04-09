@@ -1,4 +1,4 @@
-﻿# Created: 2024-04-08
+﻿# Created: 2024-04-09
 # A module that helps us organize knowledge in a tree structure.
 
 from __future__ import annotations
@@ -146,17 +146,22 @@ class LangTreeElement:
     # Moves "attributes" and "translations" to the end of the dictionary.
     # Since Python 3.7, dictionaries are ordered by insertion order.
 
+    # Added: When we read a JSON file to roughly understand the conversation, we dont need "attributes" or "translations" before "child_messages".
+    # But if we move them after "child_messages", they will be so far apart from their parent elements and can no longer be useful to human readers.
+
     @staticmethod
     def _update_key_order(dictionary):
-        if "attributes" in dictionary:
-            attributes = dictionary["attributes"]
-            del dictionary["attributes"]
-            dictionary["attributes"] = attributes
+        pass
 
-        if "translations" in dictionary:
-            translations = dictionary["translations"]
-            del dictionary["translations"]
-            dictionary["translations"] = translations
+        # if "attributes" in dictionary:
+        #     attributes = dictionary["attributes"]
+        #     del dictionary["attributes"]
+        #     dictionary["attributes"] = attributes
+
+        # if "translations" in dictionary:
+        #     translations = dictionary["translations"]
+        #     del dictionary["translations"]
+        #     dictionary["translations"] = translations
 
     def serialize_to_dict(self):
         dictionary = {}
