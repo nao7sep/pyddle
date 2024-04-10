@@ -12,6 +12,7 @@
         "popenai",
         "poutput",
         "ppath",
+        "pprompts",
         "pstring",
         "putility",
         "pweb"
