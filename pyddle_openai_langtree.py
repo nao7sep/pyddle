@@ -1,4 +1,4 @@
-# Created: 2024-04-09
+# Created: 2024-04-10
 # A module that helps us organize knowledge in a tree structure.
 
 from __future__ import annotations
@@ -578,12 +578,88 @@ class LangTreeContextBuilder:
             token_counter,
             self.token_counter)
 
-    def build_messages(
+    def build(
         self,
         message: LangTreeMessage,
-        token_counter: popenai.OpenAiTokenCounter=None):
+        token_counter: popenai.OpenAiTokenCounter=None) -> LangTreeContext:
 
-        pass
+        # All younger siblings and the root element.
+        elements = []
+
+        element = message
+
+        while True:
+            # In each round, we collect all the siblings of the current element that are younger together with the element itself OR the element alone if it's the root element.
+
+            if element.parent_element:
+                for sibling in element.parent_element.child_messages:
+                    if sibling.creation_utc < element.creation_utc:
+                        elements.append(sibling)
+
+                elements.append(element) # As an element that has a parent and may have younger siblings.
+
+                element = element.parent_element
+
+            else:
+                elements.append(element) # As the root element.
+
+                break
+
+        # No matter how the tree structure has been built, no child is older than its parent.
+        elements.sort(key=lambda element: element.creation_utc, reverse=True)
+
+        # Reducing the "if" statements:
+
+        max_numbers = [self.max_number_of_system_messages, self.max_number_of_user_messages, self.max_number_of_assistant_messages]
+        numbers = [0, 0, 0]
+
+        max_total_tokens = [self.max_total_tokens_of_system_messages, self.max_total_tokens_of_user_messages, self.max_total_tokens_of_assistant_messages]
+        total_tokens = [0, 0, 0]
+
+        elements_to_include = []
+
+        # We can just update "token_counter", but I like to keep arguments unchanged.
+        token_counter_to_use = self._get_token_counter(token_counter)
+
+        for element in elements:
+            if element.user_role == popenai.OpenAiRole.SYSTEM:
+                index = 0
+
+            elif element.user_role == popenai.OpenAiRole.USER:
+                index = 1
+
+            elif element.user_role == popenai.OpenAiRole.ASSISTANT:
+                index = 2
+
+            else:
+                raise RuntimeError(f"Unknown user role: {element.user_role}")
+
+            if element.token_count is None:
+                element.token_count = token_counter_to_use.count(element.content)
+
+            if max_numbers[index] is None or numbers[index] < max_numbers[index]:
+                if max_total_tokens[index] is None or total_tokens[index] + element.token_count <= max_total_tokens[index]:
+                    elements_to_include.append(element)
+
+                    numbers[index] += 1
+                    total_tokens[index] += element.token_count
+
+        elements_to_include.sort(key=lambda element: element.creation_utc)
+
+        messages = [popenai.openai_build_message(role=element.user_role, content=element.content, name=element.user_name) for element in elements_to_include]
+
+        return LangTreeContext(
+            number_of_system_messages=numbers[0],
+            total_tokens_of_system_messages=total_tokens[0],
+
+            number_of_user_messages=numbers[1],
+            total_tokens_of_user_messages=total_tokens[1],
+
+            number_of_assistant_messages=numbers[2],
+            total_tokens_of_assistant_messages=total_tokens[2],
+
+            elements=elements_to_include,
+            messages=messages)
 
 # Lazy loading:
 __langtree_default_context_builder = None # pylint: disable=invalid-name
@@ -595,3 +671,57 @@ def get_langtree_default_context_builder():
         __langtree_default_context_builder = LangTreeContextBuilder()
 
     return __langtree_default_context_builder
+
+class LangTreeContext:
+    def __init__(
+        self,
+
+        number_of_system_messages=None,
+        total_tokens_of_system_messages=None,
+
+        number_of_user_messages=None,
+        total_tokens_of_user_messages=None,
+
+        number_of_assistant_messages=None,
+        total_tokens_of_assistant_messages=None,
+
+        elements: list[LangTreeMessage]=None,
+        messages: list[dict]=None):
+
+        self.number_of_system_messages = number_of_system_messages
+        self.total_tokens_of_system_messages = total_tokens_of_system_messages
+
+        self.number_of_user_messages = number_of_user_messages
+        self.total_tokens_of_user_messages = total_tokens_of_user_messages
+
+        self.number_of_assistant_messages = number_of_assistant_messages
+        self.total_tokens_of_assistant_messages = total_tokens_of_assistant_messages
+
+        self.elements = elements
+        self.messages = messages
+
+    def stats_to_lines(self):
+        lines = []
+
+        if self.number_of_system_messages is not None:
+            if self.total_tokens_of_system_messages is not None:
+                lines.append(f"System: {self.number_of_system_messages} messages ({self.total_tokens_of_system_messages} tokens)")
+
+            else:
+                lines.append(f"System: {self.number_of_system_messages} messages")
+
+        if self.number_of_user_messages is not None:
+            if self.total_tokens_of_user_messages is not None:
+                lines.append(f"User: {self.number_of_user_messages} messages ({self.total_tokens_of_user_messages} tokens)")
+
+            else:
+                lines.append(f"User: {self.number_of_user_messages} messages")
+
+        if self.number_of_assistant_messages is not None:
+            if self.total_tokens_of_assistant_messages is not None:
+                lines.append(f"Assistant: {self.number_of_assistant_messages} messages ({self.total_tokens_of_assistant_messages} tokens)")
+
+            else:
+                lines.append(f"Assistant: {self.number_of_assistant_messages} messages")
+
+        return lines
