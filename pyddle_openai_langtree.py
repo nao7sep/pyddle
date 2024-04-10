@@ -1,4 +1,4 @@
-﻿# Created: 2024-04-09
+# Created: 2024-04-09
 # A module that helps us organize knowledge in a tree structure.
 
 from __future__ import annotations
@@ -52,8 +52,7 @@ class LangTreeElement:
     def create_attribute(self, name, value):
         attribute = LangTreeAttribute(
             name=name,
-            value=value
-        )
+            value=value)
 
         attribute.parent_element_guid = self.guid
         attribute.parent_element = self
@@ -69,8 +68,7 @@ class LangTreeElement:
     def create_translation(self, language: typing.Union[popenai.OpenAiLanguage, str], content):
         translation = LangTreeTranslation(
             language=language,
-            content=content
-        )
+            content=content)
 
         translation.parent_element_guid = self.guid
         translation.parent_element = self
@@ -115,8 +113,7 @@ class LangTreeElement:
             settings=self._get_chat_settings(chat_settings),
             messages=popenai.openai_build_messages(prompt),
             client=self._get_client(client),
-            timeout=self._get_response_timeout(timeout)
-        )
+            timeout=self._get_response_timeout(timeout))
 
         value = popenai.openai_extract_first_message(response)
 
@@ -136,8 +133,7 @@ class LangTreeElement:
             settings=self._get_chat_settings(chat_settings),
             messages=popenai.openai_build_messages(prompt),
             client=self._get_client(client),
-            timeout=self._get_response_timeout(timeout)
-        )
+            timeout=self._get_response_timeout(timeout))
 
         content = popenai.openai_extract_first_message(response)
 
@@ -223,8 +219,7 @@ class LangTreeElement:
     def deserialize_from_dict(dictionary):
         element = LangTreeElement(
             guid=uuid.UUID(dictionary["guid"]),
-            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
-        )
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
         LangTreeElement._deserialize_common_fields(element, dictionary)
 
@@ -252,15 +247,25 @@ class LangTreeMessage(LangTreeElement):
         self.user_role: popenai.OpenAiRole = user_role
         self.content = content
 
+        # Optional, nullable, not serialized:
+        # Comments: SH77 langtree-related Comments.json
+        self.token_count = None
+
         # Required, nullable (but not encouraged), can be empty:
         self.child_messages: list[LangTreeMessage] = []
         # The items are loosely expected to be ordered by "creation_utc".
 
-    def create_child_message(self, user_role: popenai.OpenAiRole, content, user_name=None):
+    def create_child_message(
+        self,
+        user_role: popenai.OpenAiRole,
+        content,
+        user_name=None):
+
+        ''' Consider using "create_next_message" instead. '''
+
         child_message = LangTreeMessage(
             user_role=user_role,
-            content=content
-        )
+            content=content)
 
         child_message.user_name = user_name
 
@@ -277,19 +282,18 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_child_message_with_messages(
         self,
-
         messages,
-
         client: openai.OpenAI=None,
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
+
+        ''' Consider using "generate_next_message_with_messages" instead. '''
 
         response = popenai.openai_chat_completions_create_with_settings(
             settings=self._get_chat_settings(chat_settings),
             messages=messages,
             client=self._get_client(client),
-            timeout=self._get_response_timeout(timeout)
-        )
+            timeout=self._get_response_timeout(timeout))
 
         content = popenai.openai_extract_first_message(response)
 
@@ -299,12 +303,12 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_child_message_with_context_builder(
         self,
-
         context_builder: LangTreeContextBuilder,
-
         client: openai.OpenAI=None,
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
+
+        ''' Consider using "generate_next_message_with_context_builder" instead. '''
 
         return self.generate_child_message_with_messages(
             context_builder.build_messages(self),
@@ -315,10 +319,11 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_child_message(
         self,
-
         client: openai.OpenAI=None,
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
+
+        ''' Consider using "generate_next_message" instead. '''
 
         return self.generate_child_message_with_context_builder(
             context_builder=get_langtree_default_context_builder(),
@@ -326,6 +331,56 @@ class LangTreeMessage(LangTreeElement):
             client=client,
             chat_settings=chat_settings,
             timeout=timeout)
+
+    def create_next_message(
+        self,
+        user_role: popenai.OpenAiRole,
+        content,
+        user_name=None):
+
+        if self.parent_element:
+            return self.parent_element.create_child_message(user_role=user_role, content=content, user_name=user_name)
+
+        else:
+            return self.create_child_message(user_role=user_role, content=content, user_name=user_name)
+
+    def generate_next_message_with_messages(
+        self,
+        messages,
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        if self.parent_element:
+            return self.parent_element.generate_child_message_with_messages(messages, client=client, chat_settings=chat_settings, timeout=timeout)
+
+        else:
+            return self.generate_child_message_with_messages(messages, client=client, chat_settings=chat_settings, timeout=timeout)
+
+    def generate_next_message_with_context_builder(
+        self,
+        context_builder: LangTreeContextBuilder,
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        if self.parent_element:
+            return self.parent_element.generate_child_message_with_context_builder(context_builder, client=client, chat_settings=chat_settings, timeout=timeout)
+
+        else:
+            return self.generate_child_message_with_context_builder(context_builder, client=client, chat_settings=chat_settings, timeout=timeout)
+
+    def generate_next_message(
+        self,
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        if self.parent_element:
+            return self.parent_element.generate_child_message(client=client, chat_settings=chat_settings, timeout=timeout)
+
+        else:
+            return self.generate_child_message(client=client, chat_settings=chat_settings, timeout=timeout)
 
     def serialize_to_dict(self):
         dictionary = {}
@@ -359,8 +414,7 @@ class LangTreeMessage(LangTreeElement):
             content=dictionary["content"],
 
             guid=uuid.UUID(dictionary["guid"]),
-            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
-        )
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
         LangTreeElement._deserialize_common_fields(message, dictionary)
 
@@ -397,6 +451,10 @@ class LangTreeAttribute(LangTreeElement):
         # Required, nullable:
         self.value = value
 
+        # Optional, nullable, not serialized:
+        # Comments: SH77 langtree-related Comments.json
+        self.token_count = None
+
     def serialize_to_dict(self):
         dictionary = {}
 
@@ -419,8 +477,7 @@ class LangTreeAttribute(LangTreeElement):
             value=dictionary["value"],
 
             guid=uuid.UUID(dictionary["guid"]),
-            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
-        )
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
         LangTreeElement._deserialize_common_fields(attribute, dictionary)
 
@@ -443,6 +500,10 @@ class LangTreeTranslation(LangTreeElement):
         # Required, not nullable:
         self.language: typing.Union[popenai.OpenAiLanguage, str] = language
         self.content = content
+
+        # Optional, nullable, not serialized:
+        # Comments: SH77 langtree-related Comments.json
+        self.token_count = None
 
     @property
     def language_str(self):
@@ -476,14 +537,13 @@ class LangTreeTranslation(LangTreeElement):
             content=dictionary["content"],
 
             guid=uuid.UUID(dictionary["guid"]),
-            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"])
-        )
+            creation_utc=pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
         LangTreeElement._deserialize_common_fields(translation, dictionary)
 
         return translation
 
-# Episodic comments available: GL84 in SH77 langtree-related Comments.json
+# Episodic comments available: SH77 langtree-related Comments.json
 
 class LangTreeContextBuilder:
     def __init__(
@@ -491,81 +551,39 @@ class LangTreeContextBuilder:
 
         # Refer to the episodic comments regarding the default values.
 
-        max_number_of_system_messages=None,
-        max_number_of_system_message_summaries=0,
+        max_number_of_system_messages=None, # No limit.
+        max_total_tokens_of_system_messages=None, # No limit.
 
-        max_number_of_user_messages=2,
-        max_number_of_user_message_summaries=2,
+        max_number_of_user_messages=3,
+        max_total_tokens_of_user_messages=4096,
 
-        max_number_of_assistant_messages=1,
-        max_number_of_assistant_message_summaries=2):
+        max_number_of_assistant_messages=3,
+        max_total_tokens_of_assistant_messages=4096):
 
         self.max_number_of_system_messages = max_number_of_system_messages
-        self.max_number_of_system_message_summaries = max_number_of_system_message_summaries
+        self.max_total_tokens_of_system_messages = max_total_tokens_of_system_messages
 
         self.max_number_of_user_messages = max_number_of_user_messages
-        self.max_number_of_user_message_summaries = max_number_of_user_message_summaries
+        self.max_total_tokens_of_user_messages = max_total_tokens_of_user_messages
 
         self.max_number_of_assistant_messages = max_number_of_assistant_messages
-        self.max_number_of_assistant_message_summaries = max_number_of_assistant_message_summaries
+        self.max_total_tokens_of_assistant_messages = max_total_tokens_of_assistant_messages
 
-    def build_messages(self, message: LangTreeMessage):
-        elements_with_contents = []
+        # Optional:
+        self.token_counter = None
 
-        # With C#'s "ref" or maintaining a list of max numbers, the following code could be shorter.
+    def _get_token_counter(self, token_counter: popenai.OpenAiTokenCounter):
+        return putility.get_not_none_or_call_func(
+            popenai.get_openai_default_token_counter,
+            token_counter,
+            self.token_counter)
 
-        number_of_system_messages = 0
-        number_of_system_message_summaries = 0
-        number_of_user_messages = 0
-        number_of_user_message_summaries = 0
-        number_of_assistant_messages = 0
-        number_of_assistant_message_summaries = 0
+    def build_messages(
+        self,
+        message: LangTreeMessage,
+        token_counter: popenai.OpenAiTokenCounter=None):
 
-        element = message
-
-        while True:
-            if element.user_role == popenai.OpenAiRole.SYSTEM:
-                if self.max_number_of_system_messages is None or number_of_system_messages < self.max_number_of_system_messages:
-                    elements_with_contents.append((element, element.content)) # Tuple of (element, full content)
-                    number_of_system_messages += 1
-
-                elif self.max_number_of_system_message_summaries is None or number_of_system_message_summaries < self.max_number_of_system_message_summaries:
-                    elements_with_contents.append((element, element.attributes["summary"].value)) # If the summary is not available, this should raise an exception.
-                    number_of_system_message_summaries += 1
-
-            elif element.user_role == popenai.OpenAiRole.USER:
-                if self.max_number_of_user_messages is None or number_of_user_messages < self.max_number_of_user_messages:
-                    elements_with_contents.append((element, element.content))
-                    number_of_user_messages += 1
-
-                elif self.max_number_of_user_message_summaries is None or number_of_user_message_summaries < self.max_number_of_user_message_summaries:
-                    elements_with_contents.append((element, element.attributes["summary"].value))
-                    number_of_user_message_summaries += 1
-
-            elif element.user_role == popenai.OpenAiRole.ASSISTANT:
-                if self.max_number_of_assistant_messages is None or number_of_assistant_messages < self.max_number_of_assistant_messages:
-                    elements_with_contents.append((element, element.content))
-                    number_of_assistant_messages += 1
-
-                elif self.max_number_of_assistant_message_summaries is None or number_of_assistant_message_summaries < self.max_number_of_assistant_message_summaries:
-                    elements_with_contents.append((element, element.attributes["summary"].value))
-                    number_of_assistant_message_summaries += 1
-
-            else:
-                raise RuntimeError(f"Unknown user role: {element.user_role}")
-
-            if element.parent_element:
-                element = element.parent_element
-
-            else:
-                break
-
-        messages = []
-
-        for element, content in sorted(elements_with_contents, key=lambda element_with_content: element_with_content[0].creation_utc):
-            messages.append(popenai.openai_build_message(element.user_role, content, name=element.user_name)) # Supports multi-user scenarios.
-
-        return messages
+        pass
 
 # Lazy loading:
 __langtree_default_context_builder = None # pylint: disable=invalid-name

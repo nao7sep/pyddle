@@ -131,6 +131,11 @@ class OpenAiTokenCounter:
 
         return self.encoding.encode(str_)
 
+    def count(self, str_):
+        ''' Returns the number of tokens. '''
+
+        return len(self.encode(str_))
+
     def encode_to_strs(self, str_):
         ''' Returns a list of tokens as decoded strings. OFTEN fails to decode CJK strings. '''
 
@@ -183,6 +188,30 @@ def get_gpt_4_vision_token_counter():
         __gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_VISION)
 
     return __gpt_4_vision_token_counter
+
+# Lazy loading:
+__openai_default_token_counter = None # pylint: disable=invalid-name
+
+def get_openai_default_token_counter():
+    global __openai_default_token_counter # pylint: disable=global-statement
+
+    if __openai_default_token_counter is None:
+        if DEFAULT_GPT_MODEL == OpenAiModel.GPT_3_5_TURBO:
+            __openai_default_token_counter = get_gpt_3_5_turbo_token_counter()
+
+        elif DEFAULT_GPT_MODEL == OpenAiModel.GPT_4:
+            __openai_default_token_counter = get_gpt_4_token_counter()
+
+        elif DEFAULT_GPT_MODEL == OpenAiModel.GPT_4_TURBO:
+            __openai_default_token_counter = get_gpt_4_turbo_token_counter()
+
+        elif DEFAULT_GPT_MODEL == OpenAiModel.GPT_4_VISION:
+            __openai_default_token_counter = get_gpt_4_vision_token_counter()
+
+        else:
+            raise RuntimeError(f"Unsupported model: {DEFAULT_GPT_MODEL}")
+
+    return __openai_default_token_counter
 
 # ------------------------------------------------------------------------------
 #     Clients

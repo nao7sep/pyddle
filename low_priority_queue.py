@@ -80,8 +80,7 @@ def deserialize_task(task_data):
         task_data["times_per_week"],
         # Enum objects should be represented as integers in databases,
         #     but in text files, I believe strings would be more user-friendly.
-        ptype.str_to_enum_by_name(task_data["result"], enum_type=TaskResult, ignore_case=True) if task_data["result"] is not None else None
-    )
+        ptype.str_to_enum_by_name(task_data["result"], enum_type=TaskResult, ignore_case=True) if task_data["result"] is not None else None)
 
 class TaskList:
     def __init__(self, file_path, backups):
