@@ -131,7 +131,13 @@ try:
             else:
                 break
 
-    threads = []
+    threads: list[threading.Thread] = []
+
+    def _save():
+        root_message = current_message.get_root_element()
+        json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii=False, indent=4)
+        pfs.write_all_text_to_file(JSON_FILE_PATH, json_str_)
+        return json_str_
 
     while True:
         command_str = input("Command: ") # We'll need the entire command string.
@@ -143,6 +149,7 @@ try:
         else:
             if pstring.equals_ignore_case(command.command, "system"):
                 current_message = create_sibling_message(current_message, popenai.OpenAiRole.SYSTEM, command.get_remaining_args_as_str(0))
+                _save()
 
             elif pstring.equals_ignore_case(command.command, "delete") and len(command.args) == 0:
                 if current_message:
@@ -155,6 +162,7 @@ try:
                     if previous_message:
                         current_message.parent_element.child_messages.remove(current_message)
                         current_message = previous_message
+                        _save() # Only when the JSON file has been affected.
 
                     else:
                         current_message = None # pylint: disable=invalid-name
@@ -175,6 +183,7 @@ try:
 
             else:
                 current_message = create_sibling_message(current_message, popenai.OpenAiRole.USER, command_str)
+                _save()
 
     # If at least one thread has become a zombie, this operation might not end.
     # In production code, we should set a timeout and (passively) notify the caller that the attribute/translation hasnt been generated.
@@ -183,9 +192,7 @@ try:
         thread.join()
 
     if current_message is not None:
-        root_message = current_message.get_root_element()
-        json_str = json.dumps(root_message.serialize_to_dict(), ensure_ascii=False, indent=4)
-        pfs.write_all_text_to_file(JSON_FILE_PATH, json_str)
+        json_str = _save() # Saving the translations.
 
         new_root_message = plangtree.LangTreeMessage.deserialize_from_dict(json.loads(json_str))
         new_json_str = json.dumps(new_root_message.serialize_to_dict(), ensure_ascii=False, indent=4)
