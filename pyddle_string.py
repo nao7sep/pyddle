@@ -2,6 +2,7 @@
 # This script contains string-related functions.
 
 import re
+import unicodedata
 
 import pyddle_debugging as pdebugging
 
@@ -532,3 +533,181 @@ def split_line_into_parts(str_):
             raise RuntimeError(f"Line parts could not be extracted from \"{str_}\".")
 
     return match.groups()
+
+# ------------------------------------------------------------------------------
+#     ChunkStrReader
+# ------------------------------------------------------------------------------
+
+# I consider a "line break" is a complete string that works to break a line.
+# Here, I say "chars" as chars that may be found in line breaks.
+
+# In the following implementation and elsewhere, "\r\n" and "\n" are generally supported.
+# Additionally, if "\r" is found and the next character is not "\n" or the string ends there, I believe it's OK to consider it a line break.
+# When a string is being processed, no character should be able to crash the program.
+
+LINE_BREAK_CHARS = ["\r", "\n"]
+
+def get_line_break_len(str_, str_len, first_line_break_char_index):
+    if str_[first_line_break_char_index] == "\r":
+        if first_line_break_char_index + 1 < str_len:
+            if str_[first_line_break_char_index + 1] == "\n":
+                return 2
+
+    return 1
+
+class ChunkStrReader:
+    def __init__(self, indents=""):
+        self.chunks = []
+        self.indents = indents
+        self.__first_indents_consumed = False # We must consider as if there had been a line break before the beginning of the string.
+
+    def add_chunk(self, chunk):
+        if chunk:
+            self.chunks.append(chunk)
+
+    def read_str(self, force=False):
+        # If no chunk contains a line break char, it would be a singleline string when joined.
+
+        for chunk_index, chunk in enumerate(self.chunks):
+            line_break_index = index_of_any(chunk, LINE_BREAK_CHARS)
+
+            # When we find one chunk containing a line break char (not necessarily a complete line break),
+            #     we join the chunks up to that point as a singleline string and switch to the mode where "chunks_to_return" is populated.
+
+            # If that string contains at least one character, even though they may be whitespace,
+            #     as explained in the comments at the end of this method, the first indents are applied.
+
+            if line_break_index >= 0:
+                temp_str = "".join(self.chunks[0 : chunk_index])
+
+                chunks_to_return = []
+
+                if not self.__first_indents_consumed and temp_str:
+                    chunks_to_return.append(self.indents)
+                    self.__first_indents_consumed = True
+
+                chunks_to_return.append(temp_str)
+
+                # Now we have dealt with the singleline part.
+                # We have a chunk that contains at least one line break char and 0 or more chunks after that.
+                # As the first indents have been considered, we can deal with the rest as one joined string that contains 1 or more line break chars.
+
+                remaining_str = "".join(self.chunks[chunk_index : ])
+                remaining_str_len = len(remaining_str)
+
+                char_index = 0
+
+                while char_index < remaining_str_len: # The loop must be like this so that "char_index" can be adjusted.
+                    char = remaining_str[char_index]
+
+                    # When we meet a line break "char", we check the length of the line break and get the entire line break string.
+                    # Then, depending on what follows, we decide whether to add the indents after the line break or not.
+
+                    if char in LINE_BREAK_CHARS:
+                        line_break_len = get_line_break_len(remaining_str, remaining_str_len, char_index)
+                        line_break_str = remaining_str[char_index : char_index + line_break_len]
+
+                        if char_index + line_break_len < remaining_str_len: # No way we can leave the loop from this block.
+                            next_char = remaining_str[char_index + line_break_len]
+
+                            # If the next character is another line break char, it cant be the second character of "\r\n" and it must be a empty line, which doesnt require indents.
+
+                            if next_char in LINE_BREAK_CHARS:
+                                chunks_to_return.append(line_break_str)
+                                char_index += line_break_len
+
+                            # If it's a non-line-break char, even though they may be whitespace, as explained in the comments at the end of this method, indents are applied before the next char.
+
+                            else:
+                                chunks_to_return.append(line_break_str)
+                                chunks_to_return.append(self.indents)
+                                char_index += line_break_len
+
+                        # If there's no character after the line break, we need to wait for the next chunk(s) to know whether it'll be a new line or a non-line-break char.
+                        # If "force" is False, as we are at the end of the string and are seeing a line break there, having dealt with all characters before it,
+                        #     we clear the chunks, add just the line break to the list and return what we have collected so far.
+                        # If "force" is True, assuming there wont be any more chunks, we add the line break to the list and return everything.
+
+                        else:
+                            if force: # Can leave the loop.
+                                # self.chunks.clear() # Cleared after the loop.
+                                chunks_to_return.append(line_break_str)
+                                char_index += line_break_len
+
+                            else: # Returns from here.
+                                self.chunks.clear()
+                                self.chunks.append(line_break_str)
+                                return "".join(chunks_to_return)
+
+                    # In this algorithm, a non-line-break char is not associated with any further actions.
+
+                    else: # Can leave the loop.
+                        chunks_to_return.append(char)
+                        char_index += 1
+
+                # If we have left the loop, it means we have dealt with all the characters 1) Including the last non-line-break char or 2) The last one was a line break char and "force" was True.
+                # In either case, we clear the chunks and return what we have collected.
+
+                self.chunks.clear()
+                return "".join(chunks_to_return)
+
+        # Returns the joined singleline string.
+
+        # If the string is not empty, even though they might not be visible,
+        #     there is at least one character that deserves to be indented if the first indents havent been consumed.
+        # When the string is normalized, I dont add indents to lines that would be empty when normalized,
+        #     but here the lines arent normalized and therefore one whitespace char alone could take the indentation.
+
+        str_ = "".join(self.chunks)
+        self.chunks.clear()
+
+        if not self.__first_indents_consumed and str_:
+            self.__first_indents_consumed = True
+            return self.indents + str_
+
+        return str_
+
+# ------------------------------------------------------------------------------
+#     Extraction of first part
+# ------------------------------------------------------------------------------
+
+# Considering Python's rules, 80 should be a good number.
+# Then, in the UI, a place that can display 80 characters should be able to deal with 50% more characters.
+# 80-100 too is a good option, but if we look for a punctuation char, expecting a more natural break, there should be a little more room.
+
+def extract_first_part(str_, ideal_len = 80, max_len = 120, trailing="..."):
+    if not str_:
+        return str_
+
+    # When we want to extract the first part of a string, we dont want it to contain line breaks or redundant whitespace.
+
+    normalized_str = normalize_singleline_str(str_)
+    normalized_str_len = len(normalized_str)
+
+    if normalized_str_len <= max_len:
+        return normalized_str
+
+    def _extract(category_first_letter):
+        char_index = ideal_len
+
+        while char_index < max_len:
+            char = normalized_str[char_index]
+            category = unicodedata.category(char)
+
+            if category.startswith(category_first_letter):
+                return normalized_str[0 : char_index].rstrip() + trailing
+
+            char_index += 1
+
+        return None
+
+    # https://en.wikipedia.org/wiki/Unicode_character_property
+
+    # Punctuations, symbols, separators in this order.
+    first_part = _extract("P") or _extract("S") or _extract("Z")
+
+    if first_part:
+        return first_part
+
+    # If it's a CJK string, it'd end up here.
+    return normalized_str[0 : ideal_len].rstrip() + trailing

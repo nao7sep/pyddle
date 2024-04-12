@@ -82,7 +82,10 @@ def get_merged_kvs_data():
 
     if not __merged_kvs_data:
         # https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-in-python
-        __merged_kvs_data = {**get_first_kvs_data(), **get_second_kvs_data()}
+        __merged_kvs_data = {
+            **get_first_kvs_data(),
+            **get_second_kvs_data()
+        }
 
     return __merged_kvs_data
 

@@ -99,6 +99,12 @@ class LangTreeElement:
             self.timeout,
             popenai.DEFAULT_RESPONSE_TIMEOUT)
 
+    def _get_chunk_timeout(self, timeout):
+        return putility.get_not_none(
+            timeout,
+            self.timeout,
+            popenai.DEFAULT_CHUNK_TIMEOUT)
+
     def generate_attribute_with_prompt(
         self,
 
@@ -261,7 +267,7 @@ class LangTreeMessage(LangTreeElement):
         content,
         user_name=None):
 
-        ''' Consider using "create_next_message" instead. '''
+        ''' Consider using "create_sibling_message" instead. '''
 
         child_message = LangTreeMessage(
             user_role=user_role,
@@ -287,7 +293,7 @@ class LangTreeMessage(LangTreeElement):
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
 
-        ''' Consider using "generate_next_message_with_messages" instead. '''
+        ''' Consider using "generate_sibling_message_with_messages" instead. '''
 
         response = popenai.openai_chat_completions_create_with_settings(
             settings=self._get_chat_settings(chat_settings),
@@ -308,7 +314,7 @@ class LangTreeMessage(LangTreeElement):
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
 
-        ''' Consider using "generate_next_message_with_context_builder" instead. '''
+        ''' Consider using "generate_sibling_message_with_context_builder" instead. '''
 
         return self.generate_child_message_with_messages(
             context_builder.build_messages(self),
@@ -323,7 +329,7 @@ class LangTreeMessage(LangTreeElement):
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
 
-        ''' Consider using "generate_next_message" instead. '''
+        ''' Consider using "generate_sibling_message" instead. '''
 
         return self.generate_child_message_with_context_builder(
             context_builder=get_langtree_default_context_builder(),
@@ -332,11 +338,13 @@ class LangTreeMessage(LangTreeElement):
             chat_settings=chat_settings,
             timeout=timeout)
 
-    def create_next_message(
+    def create_sibling_message(
         self,
         user_role: popenai.OpenAiRole,
         content,
         user_name=None):
+
+        ''' Creates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
             return self.parent_element.create_child_message(user_role=user_role, content=content, user_name=user_name)
@@ -344,12 +352,14 @@ class LangTreeMessage(LangTreeElement):
         else:
             return self.create_child_message(user_role=user_role, content=content, user_name=user_name)
 
-    def generate_next_message_with_messages(
+    def generate_sibling_message_with_messages(
         self,
         messages,
         client: openai.OpenAI=None,
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
+
+        ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
             return self.parent_element.generate_child_message_with_messages(messages, client=client, chat_settings=chat_settings, timeout=timeout)
@@ -357,12 +367,14 @@ class LangTreeMessage(LangTreeElement):
         else:
             return self.generate_child_message_with_messages(messages, client=client, chat_settings=chat_settings, timeout=timeout)
 
-    def generate_next_message_with_context_builder(
+    def generate_sibling_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
         client: openai.OpenAI=None,
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
+
+        ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
             return self.parent_element.generate_child_message_with_context_builder(context_builder, client=client, chat_settings=chat_settings, timeout=timeout)
@@ -370,17 +382,98 @@ class LangTreeMessage(LangTreeElement):
         else:
             return self.generate_child_message_with_context_builder(context_builder, client=client, chat_settings=chat_settings, timeout=timeout)
 
-    def generate_next_message(
+    def generate_sibling_message(
         self,
         client: openai.OpenAI=None,
         chat_settings: popenai.OpenAiChatSettings=None,
         timeout=None):
+
+        ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
             return self.parent_element.generate_child_message(client=client, chat_settings=chat_settings, timeout=timeout)
 
         else:
             return self.generate_child_message(client=client, chat_settings=chat_settings, timeout=timeout)
+
+    def start_generating_message_with_messages(
+        self,
+        messages,
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        return popenai.openai_chat_completions_create_with_settings(
+            settings=self._get_chat_settings(chat_settings),
+            messages=messages,
+            client=self._get_client(client),
+            stream_override=True,
+            timeout=self._get_chunk_timeout(timeout)) # Timeout for chunks.
+
+    def start_generating_message_with_context_builder(
+        self,
+        context_builder: LangTreeContextBuilder,
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        return self.start_generating_message_with_messages(
+            context_builder.build_messages(self),
+
+            client=client,
+            chat_settings=chat_settings,
+            timeout=timeout)
+
+    def start_generating_message(
+        self,
+        client: openai.OpenAI=None,
+        chat_settings: popenai.OpenAiChatSettings=None,
+        timeout=None):
+
+        return self.start_generating_message_with_context_builder(
+            context_builder=get_langtree_default_context_builder(),
+
+            client=client,
+            chat_settings=chat_settings,
+            timeout=timeout)
+
+    def get_previous_message(self):
+        ''' Assumes child messages at each level are ordered by "creation_utc". '''
+
+        if self.parent_element:
+            index = self.parent_element.child_messages.index(self)
+
+            if index >= 1:
+                return self.parent_element.child_messages[index - 1]
+
+            else:
+                return self.parent_element
+
+        return None
+
+    def get_next_message(self, sibling_first=True):
+        ''' Assumes child messages at each level are ordered by "creation_utc". '''
+
+        def _get_sibling():
+            if self.parent_element:
+                index = self.parent_element.child_messages.index(self)
+
+                if index + 1 < len(self.parent_element.child_messages):
+                    return self.parent_element.child_messages[index + 1]
+
+            return None
+
+        def _get_child():
+            if self.child_messages:
+                return self.child_messages[0]
+
+            return None
+
+        if sibling_first:
+            return _get_sibling() or _get_child()
+
+        else:
+            return _get_child() or _get_sibling()
 
     def serialize_to_dict(self):
         dictionary = {}
@@ -591,6 +684,11 @@ class LangTreeContextBuilder:
         while True:
             # In each round, we collect all the siblings of the current element that are younger together with the element itself OR the element alone if it's the root element.
 
+            # Considerations:
+            #     * When there are older siblings than the currently selected element, they are properly excluded from the list
+            #     * When the selected element is a part of a branch hanging from a somewhere-in-the middle sibling,
+            #           the search should properly go up to the root element including only what it should
+
             if element.parent_element:
                 for sibling in element.parent_element.child_messages:
                     if sibling.creation_utc < element.creation_utc:
@@ -649,15 +747,6 @@ class LangTreeContextBuilder:
         messages = [popenai.openai_build_message(role=element.user_role, content=element.content, name=element.user_name) for element in elements_to_include]
 
         return LangTreeContext(
-            number_of_system_messages=numbers[0],
-            total_tokens_of_system_messages=total_tokens[0],
-
-            number_of_user_messages=numbers[1],
-            total_tokens_of_user_messages=total_tokens[1],
-
-            number_of_assistant_messages=numbers[2],
-            total_tokens_of_assistant_messages=total_tokens[2],
-
             elements=elements_to_include,
             messages=messages)
 
@@ -676,52 +765,49 @@ class LangTreeContext:
     def __init__(
         self,
 
-        number_of_system_messages=None,
-        total_tokens_of_system_messages=None,
-
-        number_of_user_messages=None,
-        total_tokens_of_user_messages=None,
-
-        number_of_assistant_messages=None,
-        total_tokens_of_assistant_messages=None,
-
-        elements: list[LangTreeMessage]=None,
-        messages: list[dict]=None):
-
-        self.number_of_system_messages = number_of_system_messages
-        self.total_tokens_of_system_messages = total_tokens_of_system_messages
-
-        self.number_of_user_messages = number_of_user_messages
-        self.total_tokens_of_user_messages = total_tokens_of_user_messages
-
-        self.number_of_assistant_messages = number_of_assistant_messages
-        self.total_tokens_of_assistant_messages = total_tokens_of_assistant_messages
+        elements: list[LangTreeMessage],
+        messages: list[dict]):
 
         self.elements = elements
         self.messages = messages
 
-    def stats_to_lines(self):
-        lines = []
+    def get_elements_by_role(self, role: popenai.OpenAiRole):
+        return [element for element in self.elements if element.user_role == role]
 
-        if self.number_of_system_messages is not None:
-            if self.total_tokens_of_system_messages is not None:
-                lines.append(f"System: {self.number_of_system_messages} messages ({self.total_tokens_of_system_messages} tokens)")
+    def get_statistics(self):
+        statistics = {}
+
+        def _add(role: popenai.OpenAiRole):
+            elements = self.get_elements_by_role(role)
+
+            statistics[role] = {
+                "number": len(elements),
+                "total_tokens": sum(element.token_count for element in elements),
+                "tokens": [element.token_count for element in elements]
+            }
+
+        _add(popenai.OpenAiRole.SYSTEM)
+        _add(popenai.OpenAiRole.USER)
+        _add(popenai.OpenAiRole.ASSISTANT)
+
+        return statistics
+
+    @staticmethod
+    def statistics_to_lines(statistics, all_tokens=False):
+        def _get_line(role: popenai.OpenAiRole):
+            number = statistics[role]["number"]
+            total_tokens = statistics[role]["total_tokens"]
+
+            if all_tokens and total_tokens > 0:
+                tokens = statistics[role]["tokens"]
+
+                return f"{role.value.capitalize()}: {number} messages ({total_tokens} tokens: {", ".join([str(token) for token in tokens])})"
 
             else:
-                lines.append(f"System: {self.number_of_system_messages} messages")
+                return f"{role.value.capitalize()}: {number} messages ({total_tokens} tokens)"
 
-        if self.number_of_user_messages is not None:
-            if self.total_tokens_of_user_messages is not None:
-                lines.append(f"User: {self.number_of_user_messages} messages ({self.total_tokens_of_user_messages} tokens)")
-
-            else:
-                lines.append(f"User: {self.number_of_user_messages} messages")
-
-        if self.number_of_assistant_messages is not None:
-            if self.total_tokens_of_assistant_messages is not None:
-                lines.append(f"Assistant: {self.number_of_assistant_messages} messages ({self.total_tokens_of_assistant_messages} tokens)")
-
-            else:
-                lines.append(f"Assistant: {self.number_of_assistant_messages} messages")
-
-        return lines
+        return [
+            _get_line(popenai.OpenAiRole.SYSTEM),
+            _get_line(popenai.OpenAiRole.USER),
+            _get_line(popenai.OpenAiRole.ASSISTANT)
+        ]

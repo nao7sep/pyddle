@@ -10,6 +10,7 @@ import tiktoken
 
 import httpx
 import openai
+import openai.types.chat
 
 import pyddle_collections as pcollections
 import pyddle_json_based_kvs as pkvs
@@ -602,6 +603,7 @@ def openai_chat_completions_create_with_settings(
 
     # Optional settings:
     client: openai.OpenAI=None,
+    stream_override=None,
     timeout=None):
 
     return openai_chat_completions_create(
@@ -617,7 +619,7 @@ def openai_chat_completions_create_with_settings(
         response_format=settings.response_format,
         seed=settings.seed,
         stop=settings.stop,
-        stream=settings.stream,
+        stream=settings.stream if stream_override is None else stream_override,
         temperature=settings.temperature,
         top_p=settings.top_p,
         user=settings.user,
@@ -658,11 +660,17 @@ def openai_build_messages(user_message, user_message_name=None, system_message=N
 
     return messages
 
-def openai_extract_messages(response):
+def openai_extract_messages(response: openai.types.chat.ChatCompletion):
     return [choice.message.content for choice in response.choices]
 
-def openai_extract_first_message(response):
+def openai_extract_first_message(response: openai.types.chat.ChatCompletion):
     return response.choices[0].message.content
+
+def openai_extract_deltas(response: openai.types.chat.ChatCompletion):
+    return [choice.delta.content for choice in response.choices]
+
+def openai_extract_first_delta(chunk: openai.types.chat.ChatCompletionChunk):
+    return chunk.choices[0].delta.content
 
 # ------------------------------------------------------------------------------
 #     Vision

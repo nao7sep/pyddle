@@ -3,6 +3,7 @@
 
 import json
 import os
+import sys
 import threading
 import traceback
 
@@ -38,12 +39,12 @@ def translate(element: plangtree.LangTreeMessage, language: popenai.OpenAiLangua
         prompt=f"{prompt}\n\n{element.content}",
         client=client)
 
-def create_next_message(element: plangtree.LangTreeMessage, user_role: popenai.OpenAiRole, content: str):
+def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popenai.OpenAiRole, content: str):
     if element is None:
         new_current_message = plangtree.LangTreeMessage(user_role=user_role, content=content)
 
     else:
-        new_current_message = element.create_next_message(user_role=user_role, content=content)
+        new_current_message = element.create_sibling_message(user_role=user_role, content=content)
 
     # System messages arent translated.
 
@@ -58,21 +59,50 @@ def create_next_message(element: plangtree.LangTreeMessage, user_role: popenai.O
 
         context_builder = plangtree.get_langtree_default_context_builder()
         context = context_builder.build(new_current_message)
-        context_stat_lines = context.stats_to_lines()
 
-        if context_stat_lines:
-            plogging.log("[Context Statistics]")
-            plogging.log_lines(context_stat_lines, indents=pstring.LEVELED_INDENTS[1])
-            plogging.log("", flush_=True)
+        statistics_lines = plangtree.LangTreeContext.statistics_to_lines(context.get_statistics(), all_tokens=True)
+
+        plogging.log("[Statistics]") # [Content Statistics] sounds a little redundant.
+        plogging.log_lines(statistics_lines, indents=pstring.LEVELED_INDENTS[1])
+        plogging.log("", flush_=True)
 
         messages_json_str = json.dumps(context.messages, ensure_ascii=False, indent=4)
         plogging.log(f"[Context]\n{messages_json_str}", end="\n\n", flush_=True)
 
-        new_current_message = new_current_message.generate_next_message_with_messages(context.messages)
-        plogging.log(f"[Response]\n{new_current_message.content}", end="\n\n", flush_=True)
+        response = new_current_message.start_generating_message_with_messages(context.messages)
+
+        # Collecting what the AI has returned, excluding falsy values.
+        # As of 2024-04-12, at least one time, None is returned.
+        chunk_deltas = []
+
+        chunk_str_reader = pstring.ChunkStrReader(indents=pstring.LEVELED_INDENTS[1])
 
         pconsole.print("Response:")
-        pconsole.print_lines(pstring.splitlines(new_current_message.content), indents=pstring.LEVELED_INDENTS[1])
+
+        for chunk in response:
+            chunk_delta = popenai.openai_extract_first_delta(chunk)
+
+            if chunk_delta:
+                chunk_deltas.append(chunk_delta)
+                chunk_str_reader.add_chunk(chunk_delta)
+
+                chunk_str = chunk_str_reader.read_str()
+                pconsole.print(chunk_str, end="")
+                sys.stdout.flush() # Without this, output may come out line by line.
+
+        # ChunkStrReader doesnt return the remaining chunk if it ends with a line break and waits for the next one to determine whether indents must be added or not.
+        # When the interaction has ended, we need to receive the last chunk (if any) and print it as-is because it may contain a visible character right before the line break.
+        chunk_str = chunk_str_reader.read_str(force=True)
+        end_ = "" if chunk_str.endswith("\n") else "\n" # If we want to do this precisely, we'd need to analyze the last part of "content".
+        pconsole.print(chunk_str, end=end_)
+
+        content = "".join(chunk_deltas)
+
+        plogging.log(f"[Response]\n{content}", end="\n\n", flush_=True)
+
+        new_current_message = new_current_message.create_sibling_message(
+            user_role=popenai.OpenAiRole.ASSISTANT,
+            content=content)
 
         threads.append(threading.Thread(target=translate, args=(new_current_message, popenai.OpenAiLanguage.JAPANESE)))
         threads[-1].start()
@@ -108,17 +138,43 @@ try:
         command = pconsole.parse_command_str(command_str)
 
         if not command:
-            pconsole.print("Invalid command.", colors=pconsole.ERROR_COLORS)
+            pconsole.print("Invalid command.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.ERROR_COLORS)
 
         else:
             if pstring.equals_ignore_case(command.command, "system"):
-                current_message = create_next_message(current_message, popenai.OpenAiRole.SYSTEM, command.get_remaining_args_as_str(0))
+                current_message = create_sibling_message(current_message, popenai.OpenAiRole.SYSTEM, command.get_remaining_args_as_str(0))
 
-            elif pstring.equals_ignore_case(command.command, "exit"):
+            elif pstring.equals_ignore_case(command.command, "delete") and len(command.args) == 0:
+                if current_message:
+                    previous_message = current_message.get_previous_message()
+
+                    # Explicit implementation.
+                    # If there's an element to move back to, the current one is removed from the list.
+                    # If not, it automatically means it's the root element, so we set it to None.
+
+                    if previous_message:
+                        current_message.parent_element.child_messages.remove(current_message)
+                        current_message = previous_message
+
+                    else:
+                        current_message = None # pylint: disable=invalid-name
+
+                    pconsole.print("Deleted message.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.IMPORTANT_COLORS)
+
+                    if current_message:
+                        pconsole.print(f"Current message: {pstring.extract_first_part(current_message.content)}", indents=pstring.LEVELED_INDENTS[1])
+
+                    else:
+                        pconsole.print("No current message.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.IMPORTANT_COLORS)
+
+                else:
+                    pconsole.print("No messages to delete.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.ERROR_COLORS)
+
+            elif pstring.equals_ignore_case(command.command, "exit") and len(command.args) == 0:
                 break
 
             else:
-                current_message = create_next_message(current_message, popenai.OpenAiRole.USER, command_str)
+                current_message = create_sibling_message(current_message, popenai.OpenAiRole.USER, command_str)
 
     # If at least one thread has become a zombie, this operation might not end.
     # In production code, we should set a timeout and (passively) notify the caller that the attribute/translation hasnt been generated.
