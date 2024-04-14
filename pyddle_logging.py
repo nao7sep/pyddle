@@ -14,7 +14,7 @@ import pyddle_string as pstring
 # I think it's OK; it's quick, runs at negligible cost and certainly improves the usability of the log file.
 
 # Lazy loading:
-__logs_directory_path = None # pylint: disable = invalid-name
+__logs_directory_path: str | None = None # pylint: disable = invalid-name
 
 def get_logs_directory_path():
     global __logs_directory_path # pylint: disable = global-statement
@@ -31,7 +31,7 @@ def get_logs_directory_path():
 # The following file name format is reasonable as the script file name may not contain hyphens while file name elements should be separated by hyphens.
 
 # Lazy loading:
-__log_file_path = None # pylint: disable = invalid-name
+__log_file_path: str | None = None # pylint: disable = invalid-name
 
 def get_log_file_path():
     global __log_file_path # pylint: disable = global-statement
@@ -43,7 +43,7 @@ def get_log_file_path():
 
     return __log_file_path
 
-pending_logs = []
+pending_logs: list[str] = []
 
 def log(str_: str, indents = "", end = "\n", flush_ = False):
     if str_:

@@ -2,7 +2,6 @@
 # A module that helps us organize knowledge in a tree structure.
 
 from __future__ import annotations
-import typing
 import uuid
 
 import openai
@@ -32,7 +31,7 @@ class LangTreeElement:
 
         # Required, nullable (but not encouraged), can be empty:
         self.attributes: dict[str, LangTreeAttribute] = {}
-        self.translations: dict[typing.Union[popenai.OpenAiLanguage, str], LangTreeTranslation] = {}
+        self.translations: dict[popenai.OpenAiLanguage | str, LangTreeTranslation] = {}
         # These should be dictionaries for performance.
         # Dictionary keys and their corresponding values' internal keys must match.
 
@@ -65,7 +64,7 @@ class LangTreeElement:
 
         return attribute
 
-    def create_translation(self, language: typing.Union[popenai.OpenAiLanguage, str], content):
+    def create_translation(self, language: popenai.OpenAiLanguage | str, content):
         translation = LangTreeTranslation(
             language = language,
             content = content)
@@ -81,13 +80,13 @@ class LangTreeElement:
 
         return translation
 
-    def _get_client(self, client: openai.OpenAI):
+    def _get_client(self, client: openai.OpenAI | None):
         return putility.get_not_none_or_call_func(
             popenai.get_openai_default_client,
             client,
             self.client)
 
-    def _get_chat_settings(self, chat_settings: popenai.OpenAiChatSettings):
+    def _get_chat_settings(self, chat_settings: popenai.OpenAiChatSettings | None):
         return putility.get_not_none_or_call_func(
             popenai.get_openai_default_chat_settings,
             chat_settings,
@@ -111,8 +110,8 @@ class LangTreeElement:
         name,
         prompt,
 
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         response = popenai.openai_chat_completions_create_with_settings(
@@ -128,11 +127,11 @@ class LangTreeElement:
     def generate_translation_with_prompt(
         self,
 
-        language: typing.Union[popenai.OpenAiLanguage, str],
+        language: popenai.OpenAiLanguage | str,
         prompt,
 
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         response = popenai.openai_chat_completions_create_with_settings(
@@ -255,7 +254,7 @@ class LangTreeMessage(LangTreeElement):
 
         # Optional, nullable, not serialized:
         # Comments: SH77 langtree-related Comments.json
-        self.token_count = None
+        self.token_count: int | None = None
 
         # Required, nullable (but not encouraged), can be empty:
         self.child_messages: list[LangTreeMessage] = []
@@ -289,8 +288,8 @@ class LangTreeMessage(LangTreeElement):
     def generate_child_message_with_messages(
         self,
         messages,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         ''' Consider using "generate_sibling_message_with_messages" instead. '''
@@ -310,14 +309,14 @@ class LangTreeMessage(LangTreeElement):
     def generate_child_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         ''' Consider using "generate_sibling_message_with_context_builder" instead. '''
 
         return self.generate_child_message_with_messages(
-            context_builder.build_messages(self),
+            context_builder.build(self),
 
             client = client,
             chat_settings = chat_settings,
@@ -325,8 +324,8 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_child_message(
         self,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         ''' Consider using "generate_sibling_message" instead. '''
@@ -355,8 +354,8 @@ class LangTreeMessage(LangTreeElement):
     def generate_sibling_message_with_messages(
         self,
         messages,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
@@ -370,8 +369,8 @@ class LangTreeMessage(LangTreeElement):
     def generate_sibling_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
@@ -384,8 +383,8 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_sibling_message(
         self,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
@@ -399,8 +398,8 @@ class LangTreeMessage(LangTreeElement):
     def start_generating_message_with_messages(
         self,
         messages,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         return popenai.openai_chat_completions_create_with_settings(
@@ -413,12 +412,12 @@ class LangTreeMessage(LangTreeElement):
     def start_generating_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         return self.start_generating_message_with_messages(
-            context_builder.build_messages(self),
+            context_builder.build(self),
 
             client = client,
             chat_settings = chat_settings,
@@ -426,8 +425,8 @@ class LangTreeMessage(LangTreeElement):
 
     def start_generating_message(
         self,
-        client: openai.OpenAI = None,
-        chat_settings: popenai.OpenAiChatSettings = None,
+        client: openai.OpenAI | None = None,
+        chat_settings: popenai.OpenAiChatSettings | None = None,
         timeout = None):
 
         return self.start_generating_message_with_context_builder(
@@ -580,7 +579,7 @@ class LangTreeTranslation(LangTreeElement):
     def __init__(
         self,
 
-        language: typing.Union[popenai.OpenAiLanguage, str],
+        language: popenai.OpenAiLanguage | str,
         content,
 
         guid = None,
@@ -591,7 +590,7 @@ class LangTreeTranslation(LangTreeElement):
             creation_utc = creation_utc)
 
         # Required, not nullable:
-        self.language: typing.Union[popenai.OpenAiLanguage, str] = language
+        self.language: popenai.OpenAiLanguage | str = language
         self.content = content
 
         # Optional, nullable, not serialized:
@@ -665,7 +664,7 @@ class LangTreeContextBuilder:
         # Optional:
         self.token_counter = None
 
-    def _get_token_counter(self, token_counter: popenai.OpenAiTokenCounter):
+    def _get_token_counter(self, token_counter: popenai.OpenAiTokenCounter | None):
         return putility.get_not_none_or_call_func(
             popenai.get_openai_default_token_counter,
             token_counter,
@@ -674,7 +673,7 @@ class LangTreeContextBuilder:
     def build(
         self,
         message: LangTreeMessage,
-        token_counter: popenai.OpenAiTokenCounter = None) -> LangTreeContext:
+        token_counter: popenai.OpenAiTokenCounter | None = None) -> LangTreeContext:
 
         # All younger siblings and the root element.
         elements = []
@@ -751,7 +750,7 @@ class LangTreeContextBuilder:
             messages = messages)
 
 # Lazy loading:
-__langtree_default_context_builder = None # pylint: disable = invalid-name
+__langtree_default_context_builder: LangTreeContextBuilder | None = None # pylint: disable = invalid-name
 
 def get_langtree_default_context_builder():
     global __langtree_default_context_builder # pylint: disable = global-statement

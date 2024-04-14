@@ -14,7 +14,7 @@ IMPORTANT_COLORS = [colorama.Back.BLUE, colorama.Fore.WHITE]
 WARNING_COLORS = [colorama.Back.YELLOW, colorama.Fore.BLACK]
 ERROR_COLORS = [colorama.Back.RED, colorama.Fore.WHITE]
 
-def print(str_: str, indents = "", colors: list[str] = None, end = "\n"): # pylint: disable = redefined-builtin
+def print(str_: str, indents = "", colors: list[str] | None = None, end = "\n"): # pylint: disable = redefined-builtin
     # A frequently used method that should almost always be called like "pconsole.print".
 
     if str_:
@@ -27,7 +27,7 @@ def print(str_: str, indents = "", colors: list[str] = None, end = "\n"): # pyli
     else:
         builtin_print("", end = end)
 
-def print_lines(str_: list[str], indents = "", colors: list[str] = None, trailing = "", end = "\n"):
+def print_lines(str_: list[str], indents = "", colors: list[str] | None = None, trailing = "", end = "\n"):
     if str_:
         if colors:
             colors_string = "".join(colors)

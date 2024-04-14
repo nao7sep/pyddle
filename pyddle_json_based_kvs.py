@@ -11,7 +11,7 @@ import pyddle_global as pglobal
 import pyddle_path as ppath
 
 # Lazy loading:
-__executing_script_files_directory_path = None # pylint: disable = invalid-name
+__executing_script_files_directory_path: str | None = None # pylint: disable = invalid-name
 
 def get_executing_script_files_directory_path():
     global __executing_script_files_directory_path # pylint: disable = global-statement
@@ -22,7 +22,7 @@ def get_executing_script_files_directory_path():
     return __executing_script_files_directory_path
 
 # Lazy loading:
-__first_kvs_file_path = None # pylint: disable = invalid-name
+__first_kvs_file_path: str | None = None # pylint: disable = invalid-name
 
 def get_first_kvs_file_path():
     global __first_kvs_file_path # pylint: disable = global-statement
@@ -33,7 +33,7 @@ def get_first_kvs_file_path():
     return __first_kvs_file_path
 
 # Lazy loading:
-__second_kvs_file_path = None # pylint: disable = invalid-name
+__second_kvs_file_path: str | None = None # pylint: disable = invalid-name
 
 def get_second_kvs_file_path():
     global __second_kvs_file_path # pylint: disable = global-statement
@@ -45,7 +45,7 @@ def get_second_kvs_file_path():
     return __second_kvs_file_path
 
 # Lazy loading:
-__first_kvs_data = None # pylint: disable = invalid-name
+__first_kvs_data: str | None = None # pylint: disable = invalid-name
 
 def get_first_kvs_data():
     global __first_kvs_data # pylint: disable = global-statement
@@ -60,7 +60,7 @@ def get_first_kvs_data():
     return __first_kvs_data
 
 # Lazy loading:
-__second_kvs_data = None # pylint: disable = invalid-name
+__second_kvs_data: str | None = None # pylint: disable = invalid-name
 
 def get_second_kvs_data():
     global __second_kvs_data # pylint: disable = global-statement
@@ -75,7 +75,7 @@ def get_second_kvs_data():
     return __second_kvs_data
 
 # Lazy loading:
-__merged_kvs_data = None # pylint: disable = invalid-name
+__merged_kvs_data: str | None = None # pylint: disable = invalid-name
 
 def get_merged_kvs_data():
     global __merged_kvs_data # pylint: disable = global-statement

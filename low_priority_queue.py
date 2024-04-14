@@ -33,7 +33,7 @@ class TaskResult(enum.Enum):
     CHECKED = 2
 
 class TaskInfo:
-    def __init__(self, guid, creation_utc, handled_utc, is_active, is_shown, content, times_per_week, result: TaskResult):
+    def __init__(self, guid, creation_utc, handled_utc, is_active, is_shown, content, times_per_week, result: TaskResult | None):
         self.guid = guid
         self.creation_utc = creation_utc
         # AI said handling_utc would be confusing as it might be interpreted as the time that the task was scheduled to be executed.

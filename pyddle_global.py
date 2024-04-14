@@ -8,7 +8,7 @@ import os
 # ------------------------------------------------------------------------------
 
 # Not a constant, but should act like one.
-MAIN_SCRIPT_FILE_PATH = None
+MAIN_SCRIPT_FILE_PATH: str | None = None
 
 def set_main_script_file_path(file_path):
     # "global" lets us modify the global variables outside of the function.

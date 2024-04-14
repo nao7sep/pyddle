@@ -1,4 +1,4 @@
-﻿# Created: 2024-03-26
+# Created: 2024-03-26
 # Sugar-coating classes and methods for OpenAI's API.
 
 import base64
@@ -296,7 +296,7 @@ def openai_audio_speech_create(
     speed = None,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     timeout = None):
 
     # Checked: all, order, named, falsy
@@ -426,7 +426,7 @@ def openai_audio_transcriptions_create(
     timestamp_granularities = None,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     timeout = None):
 
     with open(file_path, "rb") as file:
@@ -461,7 +461,7 @@ def openai_audio_translations_create(
     temperature = None,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     timeout = None):
 
     with open(file_path, "rb") as file:
@@ -514,7 +514,7 @@ def openai_chat_completions_create(
     max_tokens = None,
     n = None,
     presence_penalty = None,
-    response_format: OpenAiChatFormat = None,
+    response_format: OpenAiChatFormat | None = None,
     seed = None,
     stop = None,
     stream = None,
@@ -523,7 +523,7 @@ def openai_chat_completions_create(
     user = None,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     timeout = None):
 
     # Checked: all, order, named, falsy
@@ -567,7 +567,7 @@ class OpenAiChatSettings:
         self.max_tokens = None
         self.n = None
         self.presence_penalty = None
-        self.response_format: OpenAiChatFormat = None
+        self.response_format: OpenAiChatFormat | None = None
         self.seed = None
         self.stop = None
         self.stream = None
@@ -684,7 +684,7 @@ class OpenAiVisionDetail(enum.Enum):
     LOW = "low"
 
 def openai_build_messages_for_vision(image_file_paths, user_message,
-                                     detail: OpenAiVisionDetail = None,
+                                     detail: OpenAiVisionDetail | None = None,
                                      system_message = None):
     messages = []
 
@@ -802,13 +802,13 @@ def openai_images_generate(
 
     # Optional parameters:
     n = None,
-    quality: OpenAiImageQuality = None,
-    size: OpenAiImageSize = None,
-    style: OpenAiImageStyle = None,
+    quality: OpenAiImageQuality | None = None,
+    size: OpenAiImageSize | None = None,
+    style: OpenAiImageStyle | None = None,
     user = None,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     timeout = None):
 
     ''' Returns a list of file paths. '''
@@ -850,11 +850,11 @@ def openai_images_edit(
     # Optional parameters:
     mask_file_path = None,
     n = None,
-    size: OpenAiImageSize = None,
+    size: OpenAiImageSize | None = None,
     user = None,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     timeout = None):
 
     ''' Returns a list of file paths. '''
@@ -899,11 +899,11 @@ def openai_images_create_variation(
 
     # Optional parameters:
     n = None,
-    size: OpenAiImageSize = None,
+    size: OpenAiImageSize | None = None,
     user = None,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     timeout = None):
 
     ''' Returns a list of file paths. '''

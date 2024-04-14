@@ -83,7 +83,7 @@ try:
     #     Find solution directories
     # ------------------------------------------------------------------------------
 
-    solutions = []
+    solutions: list[pdotnet.SolutionInfo] = []
 
     # "os.listdir" returns not only directories but also files.
     # https://www.geeksforgeeks.org/python-os-listdir-method/
