@@ -57,7 +57,7 @@ NORMALIZED_MULTILINE_LIST = pstring.normalize_lines(MULTILINE_LIST)
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(None)
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines([None]) # => One empty line.
+poutput.print_and_log_lines([None]) # type: ignore # => One empty line.
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines([""]) # => One empty line.
 poutput.print_and_log(BORDERLINE)

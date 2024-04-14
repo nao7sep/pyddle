@@ -79,7 +79,7 @@ class OpenAiSettings:
         return self.__base_url
 
 # Lazy loading:
-__openai_default_settings = None # pylint: disable = invalid-name
+__openai_default_settings: OpenAiSettings | None = None # pylint: disable = invalid-name
 
 def get_openai_default_settings():
     global __openai_default_settings # pylint: disable = global-statement
@@ -146,7 +146,7 @@ class OpenAiTokenCounter:
         return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str_)]
 
 # Lazy loading:
-__gpt_3_5_turbo_token_counter = None # pylint: disable = invalid-name
+__gpt_3_5_turbo_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_3_5_turbo_token_counter():
     global __gpt_3_5_turbo_token_counter # pylint: disable = global-statement
@@ -157,7 +157,7 @@ def get_gpt_3_5_turbo_token_counter():
     return __gpt_3_5_turbo_token_counter
 
 # Lazy loading:
-__gpt_4_token_counter = None # pylint: disable = invalid-name
+__gpt_4_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_4_token_counter():
     global __gpt_4_token_counter # pylint: disable = global-statement
@@ -168,7 +168,7 @@ def get_gpt_4_token_counter():
     return __gpt_4_token_counter
 
 # Lazy loading:
-__gpt_4_turbo_token_counter = None # pylint: disable = invalid-name
+__gpt_4_turbo_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_4_turbo_token_counter():
     global __gpt_4_turbo_token_counter # pylint: disable = global-statement
@@ -180,7 +180,7 @@ def get_gpt_4_turbo_token_counter():
 
 # Lazy loading:
 # May be unnecessary.
-__gpt_4_vision_token_counter = None # pylint: disable = invalid-name
+__gpt_4_vision_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_4_vision_token_counter():
     global __gpt_4_vision_token_counter # pylint: disable = global-statement
@@ -191,7 +191,7 @@ def get_gpt_4_vision_token_counter():
     return __gpt_4_vision_token_counter
 
 # Lazy loading:
-__openai_default_token_counter = None # pylint: disable = invalid-name
+__openai_default_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
 
 def get_openai_default_token_counter():
     global __openai_default_token_counter # pylint: disable = global-statement
@@ -247,7 +247,7 @@ def create_openai_client(api_key = None, organization = None, base_url = None, t
     return openai.OpenAI(**args.args)
 
 # Lazy loading:
-__openai_default_client = None # pylint: disable = invalid-name
+__openai_default_client: openai.OpenAI | None = None # pylint: disable = invalid-name
 
 def get_openai_default_client():
     global __openai_default_client # pylint: disable = global-statement
@@ -587,7 +587,7 @@ class OpenAiChatSettings:
 DEFAULT_GPT_MODEL = OpenAiModel.GPT_4_TURBO
 
 # Lazy loading:
-__openai_default_chat_settings = None # pylint: disable = invalid-name
+__openai_default_chat_settings: OpenAiChatSettings | None = None # pylint: disable = invalid-name
 
 def get_openai_default_chat_settings():
     global __openai_default_chat_settings # pylint: disable = global-statement
@@ -602,7 +602,7 @@ def openai_chat_completions_create_with_settings(
     messages,
 
     # Optional settings:
-    client: openai.OpenAI = None,
+    client: openai.OpenAI | None = None,
     stream_override = None,
     timeout = None):
 

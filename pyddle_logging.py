@@ -1,4 +1,4 @@
-﻿# Created: 2024-03-07
+# Created: 2024-03-07
 # This script contains the possibly simplest logging mechanism that should be just enough for a small, single-threaded app.
 
 import datetime
@@ -45,7 +45,7 @@ def get_log_file_path():
 
 pending_logs: list[str] = []
 
-def log(str_: str, indents = "", end = "\n", flush_ = False):
+def log(str_: str | None, indents = "", end = "\n", flush_ = False):
     if str_:
         pending_logs.append(f"{indents}{str_}{end}")
 
@@ -55,7 +55,7 @@ def log(str_: str, indents = "", end = "\n", flush_ = False):
     if flush_:
         flush()
 
-def log_lines(str_: list[str], indents = "", trailing = "", end = "\n", flush_ = False):
+def log_lines(str_: list[str] | None, indents = "", trailing = "", end = "\n", flush_ = False):
     if str_:
         for line in str_:
             parts = pstring.split_line_into_parts(line)

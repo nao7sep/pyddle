@@ -25,7 +25,7 @@ LIST_VAR = [1, "2_2", 3]
 TUPLE_VAR = ("4_4", 5)
 BOOL_VAR = True
 BYTES_VAR = "はろ～".encode("UTF-8") # A friendly representation of "Hello" in Japanese.
-NONE_VAR = None
+NONE_VAR: None = None
 
 # Initialize a dictionary with the variables.
 
