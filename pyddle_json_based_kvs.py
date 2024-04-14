@@ -5,6 +5,7 @@ import datetime
 import json
 import os
 import sqlite3
+import typing
 
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
@@ -45,7 +46,7 @@ def get_second_kvs_file_path():
     return __second_kvs_file_path
 
 # Lazy loading:
-__first_kvs_data: str | None = None # pylint: disable = invalid-name
+__first_kvs_data: dict[str, typing.Any] | None = None # pylint: disable = invalid-name
 
 def get_first_kvs_data():
     global __first_kvs_data # pylint: disable = global-statement
@@ -60,7 +61,7 @@ def get_first_kvs_data():
     return __first_kvs_data
 
 # Lazy loading:
-__second_kvs_data: str | None = None # pylint: disable = invalid-name
+__second_kvs_data: dict[str, typing.Any] | None = None # pylint: disable = invalid-name
 
 def get_second_kvs_data():
     global __second_kvs_data # pylint: disable = global-statement
@@ -75,7 +76,7 @@ def get_second_kvs_data():
     return __second_kvs_data
 
 # Lazy loading:
-__merged_kvs_data: str | None = None # pylint: disable = invalid-name
+__merged_kvs_data: dict[str, typing.Any] | None = None # pylint: disable = invalid-name
 
 def get_merged_kvs_data():
     global __merged_kvs_data # pylint: disable = global-statement

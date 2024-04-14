@@ -11,6 +11,7 @@ import random
 import re
 import sqlite3
 import traceback
+import typing
 import uuid
 
 import pyddle_console as pconsole
@@ -354,7 +355,7 @@ def show_statistics(handled_task_list_, task_list_, days):
                 execution_counts_and_more[task_.guid] = 1, task_.handled_utc
 
             else:
-                execution_counts_and_more[task_.guid] = 1, None
+                execution_counts_and_more[task_.guid] = 1, typing.cast(datetime.datetime, None)
 
         if task_.handled_utc < first_handled_utc:
             first_handled_utc = task_.handled_utc
@@ -377,7 +378,7 @@ def show_statistics(handled_task_list_, task_list_, days):
                 statistics.append((task_, execution_count_, last_done_utc, 0))
 
             else:
-                statistics.append((task_, 0, None, 0))
+                statistics.append((task_, 0, typing.cast(datetime.datetime, None), 0))
 
     for index_, (task_, execution_count_, last_done_utc, _) in enumerate(statistics):
         if days:

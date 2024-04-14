@@ -40,7 +40,7 @@ def translate(element: plangtree.LangTreeMessage, language: popenai.OpenAiLangua
         prompt = f"{prompt}\n\n{element.content}",
         client = client)
 
-def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popenai.OpenAiRole, content: str):
+def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role: popenai.OpenAiRole, content: str):
     if element is None:
         new_current_message = plangtree.LangTreeMessage(user_role = user_role, content = content)
 
@@ -135,8 +135,7 @@ try:
     threads: list[threading.Thread] = []
 
     def _save():
-        root_message = typing.cast(plangtree.LangTreeMessage, current_message).get_root_element() # For MyPy.
-        # If current_message is None, this line must raise an exception.
+        root_message = typing.cast(plangtree.LangTreeMessage, current_message).get_root_element()
         json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii = False, indent = 4)
         pfs.write_all_text_to_file(JSON_FILE_PATH, json_str_)
         return json_str_

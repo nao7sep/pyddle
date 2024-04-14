@@ -28,7 +28,7 @@ class LangTreeElement:
 
         # Required, nullable:
         self.parent_element_guid = None
-        self.parent_element: LangTreeElement = None
+        self.parent_element: LangTreeElement | None = None
 
         # Required, nullable (but not encouraged), can be empty:
         self.attributes: dict[str, LangTreeAttribute] = {}
@@ -37,8 +37,8 @@ class LangTreeElement:
         # Dictionary keys and their corresponding values' internal keys must match.
 
         # Optional:
-        self.client: openai.OpenAI = None
-        self.chat_settings: popenai.OpenAiChatSettings = None
+        self.client: openai.OpenAI | None = None
+        self.chat_settings: popenai.OpenAiChatSettings | None = None
         self.timeout = None
 
     def get_root_element(self):
@@ -166,7 +166,7 @@ class LangTreeElement:
             dictionary["child_messages"] = child_messages
 
     def serialize_to_dict(self):
-        dictionary = {}
+        dictionary: dict[str, typing.Any] = {}
 
         # Not nullable:
         dictionary["guid"] = str(self.guid)

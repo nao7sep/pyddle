@@ -118,7 +118,7 @@ class OpenAiModel(enum.Enum):
 class OpenAiTokenCounter:
     def __init__(self, model: OpenAiModel):
         self.model: OpenAiModel = model
-        self.__encoding = None
+        self.__encoding: tiktoken.Encoding | None = None
 
     @property
     def encoding(self):

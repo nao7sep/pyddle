@@ -6,6 +6,7 @@ import configparser
 import csv
 import json
 import sqlite3
+import typing
 import xml.dom.minidom
 import xml.etree.ElementTree
 
@@ -77,7 +78,7 @@ for key, value in config["data"].items():
 
 # Convert the bytes in the data to a Base64 string for JSON serialization.
 
-data["bytes"] = base64.b64encode(data["bytes"]).decode("ascii")
+data["bytes"] = base64.b64encode(typing.cast(bytes, data["bytes"])).decode("ascii")
 
 print(f"Bytes converted to Base64: {data['bytes']}")
 
@@ -93,7 +94,7 @@ with pfs.open_file_and_detect_utf_encoding("write_and_read_settings.json") as js
 
 # Convert the Base64 strings in the 2 portions of data back to bytes.
 
-data["bytes"] = base64.b64decode(data["bytes"])
+data["bytes"] = base64.b64decode(typing.cast(str, data["bytes"]))
 data_from_json["bytes"] = base64.b64decode(data_from_json["bytes"])
 
 print("Data from the JSON file:")

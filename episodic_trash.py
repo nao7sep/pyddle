@@ -612,12 +612,13 @@ try:
 
                             try:
                                 episode.save()
-                                os.remove(old_file_path)
+                                os.remove(typing.cast(str, old_file_path))
 
                             except Exception: # pylint: disable = broad-except
                                 try:
-                                    if os.path.isfile(episode.file_path):
-                                        os.remove(episode.file_path)
+                                    if episode.file_path:
+                                        if os.path.isfile(episode.file_path):
+                                            os.remove(episode.file_path)
 
                                 except Exception: # pylint: disable = broad-except
                                     pass
@@ -649,7 +650,7 @@ try:
 
                     if episode:
                         try:
-                            os.remove(episode.file_path)
+                            os.remove(typing.cast(str, episode.file_path))
 
                         except Exception: # pylint: disable = broad-except
                             pconsole.print("Failed to delete episode.", colors = pconsole.ERROR_COLORS)
