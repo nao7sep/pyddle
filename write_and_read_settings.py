@@ -84,7 +84,7 @@ print(f"Bytes converted to Base64: {data['bytes']}")
 # Write the data into a JSON file.
 
 with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.json") as json_file:
-    json.dump(data, json_file, indent=4)
+    json.dump(data, json_file, indent = 4)
 
 # Read the data from the JSON file.
 
@@ -139,7 +139,7 @@ for child in root:
 
 with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.csv") as csv_file:
     # "\r\n", the default value on Windows, might cause the parser to read an empty row within each line ending.
-    writer = csv.writer(csv_file, lineterminator="\n")
+    writer = csv.writer(csv_file, lineterminator = "\n")
 
     for key, value in data.items():
         writer.writerow([key, value])

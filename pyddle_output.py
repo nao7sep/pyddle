@@ -8,9 +8,9 @@ import pyddle_logging as plogging
 # If "str" is falsy, "indents" wont be output, but "end" will be.
 # "indents" and "end" will never be colored.
 
-def print_and_log(str_: str, indents = "", colors = "", end="\n", flush = False):
-    pconsole.print(str_, indents=indents, colors=colors, end=end)
-    plogging.log(str_, indents=indents, end=end, flush_=flush)
+def print_and_log(str_: str, indents = "", colors = "", end = "\n", flush = False):
+    pconsole.print(str_, indents = indents, colors = colors, end = end)
+    plogging.log(str_, indents = indents, end = end, flush_ = flush)
 
 # Each line will be split into 1) Indents, 2) Visible content, 3) Trailing whitespace.
 
@@ -24,6 +24,6 @@ def print_and_log(str_: str, indents = "", colors = "", end="\n", flush = False)
 
 # If #2 is falsy, "indents", the indentation and trailing whitespace parts of #2 and "trailing" wont be output, but "end" will be.
 
-def print_and_log_lines(str_: list[str], indents = "", colors: list[str] = None, trailing = "", end="\n", flush = False):
-    pconsole.print_lines(str_, indents=indents, colors=colors, trailing=trailing, end=end)
-    plogging.log_lines(str_, indents=indents, trailing=trailing, end=end, flush_=flush)
+def print_and_log_lines(str_: list[str], indents = "", colors: list[str] = None, trailing = "", end = "\n", flush = False):
+    pconsole.print_lines(str_, indents = indents, colors = colors, trailing = trailing, end = end)
+    plogging.log_lines(str_, indents = indents, trailing = trailing, end = end, flush_ = flush)

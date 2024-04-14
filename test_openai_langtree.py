@@ -35,26 +35,26 @@ def translate(element: plangtree.LangTreeMessage, language: popenai.OpenAiLangua
         raise RuntimeError(f"Invalid language: {language}")
 
     element.generate_translation_with_prompt(
-        language=language,
-        prompt=f"{prompt}\n\n{element.content}",
-        client=client)
+        language = language,
+        prompt = f"{prompt}\n\n{element.content}",
+        client = client)
 
 def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popenai.OpenAiRole, content: str):
     if element is None:
-        new_current_message = plangtree.LangTreeMessage(user_role=user_role, content=content)
+        new_current_message = plangtree.LangTreeMessage(user_role = user_role, content = content)
 
     else:
-        new_current_message = element.create_sibling_message(user_role=user_role, content=content)
+        new_current_message = element.create_sibling_message(user_role = user_role, content = content)
 
     # System messages arent translated.
 
     if user_role == popenai.OpenAiRole.USER:
         # Comments: SH77 langtree-related Comments.json
 
-        threads.append(threading.Thread(target=translate, args=(new_current_message, popenai.OpenAiLanguage.JAPANESE)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.JAPANESE)))
         threads[-1].start()
 
-        threads.append(threading.Thread(target=translate, args=(new_current_message, popenai.OpenAiLanguage.RUSSIAN)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.RUSSIAN)))
         threads[-1].start()
 
         context_builder = plangtree.get_langtree_default_context_builder()
@@ -66,8 +66,8 @@ def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popena
         plogging.log_lines(statistics_lines, indents = pstring.LEVELED_INDENTS[1])
         plogging.log("", flush_ = True)
 
-        messages_json_str = json.dumps(context.messages, ensure_ascii = False, indent=4)
-        plogging.log(f"[Context]\n{messages_json_str}", end="\n\n", flush_ = True)
+        messages_json_str = json.dumps(context.messages, ensure_ascii = False, indent = 4)
+        plogging.log(f"[Context]\n{messages_json_str}", end = "\n\n", flush_ = True)
 
         response = new_current_message.start_generating_message_with_messages(context.messages)
 
@@ -94,20 +94,20 @@ def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popena
         # When the interaction has ended, we need to receive the last chunk (if any) and print it as-is because it may contain a visible character right before the line break.
         chunk_str = chunk_str_reader.read_str(force = True)
         end_ = "" if chunk_str.endswith("\n") else "\n" # If we want to do this precisely, we'd need to analyze the last part of "content".
-        pconsole.print(chunk_str, end=end_)
+        pconsole.print(chunk_str, end = end_)
 
         content = "".join(chunk_deltas)
 
-        plogging.log(f"[Response]\n{content}", end="\n\n", flush_ = True)
+        plogging.log(f"[Response]\n{content}", end = "\n\n", flush_ = True)
 
         new_current_message = new_current_message.create_sibling_message(
-            user_role=popenai.OpenAiRole.ASSISTANT,
-            content=content)
+            user_role = popenai.OpenAiRole.ASSISTANT,
+            content = content)
 
-        threads.append(threading.Thread(target=translate, args=(new_current_message, popenai.OpenAiLanguage.JAPANESE)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.JAPANESE)))
         threads[-1].start()
 
-        threads.append(threading.Thread(target=translate, args=(new_current_message, popenai.OpenAiLanguage.RUSSIAN)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.RUSSIAN)))
         threads[-1].start()
 
     return new_current_message
@@ -135,7 +135,7 @@ try:
 
     def _save():
         root_message = current_message.get_root_element()
-        json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii = False, indent=4)
+        json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii = False, indent = 4)
         pfs.write_all_text_to_file(JSON_FILE_PATH, json_str_)
         return json_str_
 
@@ -195,10 +195,10 @@ try:
         json_str = _save() # Saving the translations.
 
         new_root_message = plangtree.LangTreeMessage.deserialize_from_dict(json.loads(json_str))
-        new_json_str = json.dumps(new_root_message.serialize_to_dict(), ensure_ascii = False, indent=4)
+        new_json_str = json.dumps(new_root_message.serialize_to_dict(), ensure_ascii = False, indent = 4)
 
         colors = pconsole.IMPORTANT_COLORS if new_json_str == json_str else pconsole.ERROR_COLORS
-        pconsole.print(f"new_json_str == json_str: {new_json_str == json_str}", colors=colors)
+        pconsole.print(f"new_json_str == json_str: {new_json_str == json_str}", colors = colors)
 
 except Exception: # pylint: disable = broad-except
     pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)

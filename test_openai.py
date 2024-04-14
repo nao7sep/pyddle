@@ -25,10 +25,10 @@ def test_audio():
     # Makes audio.
 
     audio_response = openai.openai_audio_speech_create(
-        input_=ENGLISH_TEXT_FOR_AUDIO,
-        model=openai.OpenAiModel.TTS_1_HD,
-        voice=openai.OpenAiVoice.NOVA,
-        response_format=openai.OpenAiAudioFormat.MP3)
+        input_ = ENGLISH_TEXT_FOR_AUDIO,
+        model = openai.OpenAiModel.TTS_1_HD,
+        voice = openai.OpenAiVoice.NOVA,
+        response_format = openai.OpenAiAudioFormat.MP3)
 
     # Saves the audio to a file.
 
@@ -39,14 +39,14 @@ def test_audio():
     # Transcribes the audio file.
 
     transcription = openai.openai_audio_transcriptions_create(
-        file_path=audio_file_name,
-        model=openai.OpenAiModel.WHISPER_1,
-        response_format=openai.OpenAiTranscriptFormat.VERBOSE_JSON)
+        file_path = audio_file_name,
+        model = openai.OpenAiModel.WHISPER_1,
+        response_format = openai.OpenAiTranscriptFormat.VERBOSE_JSON)
 
     # Saves the transcription to a file.
 
     transcription_file_name = "test_openai_english_transcription.json"
-    transcription_json = transcription.model_dump_json(indent=4)
+    transcription_json = transcription.model_dump_json(indent = 4)
     pfs.write_all_text_to_file(transcription_file_name, transcription_json)
     print(f"English transcription saved to: {transcription_file_name}")
 
@@ -58,15 +58,15 @@ def test_audio():
     # We'll use Chat here, but Chat will be tested later.
 
     translated_transcription_response = openai.openai_chat_completions_create(
-        model=openai.OpenAiModel.GPT_4_TURBO,
-        messages=openai.openai_build_messages(
+        model = openai.OpenAiModel.GPT_4_TURBO,
+        messages = openai.openai_build_messages(
             # Based on my comments, GitHub Copilot generated this.
-            user_message=f"Translate the following text into Japanese: {transcription.text}"))
+            user_message = f"Translate the following text into Japanese: {transcription.text}"))
 
     # Saves the translated transcription to a file.
 
     translated_transcription_file_name = "test_openai_japanese_translation_by_chat.json"
-    translated_transcription_json = translated_transcription_response.model_dump_json(indent=4)
+    translated_transcription_json = translated_transcription_response.model_dump_json(indent = 4)
     pfs.write_all_text_to_file(translated_transcription_file_name, translated_transcription_json)
     print(f"Japanese translation by Chat saved to: {translated_transcription_file_name}")
 
@@ -78,10 +78,10 @@ def test_audio():
     # Makes new audio from the translated transcription.
 
     translated_audio_response = openai.openai_audio_speech_create(
-        input_=translated_transcription_text,
-        model=openai.OpenAiModel.TTS_1_HD,
-        voice=openai.OpenAiVoice.ALLOY,
-        response_format=openai.OpenAiAudioFormat.MP3)
+        input_ = translated_transcription_text,
+        model = openai.OpenAiModel.TTS_1_HD,
+        voice = openai.OpenAiVoice.ALLOY,
+        response_format = openai.OpenAiAudioFormat.MP3)
 
     # Saves the translated audio to a file.
 
@@ -92,14 +92,14 @@ def test_audio():
     # Translates the new audio file.
 
     translation = openai.openai_audio_translations_create(
-        file_path=translated_audio_file_name,
-        model=openai.OpenAiModel.WHISPER_1,
-        response_format=openai.OpenAiTranscriptFormat.VERBOSE_JSON)
+        file_path = translated_audio_file_name,
+        model = openai.OpenAiModel.WHISPER_1,
+        response_format = openai.OpenAiTranscriptFormat.VERBOSE_JSON)
 
     # Saves the translation to a file.
 
     translation_file_name = "test_openai_english_translation.json"
-    translation_json = translation.model_dump_json(indent=4)
+    translation_json = translation.model_dump_json(indent = 4)
     pfs.write_all_text_to_file(translation_file_name, translation_json)
     print(f"English translation saved to: {translation_file_name}")
 
@@ -115,13 +115,13 @@ def compare_original_and_translated_texts():
     # Compare the text:
 
     comparison_response = openai.openai_chat_completions_create(
-        model=openai.OpenAiModel.GPT_4_TURBO,
-        messages=openai.openai_build_messages(f"Compare the following texts:\n\n{ENGLISH_TEXT_FOR_AUDIO}\n\n {translation_text}"))
+        model = openai.OpenAiModel.GPT_4_TURBO,
+        messages = openai.openai_build_messages(f"Compare the following texts:\n\n{ENGLISH_TEXT_FOR_AUDIO}\n\n {translation_text}"))
 
     # Saves the comparison results to a file.
 
     comparison_file_name = "test_openai_text_comparison.json"
-    comparison_json = comparison_response.model_dump_json(indent=4)
+    comparison_json = comparison_response.model_dump_json(indent = 4)
     pfs.write_all_text_to_file(comparison_file_name, comparison_json)
     print(f"Text comparison results saved to: {comparison_file_name}")
 
@@ -150,8 +150,8 @@ def test_chat():
         openai.openai_add_user_message(messages, different_tool_prompt)
 
         different_tool_responses.append(openai.openai_chat_completions_create(
-            model=openai.OpenAiModel.GPT_4_TURBO,
-            messages=messages))
+            model = openai.OpenAiModel.GPT_4_TURBO,
+            messages = messages))
 
         different_tool_answers.append(openai.openai_extract_first_message(different_tool_responses[index]))
         openai.openai_add_assistant_message(messages, different_tool_answers[index])
@@ -160,7 +160,7 @@ def test_chat():
 
     for index in range(3):
         different_tool_file_name = f"test_openai_tool_{index + 1}.json"
-        different_tool_json = different_tool_responses[index].model_dump_json(indent=4)
+        different_tool_json = different_tool_responses[index].model_dump_json(indent = 4)
         pfs.write_all_text_to_file(different_tool_file_name, different_tool_json)
         print(f"Tool {index + 1} saved to: {different_tool_file_name}")
 
@@ -186,9 +186,9 @@ def test_chat():
         openai.openai_add_user_message(messages, summarization_prompt)
 
         summarization_responses.append(openai.openai_chat_completions_create(
-            model=openai.OpenAiModel.GPT_4_TURBO,
-            messages=messages,
-            max_tokens=100)) # Limited length.
+            model = openai.OpenAiModel.GPT_4_TURBO,
+            messages = messages,
+            max_tokens = 100)) # Limited length.
             # As a result, the summaries will be incomplete.
             # "finish_reason" will be set to "length".
 
@@ -199,7 +199,7 @@ def test_chat():
 
     for index in range(3):
         summarization_file_name = f"test_openai_tool_{index + 1}_summary.json"
-        summarization_json = summarization_responses[index].model_dump_json(indent=4)
+        summarization_json = summarization_responses[index].model_dump_json(indent = 4)
         pfs.write_all_text_to_file(summarization_file_name, summarization_json)
         print(f"Tool {index + 1} summary saved to: {summarization_file_name}")
 
@@ -226,8 +226,8 @@ def test_chat():
     openai.openai_add_user_message(messages, suitable_tool_prompt)
 
     suitable_tool_response = openai.openai_chat_completions_create(
-        model=openai.OpenAiModel.GPT_4_TURBO,
-        messages=messages,
+        model = openai.OpenAiModel.GPT_4_TURBO,
+        messages = messages,
         stream = True)
 
     # Displays the chunks as they come in.
@@ -276,7 +276,7 @@ def test_chat():
     # Saves the chunks to a file.
 
     suitable_tool_file_name = "test_openai_suitable_tool.json"
-    suitable_tool_json = json.dumps(chunk_models, indent=4)
+    suitable_tool_json = json.dumps(chunk_models, indent = 4)
     pfs.write_all_text_to_file(suitable_tool_file_name, suitable_tool_json)
     print(f"Suitable tool saved to: {suitable_tool_file_name}")
 
@@ -285,13 +285,13 @@ def test_images_and_vision():
     # Asks for 3 random prompts for image generation.
 
     prompt_generation_response = openai.openai_chat_completions_create(
-        model=openai.OpenAiModel.GPT_4_TURBO,
-        messages=openai.openai_build_messages(
+        model = openai.OpenAiModel.GPT_4_TURBO,
+        messages = openai.openai_build_messages(
             # Generated by ChatGPT:
-            user_message="Craft three unique prompts for image generation, each on a separate line without leading numbers or indentation, and no trailing white space."))
+            user_message = "Craft three unique prompts for image generation, each on a separate line without leading numbers or indentation, and no trailing white space."))
 
     prompt_generation_file_name = "test_openai_image_prompts.json"
-    prompt_generation_json = prompt_generation_response.model_dump_json(indent=4)
+    prompt_generation_json = prompt_generation_response.model_dump_json(indent = 4)
     pfs.write_all_text_to_file(prompt_generation_file_name, prompt_generation_json)
     print(f"Image prompts saved to: {prompt_generation_file_name}")
 
@@ -311,9 +311,9 @@ def test_images_and_vision():
 
     for index in range(3):
         image_generation_responses.append(openai.openai_images_generate(
-            model=openai.OpenAiModel.DALL_E_3,
-            prompt=image_generation_prompts[index],
-            quality=openai.OpenAiImageQuality.HD))
+            model = openai.OpenAiModel.DALL_E_3,
+            prompt = image_generation_prompts[index],
+            quality = openai.OpenAiImageQuality.HD))
             # => The default size (1024x1024) will be applied.
 
         image_generation_file_names.append(f"test_openai_image_{index + 1}.png")
@@ -350,15 +350,15 @@ def test_images_and_vision():
         # (0, 0) is the top-left corner.
 
         if index == 0:
-            draw.rectangle([(0, 0), (width // 2, height // 2)], fill=0)
-            draw.rectangle([(width // 2, height // 2), (width, height)], fill=0)
+            draw.rectangle([(0, 0), (width // 2, height // 2)], fill = 0)
+            draw.rectangle([(width // 2, height // 2), (width, height)], fill = 0)
 
         elif index == 1:
-            draw.polygon([(0, 0), (0, height), (width, height)], fill=0)
+            draw.polygon([(0, 0), (0, height), (width, height)], fill = 0)
 
         else:
             margin = width // 6 # The diameter of the ellipse will be 2/3 of the image width.
-            draw.ellipse([(margin, margin), (width - margin, height - margin)], fill=0)
+            draw.ellipse([(margin, margin), (width - margin, height - margin)], fill = 0)
 
         # Combines the RGB and alpha channels.
         rgba_image.putalpha(alpha)
@@ -383,10 +383,10 @@ def test_images_and_vision():
 
     for index in range(3):
         image_editing_responses.append(openai.openai_images_edit(
-            input_file_path=masked_image_file_names[index],
-            model=openai.OpenAiModel.DALL_E_2,
+            input_file_path = masked_image_file_names[index],
+            model = openai.OpenAiModel.DALL_E_2,
             # Generated by ChatGPT:
-            prompt="Using the context provided by the unmasked portions of the image, completely reimagine and recreate the content within the masked area to blend seamlessly and coherently with its surroundings."))
+            prompt = "Using the context provided by the unmasked portions of the image, completely reimagine and recreate the content within the masked area to blend seamlessly and coherently with its surroundings."))
 
         edited_image_file_names.append(masked_image_file_names[index].replace("_masked.png", "_edited.png"))
         openai.openai_save_images(edited_image_file_names[index], image_editing_responses[index])
@@ -398,8 +398,8 @@ def test_images_and_vision():
 
     for index in range(3):
         image_variation_responses.append(openai.openai_images_create_variation(
-            input_file_path=image_generation_file_names[index],
-            model=openai.OpenAiModel.DALL_E_2))
+            input_file_path = image_generation_file_names[index],
+            model = openai.OpenAiModel.DALL_E_2))
 
         variation_file_name = image_generation_file_names[index].replace(".png", "_variation.png")
         openai.openai_save_images(variation_file_name, image_variation_responses[index])
@@ -412,13 +412,13 @@ def test_images_and_vision():
 
     for index in range(3):
         vision_each_image_responses.append(openai.openai_chat_completions_create(
-            model=openai.OpenAiModel.GPT_4_VISION,
-            messages=openai.openai_build_messages_for_vision(
-                image_file_paths=[image_generation_file_names[index]],
-                user_message="What do you see in this image?")))
+            model = openai.OpenAiModel.GPT_4_VISION,
+            messages = openai.openai_build_messages_for_vision(
+                image_file_paths = [image_generation_file_names[index]],
+                user_message = "What do you see in this image?")))
 
         vision_each_image_file_name = f"test_openai_image_{index + 1}_vision.json"
-        vision_each_image_json = vision_each_image_responses[index].model_dump_json(indent=4)
+        vision_each_image_json = vision_each_image_responses[index].model_dump_json(indent = 4)
         pfs.write_all_text_to_file(vision_each_image_file_name, vision_each_image_json)
         print(f"Vision results for image {index + 1} saved to: {vision_each_image_file_name}")
 
@@ -432,14 +432,14 @@ def test_images_and_vision():
     # Asks Vision about 3 images at once.
 
     vision_all_images_response = openai.openai_chat_completions_create(
-        model=openai.OpenAiModel.GPT_4_VISION,
-        messages=openai.openai_build_messages_for_vision(
-            image_file_paths=image_generation_file_names,
-            user_message="What do you find in common among these images?"))
+        model = openai.OpenAiModel.GPT_4_VISION,
+        messages = openai.openai_build_messages_for_vision(
+            image_file_paths = image_generation_file_names,
+            user_message = "What do you find in common among these images?"))
             # => I once got a response like: I'm sorry, I can't help with identifying or making assumptions about these images.
 
     vision_all_images_file_name = "test_openai_images_vision.json"
-    vision_all_images_json = vision_all_images_response.model_dump_json(indent=4)
+    vision_all_images_json = vision_all_images_response.model_dump_json(indent = 4)
     pfs.write_all_text_to_file(vision_all_images_file_name, vision_all_images_json)
     print(f"Vision results for all images saved to: {vision_all_images_file_name}")
 

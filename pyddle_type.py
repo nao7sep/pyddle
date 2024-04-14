@@ -76,7 +76,7 @@ def str_to_bool_or_default(str_, default):
 # The following methods will help us handle either case:
 
 def str_to_enum_by_name(str_, enum_type, ignore_case = True):
-    member = try_str_to_enum_by_name(str_, enum_type=enum_type, ignore_case=ignore_case)
+    member = try_str_to_enum_by_name(str_, enum_type = enum_type, ignore_case = ignore_case)
 
     if member:
         return member
@@ -96,7 +96,7 @@ def try_str_to_enum_by_name(str_, enum_type, ignore_case = True):
     return None
 
 def str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
-    member = try_str_to_enum_by_str_value(str_, enum_type=enum_type, ignore_case=ignore_case)
+    member = try_str_to_enum_by_str_value(str_, enum_type = enum_type, ignore_case = ignore_case)
 
     if member:
         return member
@@ -120,7 +120,7 @@ def try_str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
 #     like an exception is raised if the underlying types differ.
 
 def str_to_enum_by_int_value(value, enum_type):
-    member = try_str_to_enum_by_int_value(value, enum_type=enum_type)
+    member = try_str_to_enum_by_int_value(value, enum_type = enum_type)
 
     if member:
         return member
@@ -135,7 +135,7 @@ def try_str_to_enum_by_int_value(value, enum_type):
     return None
 
 def str_to_enum_by_float_value(value, enum_type):
-    member = try_str_to_enum_by_float_value(value, enum_type=enum_type)
+    member = try_str_to_enum_by_float_value(value, enum_type = enum_type)
 
     if member:
         return member
@@ -150,7 +150,7 @@ def try_str_to_enum_by_float_value(value, enum_type):
     return None
 
 def str_to_enum_by_complex_value(value, enum_type):
-    member = try_str_to_enum_by_complex_value(value, enum_type=enum_type)
+    member = try_str_to_enum_by_complex_value(value, enum_type = enum_type)
 
     if member:
         return member
@@ -165,7 +165,7 @@ def try_str_to_enum_by_complex_value(value, enum_type):
     return None
 
 def str_to_enum_by_bool_value(value, enum_type):
-    member = try_str_to_enum_by_bool_value(value, enum_type=enum_type)
+    member = try_str_to_enum_by_bool_value(value, enum_type = enum_type)
 
     if member:
         return member

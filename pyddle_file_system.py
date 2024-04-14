@@ -90,7 +90,7 @@ def detect_utf_encoding_of_file(file):
 
     return encoding, bom
 
-def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append = False):
+def open_file_and_write_utf_encoding_bom(path, encoding = "UTF-8", append = False):
     """
         Raises a RuntimeError if the encoding is not supported.
         If 'append' is True and the file already has content without a BOM, the BOM will NOT be written.
@@ -103,11 +103,11 @@ def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append = False)
         raise RuntimeError(f"Unsupported encoding: {encoding}")
 
     if not append:
-        file = open(path, "w", encoding=encoding)
+        file = open(path, "w", encoding = encoding)
         file.buffer.write(bom) # Using the underlying buffer.
 
     else:
-        file = open(path, "a", encoding=encoding)
+        file = open(path, "a", encoding = encoding)
         file.buffer.seek(0, os.SEEK_END) # Just to make sure.
 
         if file.buffer.tell() == 0:
@@ -115,10 +115,10 @@ def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append = False)
 
     return file
 
-def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
+def open_file_and_detect_utf_encoding(path, fallback_encoding = "UTF-8"):
     """ The position will be right after the detected BOM (if there's one). """
 
-    file = open(path, "r", encoding="UTF-8") # The strongly encouraged default encoding.
+    file = open(path, "r", encoding = "UTF-8") # The strongly encouraged default encoding.
     encoding, bom = detect_utf_encoding_of_file(file.buffer)
 
     if encoding:
@@ -128,7 +128,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
 
         else:
             file.close()
-            file = open(path, "r", encoding=encoding)
+            file = open(path, "r", encoding = encoding)
             # Adjust the position to be right after the BOM.
             file.buffer.seek(len(bom))
             return file
@@ -140,7 +140,7 @@ def open_file_and_detect_utf_encoding(path, fallback_encoding="UTF-8"):
 
         else:
             file.close()
-            file = open(path, "r", encoding=fallback_encoding)
+            file = open(path, "r", encoding = fallback_encoding)
             # No position adjustment is necessary.
             return file
 
@@ -152,33 +152,33 @@ def read_all_bytes_from_file(path):
     with open(path, "rb") as file:
         return file.read()
 
-def read_all_text_from_file(path, detect_encoding = True, fallback_encoding="UTF-8"):
+def read_all_text_from_file(path, detect_encoding = True, fallback_encoding = "UTF-8"):
     if detect_encoding:
         with open_file_and_detect_utf_encoding(path, fallback_encoding) as file:
             return file.read()
 
     else:
-        with open(path, "r", encoding=fallback_encoding) as file:
+        with open(path, "r", encoding = fallback_encoding) as file:
             return file.read()
 
 def write_all_bytes_to_file(path, bytes_):
     with open(path, "wb") as file:
         file.write(bytes_)
 
-def write_all_text_to_file(path, text, encoding="UTF-8", write_bom = True):
+def write_all_text_to_file(path, text, encoding = "UTF-8", write_bom = True):
     if write_bom:
         with open_file_and_write_utf_encoding_bom(path, encoding) as file:
             file.write(text)
 
     else:
-        with open(path, "w", encoding=encoding) as file:
+        with open(path, "w", encoding = encoding) as file:
             file.write(text)
 
 def append_all_bytes_to_file(path, bytes_):
     with open(path, "ab") as file:
         file.write(bytes_)
 
-def append_all_text_to_file(path, text, encoding="UTF-8", write_bom = True):
+def append_all_text_to_file(path, text, encoding = "UTF-8", write_bom = True):
     """ If the file already has content without a BOM, the BOM will NOT be written. """
 
     if write_bom:
@@ -186,7 +186,7 @@ def append_all_text_to_file(path, text, encoding="UTF-8", write_bom = True):
             file.write(text)
 
     else:
-        with open(path, "a", encoding=encoding) as file:
+        with open(path, "a", encoding = encoding) as file:
             file.write(text)
 
 # ------------------------------------------------------------------------------

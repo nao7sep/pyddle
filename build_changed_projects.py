@@ -166,20 +166,20 @@ try:
 
     valid_project_count = 0 # pylint: disable = invalid-name
 
-    for solution in sorted(solutions, key=lambda x: x.name):
+    for solution in sorted(solutions, key = lambda x: x.name):
         try:
             poutput.print_and_log(f"{solution.name} v{solution.common_version_string}")
 
             if not os.path.isfile(solution.source_archive_file_path):
                 poutput.print_and_log(solution.source_archive_file_path, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
-            for project in sorted(solution.projects, key=lambda x: x.name):
+            for project in sorted(solution.projects, key = lambda x: x.name):
                 try:
                     poutput.print_and_log(f"{project.name} v{project.version_string}", indents = pstring.LEVELED_INDENTS[1])
 
                     try:
                         if project.referenced_projects:
-                            for referenced_project in sorted(project.referenced_projects, key=lambda x: x.name):
+                            for referenced_project in sorted(project.referenced_projects, key = lambda x: x.name):
                                 poutput.print_and_log(f"{referenced_project.name} v{referenced_project.version_string}", indents = pstring.LEVELED_INDENTS[2])
 
                         else:

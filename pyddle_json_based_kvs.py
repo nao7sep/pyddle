@@ -154,7 +154,7 @@ def delete_from_second_kvs_data(key):
 # ------------------------------------------------------------------------------
 
 def save_kvs_data_to_file(path, data):
-    json_string = json.dumps(data, ensure_ascii = False, indent=4)
+    json_string = json.dumps(data, ensure_ascii = False, indent = 4)
     pfs.write_all_text_to_file(path, json_string)
 
     # Saves the data to a SQLite database file for backup purposes.

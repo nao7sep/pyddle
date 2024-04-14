@@ -193,7 +193,7 @@ def extract_version_string_from_app_manifest_file(path):
         root = tree.getroot() # assembly
         namespaces = extract_default_namespace_from_root_tag(root.tag)
 
-        assembly_identity = root.find("assemblyIdentity", namespaces=namespaces)
+        assembly_identity = root.find("assemblyIdentity", namespaces = namespaces)
 
         if assembly_identity is not None:
             # https://docs.python.org/3/library/xml.etree.elementtree.html#xml.etree.ElementTree.Element.get
@@ -215,7 +215,7 @@ def extract_version_string_from_assembly_info_file(path):
 
             # Regex not compiled.
             # Infrequent operation.
-            match = re.match(ASSEMBLY_INFO_FILE_VERSION_STRING_PATTERN, line, flags=re.IGNORECASE)
+            match = re.match(ASSEMBLY_INFO_FILE_VERSION_STRING_PATTERN, line, flags = re.IGNORECASE)
 
             if match:
                 return match.group("version")
@@ -236,7 +236,7 @@ def parse_version_string(str_):
 
     return digits
 
-def version_digits_to_string(digits, minimum_digit_count=2):
+def version_digits_to_string(digits, minimum_digit_count = 2):
     """
         Can be used to normalize a version string.
         Takes a list of 4 integers.
@@ -272,8 +272,8 @@ def extract_referenced_project_names_from_csproj_file(path):
 
         referenced_project_names = []
 
-        for item_group in root.findall("ItemGroup", namespaces=namespaces):
-            for project_reference in item_group.findall("ProjectReference", namespaces=namespaces):
+        for item_group in root.findall("ItemGroup", namespaces = namespaces):
+            for project_reference in item_group.findall("ProjectReference", namespaces = namespaces):
                 include = project_reference.get("Include")
 
                 if include:
@@ -281,7 +281,7 @@ def extract_referenced_project_names_from_csproj_file(path):
                     file_name_without_extension, _ = os.path.splitext(ppath.basename(include))
                     referenced_project_names.append(file_name_without_extension)
 
-            for reference in item_group.findall("Reference", namespaces=namespaces):
+            for reference in item_group.findall("Reference", namespaces = namespaces):
                 include = reference.get("Include")
 
                 if include:
@@ -395,7 +395,7 @@ def build_project(project, no_restore = False):
     if no_restore:
         args.append("--no-restore")
 
-    result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
+    result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
     return subprocess_result_into_messages(result)
 
 def update_nuget_packages_in_project(project):
@@ -404,11 +404,11 @@ def update_nuget_packages_in_project(project):
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-list-package
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "console" ] # Output for display.
-    result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
+    result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
     messages.extend(subprocess_result_into_messages(result))
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "json" ] # For parsing.
-    result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
+    result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
 
     # When an old project contains "package.config", which isnt supported by the "dotnet" command, we get a string like the following set to "stderr":
     #     プロジェクト 'C:\Repositories\Nekote2018\Nekote2018\Nekote2018.csproj' では NuGet パッケージに package.config を使用しますが、コマンドはパッケージ参照プロジェクトでのみ動作します。
@@ -441,7 +441,7 @@ def update_nuget_packages_in_project(project):
                         # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package
 
                         args = [ "dotnet", "add", project.file_path, "package", id_, "--version", latest_version ]
-                        result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
+                        result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
                         messages.extend(subprocess_result_into_messages(result))
 
     return messages
@@ -475,12 +475,12 @@ def clean(project, supported_runtimes, delete_obj_directory):
         # BR08 dotnet Commands.json contains (excessively) detailed comments.
 
         args = [ "dotnet", "clean", project.file_path, "--configuration", "Release" ]
-        result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
+        result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
         messages.extend(subprocess_result_into_messages(result))
 
         for supported_runtime in supported_runtimes:
             args = [ "dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime ]
-            result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
+            result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
             messages.extend(subprocess_result_into_messages(result))
 
     else:
@@ -522,7 +522,7 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
             shutil.rmtree(runtime_specific_publish_directory_path)
 
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
-        result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
+        result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
         messages.extend(subprocess_result_into_messages(result))
 
         solution_archives_directory_path = ppath.dirname(project.solution.source_archive_file_path)
@@ -558,5 +558,5 @@ def subprocess_result_into_messages(result):
 
     return messages
 
-def format_result_string_from_messages(messages, indents = "", end="\n"):
+def format_result_string_from_messages(messages, indents = "", end = "\n"):
     return end.join(f"{indents}{message}" for message in messages)

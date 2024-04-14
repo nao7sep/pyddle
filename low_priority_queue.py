@@ -80,7 +80,7 @@ def deserialize_task(task_data):
         task_data["times_per_week"],
         # Enum objects should be represented as integers in databases,
         #     but in text files, I believe strings would be more user-friendly.
-        ptype.str_to_enum_by_name(task_data["result"], enum_type=TaskResult, ignore_case = True) if task_data["result"] is not None else None)
+        ptype.str_to_enum_by_name(task_data["result"], enum_type = TaskResult, ignore_case = True) if task_data["result"] is not None else None)
 
 class TaskList:
     def __init__(self, file_path, backups):
@@ -95,7 +95,7 @@ class TaskList:
                 self.tasks = [deserialize_task(task_data) for task_data in data_from_json]
 
     def save(self):
-        json_string = json.dumps(self.tasks, ensure_ascii = False, indent=4, default=serialize_task)
+        json_string = json.dumps(self.tasks, ensure_ascii = False, indent = 4, default = serialize_task)
 
         pfs.create_parent_directory(self.file_path)
         pfs.write_all_text_to_file(self.file_path, json_string)
@@ -215,7 +215,7 @@ def generate_sample_data(handled_task_list_, task_list_):
 
     for day_offset in range(days - 1 + 1, -1 + 1, -1): # Modified not to generate a future datetime.
         # "utc" is like an adjective here.
-        utc_then = utc_now - datetime.timedelta(days=day_offset)
+        utc_then = utc_now - datetime.timedelta(days = day_offset)
         handled_tasks = random.randint(inclusive_min_handled_tasks_per_day, inclusive_max_handled_tasks_per_day)
         done_tasks = round(handled_tasks * done_tasks_out_of_10_handled_ones / 10)
 
@@ -233,7 +233,7 @@ def generate_sample_data(handled_task_list_, task_list_):
             seconds = total_seconds % 60
 
             # "utc" is a noun here.
-            handled_utc = datetime.datetime(utc_then.year, utc_then.month, utc_then.day, hours, minutes, seconds, random.randint(0, 1000000 - 1), tzinfo=datetime.UTC)
+            handled_utc = datetime.datetime(utc_then.year, utc_then.month, utc_then.day, hours, minutes, seconds, random.randint(0, 1000000 - 1), tzinfo = datetime.UTC)
 
             task_ = random.choice(task_list_.tasks) # Allowing duplicates.
 
@@ -251,7 +251,7 @@ def generate_sample_data(handled_task_list_, task_list_):
     handled_task_list_.save()
 
 def select_shown_tasks(handled_task_list_, task_list_, shows_all):
-    seven_days_ago_utc = pdatetime.get_utc_now() - datetime.timedelta(days=7)
+    seven_days_ago_utc = pdatetime.get_utc_now() - datetime.timedelta(days = 7)
     handled_tasks_in_last_seven_days = [task for task in handled_task_list_.tasks if task.handled_utc is not None and task.handled_utc > seven_days_ago_utc]
 
     execution_counts_ = {}
@@ -324,7 +324,7 @@ def show_statistics(handled_task_list_, task_list_, days):
     # If it does its job, I might just leave it as-is, though. :)
 
     if days:
-        too_old_utc = pdatetime.get_utc_now() - datetime.timedelta(days=days)
+        too_old_utc = pdatetime.get_utc_now() - datetime.timedelta(days = days)
         not_too_old_handled_tasks = [task for task in handled_task_list_.tasks if task.handled_utc is not None and task.handled_utc > too_old_utc]
 
     else:
@@ -397,7 +397,7 @@ def show_statistics(handled_task_list_, task_list_, days):
         statistics[index_] = (task_, execution_count_, last_done_utc, completion_rate)
 
     # Sorting by completion_rate.
-    statistics = sorted(statistics, key=lambda x: x[3], reverse = True)
+    statistics = sorted(statistics, key = lambda x: x[3], reverse = True)
 
     if days:
         pconsole.print(f"Past {days} days:")

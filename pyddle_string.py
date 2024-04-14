@@ -353,8 +353,8 @@ def splitlines(str_: str, trim_line_start = False, trim_line_end = True,
         # "".splitlines() returns an empty list.
         return []
 
-    return normalize_lines(str_.splitlines(), trim_line_start=trim_line_start, trim_line_end=trim_line_end,
-                           remove_empty_lines_at_start=remove_empty_lines_at_start, remove_redundant_empty_lines=remove_redundant_empty_lines, remove_empty_lines_at_end=remove_empty_lines_at_end)
+    return normalize_lines(str_.splitlines(), trim_line_start=trim_line_start, trim_line_end = trim_line_end,
+                           remove_empty_lines_at_start=remove_empty_lines_at_start, remove_redundant_empty_lines=remove_redundant_empty_lines, remove_empty_lines_at_end = remove_empty_lines_at_end)
 
 # The method below was originally a part of the "splitlines" method.
 # As Python doesnt have C#'s StringBuilder and such mechanisms may not be efficient,
@@ -519,7 +519,7 @@ def normalize_singleline_str(str_, trim_start = True, remove_redundant_whitespac
 # In many cases, a line only with invisible indents and trailing whitespace doesnt need to be processed.
 # Then, if the visible content shouldnt contain a line break, make sure to check it.
 
-COMPILED_REGEX_FOR_SPLIT_LINE_INTO_PARTS = re.compile(r"^(\s*)(.*?)(\s*)$", flags=re.DOTALL)
+COMPILED_REGEX_FOR_SPLIT_LINE_INTO_PARTS = re.compile(r"^(\s*)(.*?)(\s*)$", flags = re.DOTALL)
 
 def split_line_into_parts(str_):
     if not str_:
@@ -675,7 +675,7 @@ class ChunkStrReader:
 # Then, in the UI, a place that can display 80 characters should be able to deal with 50% more characters.
 # 80-100 too is a good option, but if we look for a punctuation char, expecting a more natural break, there should be a little more room.
 
-def extract_first_part(str_, ideal_len = 80, max_len = 120, trailing="..."):
+def extract_first_part(str_, ideal_len = 80, max_len = 120, trailing = "..."):
     if not str_:
         return str_
 

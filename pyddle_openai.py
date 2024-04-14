@@ -86,8 +86,8 @@ def get_openai_default_settings():
 
     if __openai_default_settings is None:
         __openai_default_settings = OpenAiSettings(
-            kvs_data=pkvs.get_merged_kvs_data(),
-            kvs_key_prefix=KVS_KEY_PREFIX)
+            kvs_data = pkvs.get_merged_kvs_data(),
+            kvs_key_prefix = KVS_KEY_PREFIX)
 
     return __openai_default_settings
 
@@ -152,7 +152,7 @@ def get_gpt_3_5_turbo_token_counter():
     global __gpt_3_5_turbo_token_counter # pylint: disable = global-statement
 
     if __gpt_3_5_turbo_token_counter is None:
-        __gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_3_5_TURBO)
+        __gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_3_5_TURBO)
 
     return __gpt_3_5_turbo_token_counter
 
@@ -163,7 +163,7 @@ def get_gpt_4_token_counter():
     global __gpt_4_token_counter # pylint: disable = global-statement
 
     if __gpt_4_token_counter is None:
-        __gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4)
+        __gpt_4_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_4)
 
     return __gpt_4_token_counter
 
@@ -174,7 +174,7 @@ def get_gpt_4_turbo_token_counter():
     global __gpt_4_turbo_token_counter # pylint: disable = global-statement
 
     if __gpt_4_turbo_token_counter is None:
-        __gpt_4_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_TURBO)
+        __gpt_4_turbo_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_4_TURBO)
 
     return __gpt_4_turbo_token_counter
 
@@ -186,7 +186,7 @@ def get_gpt_4_vision_token_counter():
     global __gpt_4_vision_token_counter # pylint: disable = global-statement
 
     if __gpt_4_vision_token_counter is None:
-        __gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_VISION)
+        __gpt_4_vision_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_4_VISION)
 
     return __gpt_4_vision_token_counter
 
@@ -242,7 +242,7 @@ def create_openai_client(api_key = None, organization = None, base_url = None, t
 
     else:
         # Explained in pyddle_web.py.
-        args.must_contain("timeout", httpx.Timeout(timeout=pweb.DEFAULT_TIMEOUT, read=DEFAULT_RESPONSE_TIMEOUT))
+        args.must_contain("timeout", httpx.Timeout(timeout = pweb.DEFAULT_TIMEOUT, read = DEFAULT_RESPONSE_TIMEOUT))
 
     return openai.OpenAI(**args.args)
 
@@ -551,7 +551,7 @@ def openai_chat_completions_create(
 
     else:
         if stream:
-            args.must_contain("timeout", httpx.Timeout(timeout=pweb.DEFAULT_TIMEOUT, read=DEFAULT_CHUNK_TIMEOUT))
+            args.must_contain("timeout", httpx.Timeout(timeout = pweb.DEFAULT_TIMEOUT, read = DEFAULT_CHUNK_TIMEOUT))
 
     return putility.get_not_none_or_call_func(get_openai_default_client, client).chat.completions.create(**args.args)
 
@@ -593,7 +593,7 @@ def get_openai_default_chat_settings():
     global __openai_default_chat_settings # pylint: disable = global-statement
 
     if __openai_default_chat_settings is None:
-        __openai_default_chat_settings = OpenAiChatSettings(model=DEFAULT_GPT_MODEL)
+        __openai_default_chat_settings = OpenAiChatSettings(model = DEFAULT_GPT_MODEL)
 
     return __openai_default_chat_settings
 
@@ -607,24 +607,24 @@ def openai_chat_completions_create_with_settings(
     timeout = None):
 
     return openai_chat_completions_create(
-        model=settings.model,
-        messages=messages,
-        frequency_penalty=settings.frequency_penalty,
-        logit_bias=settings.logit_bias,
-        logprobs=settings.logprobs,
-        top_logprobs=settings.top_logprobs,
-        max_tokens=settings.max_tokens,
-        n=settings.n,
-        presence_penalty=settings.presence_penalty,
-        response_format=settings.response_format,
-        seed=settings.seed,
-        stop=settings.stop,
-        stream=settings.stream if stream_override is None else stream_override,
-        temperature=settings.temperature,
-        top_p=settings.top_p,
-        user=settings.user,
-        client=client,
-        timeout=timeout)
+        model = settings.model,
+        messages = messages,
+        frequency_penalty = settings.frequency_penalty,
+        logit_bias = settings.logit_bias,
+        logprobs = settings.logprobs,
+        top_logprobs = settings.top_logprobs,
+        max_tokens = settings.max_tokens,
+        n = settings.n,
+        presence_penalty = settings.presence_penalty,
+        response_format = settings.response_format,
+        seed = settings.seed,
+        stop = settings.stop,
+        stream = settings.stream if stream_override is None else stream_override,
+        temperature = settings.temperature,
+        top_p = settings.top_p,
+        user = settings.user,
+        client = client,
+        timeout = timeout)
 
 def openai_build_message(role: OpenAiRole, content, name = None):
     message = {}
@@ -639,16 +639,16 @@ def openai_build_message(role: OpenAiRole, content, name = None):
     return message
 
 def openai_add_message(messages, role: OpenAiRole, content, name = None):
-    messages.append(openai_build_message(role=role, content=content, name=name))
+    messages.append(openai_build_message(role = role, content = content, name = name))
 
 def openai_add_system_message(messages, system_message, name = None):
-    openai_add_message(messages, role=OpenAiRole.SYSTEM, content=system_message, name=name)
+    openai_add_message(messages, role = OpenAiRole.SYSTEM, content = system_message, name = name)
 
 def openai_add_user_message(messages, user_message, name = None):
-    openai_add_message(messages, role=OpenAiRole.USER, content=user_message, name=name)
+    openai_add_message(messages, role = OpenAiRole.USER, content = user_message, name = name)
 
 def openai_add_assistant_message(messages, assistant_message, name = None):
-    openai_add_message(messages, role=OpenAiRole.ASSISTANT, content=assistant_message, name=name)
+    openai_add_message(messages, role = OpenAiRole.ASSISTANT, content = assistant_message, name = name)
 
 def openai_build_messages(user_message, user_message_name = None, system_message = None, system_message_name = None):
     messages = []
@@ -776,7 +776,7 @@ def openai_save_images(file_path, response):
         else:
             new_file_path = os.path.join(dirname, f"{root}-{index}{extension}")
 
-        with requests.get(image.url, stream = True, timeout=pweb.DEFAULT_TIMEOUT) as downloader:
+        with requests.get(image.url, stream = True, timeout = pweb.DEFAULT_TIMEOUT) as downloader:
             # If it fails with the second image, the user might leave the first one on the disk.
             # I will not take care of that for 2 reasons:
             #     1. If the first one was saved, the rest should usually be saved as well
@@ -788,7 +788,7 @@ def openai_save_images(file_path, response):
             with open(new_file_path, "wb") as file:
                 # I've seen 8192 in a lot of places.
                 # https://stackoverflow.com/questions/2811006/what-is-a-good-buffer-size-for-socket-programming
-                for chunk in downloader.iter_content(chunk_size=8192):
+                for chunk in downloader.iter_content(chunk_size = 8192):
                     file.write(chunk)
 
         file_paths.append(new_file_path)

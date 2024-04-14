@@ -14,20 +14,20 @@ IMPORTANT_COLORS = [colorama.Back.BLUE, colorama.Fore.WHITE]
 WARNING_COLORS = [colorama.Back.YELLOW, colorama.Fore.BLACK]
 ERROR_COLORS = [colorama.Back.RED, colorama.Fore.WHITE]
 
-def print(str_: str, indents = "", colors: list[str] = None, end="\n"): # pylint: disable = redefined-builtin
+def print(str_: str, indents = "", colors: list[str] = None, end = "\n"): # pylint: disable = redefined-builtin
     # A frequently used method that should almost always be called like "pconsole.print".
 
     if str_:
         if colors:
-            builtin_print(f"{indents}{"".join(colors)}{str_}{colorama.Style.RESET_ALL}", end=end)
+            builtin_print(f"{indents}{"".join(colors)}{str_}{colorama.Style.RESET_ALL}", end = end)
 
         else:
-            builtin_print(f"{indents}{str_}", end=end)
+            builtin_print(f"{indents}{str_}", end = end)
 
     else:
-        builtin_print("", end=end)
+        builtin_print("", end = end)
 
-def print_lines(str_: list[str], indents = "", colors: list[str] = None, trailing = "", end="\n"):
+def print_lines(str_: list[str], indents = "", colors: list[str] = None, trailing = "", end = "\n"):
     if str_:
         if colors:
             colors_string = "".join(colors)
@@ -41,13 +41,13 @@ def print_lines(str_: list[str], indents = "", colors: list[str] = None, trailin
             if parts[1]:
                 if colors_string:
                     # Colors are applied only to the visible content.
-                    builtin_print(f"{indents}{parts[0]}{colors_string}{parts[1]}{colorama.Style.RESET_ALL}{parts[2]}{trailing}", end=end)
+                    builtin_print(f"{indents}{parts[0]}{colors_string}{parts[1]}{colorama.Style.RESET_ALL}{parts[2]}{trailing}", end = end)
 
                 else:
-                    builtin_print(f"{indents}{line}{trailing}", end=end)
+                    builtin_print(f"{indents}{line}{trailing}", end = end)
 
             else:
-                builtin_print("", end=end)
+                builtin_print("", end = end)
 
     # When the output is like:
     #     Values:
@@ -61,14 +61,14 @@ def print_lines(str_: list[str], indents = "", colors: list[str] = None, trailin
 #     Typical output/input operations
 # ------------------------------------------------------------------------------
 
-def print_numbered_options(options, indents = "", end="\n"):
+def print_numbered_options(options, indents = "", end = "\n"):
     ''' Space-pads the indices. '''
 
     digit_count = len(str(len(options))) # Wont be a negative number.
 
     for index, option in enumerate(options):
         padded_index_str = str(index + 1).rjust(digit_count, " ")
-        print(f"{indents}{padded_index_str}. {option}", end=end)
+        print(f"{indents}{padded_index_str}. {option}", end = end)
 
 def input_number(prompt, indents = ""):
     ''' Returns None if the input is not a number. '''
@@ -130,14 +130,14 @@ class CommandInfo:
     def get_args(self, index, length):
         return self.args[index : index + length]
 
-    def get_args_as_str(self, index, length, separator=" "):
+    def get_args_as_str(self, index, length, separator = " "):
         return separator.join(self.get_args(index, length))
 
     def get_remaining_args(self, index):
         return self.args[index:]
 
     # Should be useful for something like "add Hoge Moge Poge" where "Hoge Moge Poge" is one name for example.
-    def get_remaining_args_as_str(self, index, separator=" "):
+    def get_remaining_args_as_str(self, index, separator = " "):
         return separator.join(self.get_remaining_args(index))
 
     def to_string(self, indents = ""):

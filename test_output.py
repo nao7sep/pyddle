@@ -75,7 +75,7 @@ poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstri
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, colors = pconsole.IMPORTANT_COLORS)
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, trailing = LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, end = "")
 poutput.print_and_log("b") # Makes sure "end" was effective.
@@ -87,13 +87,13 @@ poutput.print_and_log("b") # Makes sure "end" was effective.
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], trailing = LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, colors = pconsole.IMPORTANT_COLORS, trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, colors = pconsole.IMPORTANT_COLORS, trailing = LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 
 # 3 parameters.
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS, trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS, trailing = LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 
 plogging.flush()
 

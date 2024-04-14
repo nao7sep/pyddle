@@ -82,7 +82,7 @@ def serialize_episode(episode_):
         }
 
         if episode_.notes:
-            data["notes"] = [serialize_episode(note) for note in sorted(episode_.notes, key=lambda note: note.creation_utc)]
+            data["notes"] = [serialize_episode(note) for note in sorted(episode_.notes, key = lambda note: note.creation_utc)]
 
         return data
 
@@ -96,7 +96,7 @@ def serialize_episode(episode_):
         }
 
         if episode_.notes:
-            data["notes"] = [serialize_episode(note) for note in sorted(episode_.notes, key=lambda note: note.creation_utc)]
+            data["notes"] = [serialize_episode(note) for note in sorted(episode_.notes, key = lambda note: note.creation_utc)]
 
         return data
 
@@ -124,7 +124,7 @@ def deserialize_notes(parent, notes_of_parent, note_data):
 
         if "notes" in note_data_item:
             deserialize_notes(note, note.notes, note_data_item["notes"])
-            note.notes.sort(key=lambda note: note.creation_utc)
+            note.notes.sort(key = lambda note: note.creation_utc)
 
         notes_of_parent.append(note)
 
@@ -146,10 +146,10 @@ class EpisodeInfo(EntryInfo):
 
                 if "notes" in data_from_json:
                     deserialize_notes(self, self.notes, data_from_json["notes"])
-                    self.notes.sort(key=lambda note: note.creation_utc)
+                    self.notes.sort(key = lambda note: note.creation_utc)
 
     def save(self):
-        json_string = json.dumps(self, ensure_ascii = False, indent=4, default=serialize_episode)
+        json_string = json.dumps(self, ensure_ascii = False, indent = 4, default = serialize_episode)
 
         pfs.create_parent_directory(self.file_path)
         pfs.write_all_text_to_file(self.file_path, json_string)
@@ -251,7 +251,7 @@ def episodes_list_command(episodes_):
         return
 
     # Sorted like a directory's file list.
-    for episode_ in sorted(episodes_, key=lambda episode: episode.title.lower()):
+    for episode_ in sorted(episodes_, key = lambda episode: episode.title.lower()):
         pconsole.print(f"{episode_.code} {episode_.title}", indents = pstring.LEVELED_INDENTS[1])
 
 def notes_list_command(notes, depth):
@@ -280,7 +280,7 @@ def episodes_open_command(episodes_, command_):
                 notes_help_command()
 
             while True:
-                notes_list_command(episode_.notes, depth=0)
+                notes_list_command(episode_.notes, depth = 0)
 
                 command_ = pconsole.input_command(f"Episode {episode_.code}: ")
 
@@ -365,7 +365,7 @@ def episodes_open_command(episodes_, command_):
                             pconsole.print("Parent code is required.", colors = pconsole.ERROR_COLORS)
 
                     elif pstring.equals_ignore_case(command_.command, "list"):
-                        notes_list_command(episode_.notes, depth=0)
+                        notes_list_command(episode_.notes, depth = 0)
 
                     elif pstring.equals_ignore_case(command_.command, "read"):
                         code_ = command_.get_arg_or_default(0, None)
@@ -406,7 +406,7 @@ def episodes_open_command(episodes_, command_):
 
                                         try:
                                             parent_note.create_note(note)
-                                            parent_note.notes.sort(key=lambda note: note.creation_utc)
+                                            parent_note.notes.sort(key = lambda note: note.creation_utc)
                                             old_parent.delete_note(note)
 
                                         except Exception: # pylint: disable = broad-except
