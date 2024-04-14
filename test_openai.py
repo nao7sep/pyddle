@@ -263,10 +263,10 @@ def test_chat():
 
             else:
                 if needs_indentation:
-                    print(pstring.LEVELED_INDENTS[1], end="")
+                    print(pstring.LEVELED_INDENTS[1], end = "")
                     needs_indentation = False
 
-            print(chunk_str, end="")
+            print(chunk_str, end = "")
 
         chunk_models.append(chunk.model_dump())
 
@@ -469,7 +469,7 @@ try:
     test_images_and_vision()
 
 except Exception: # pylint: disable=broad-except
-    pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
+    pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:
     pdebugging.display_press_enter_key_to_continue_if_not_debugging()

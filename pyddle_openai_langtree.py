@@ -19,8 +19,8 @@ class LangTreeElement:
     def __init__(
         self,
 
-        guid=None,
-        creation_utc=None):
+        guid = None,
+        creation_utc = None):
 
         # Required, not nullable, auto-initialized:
         self.guid = guid if guid is not None else uuid.uuid4()
@@ -111,9 +111,9 @@ class LangTreeElement:
         name,
         prompt,
 
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         response = popenai.openai_chat_completions_create_with_settings(
             settings=self._get_chat_settings(chat_settings),
@@ -131,9 +131,9 @@ class LangTreeElement:
         language: typing.Union[popenai.OpenAiLanguage, str],
         prompt,
 
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         response = popenai.openai_chat_completions_create_with_settings(
             settings=self._get_chat_settings(chat_settings),
@@ -239,8 +239,8 @@ class LangTreeMessage(LangTreeElement):
         user_role: popenai.OpenAiRole,
         content,
 
-        guid=None,
-        creation_utc=None):
+        guid = None,
+        creation_utc = None):
 
         super().__init__(
             guid=guid,
@@ -265,7 +265,7 @@ class LangTreeMessage(LangTreeElement):
         self,
         user_role: popenai.OpenAiRole,
         content,
-        user_name=None):
+        user_name = None):
 
         ''' Consider using "create_sibling_message" instead. '''
 
@@ -289,9 +289,9 @@ class LangTreeMessage(LangTreeElement):
     def generate_child_message_with_messages(
         self,
         messages,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         ''' Consider using "generate_sibling_message_with_messages" instead. '''
 
@@ -310,9 +310,9 @@ class LangTreeMessage(LangTreeElement):
     def generate_child_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         ''' Consider using "generate_sibling_message_with_context_builder" instead. '''
 
@@ -325,9 +325,9 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_child_message(
         self,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         ''' Consider using "generate_sibling_message" instead. '''
 
@@ -342,7 +342,7 @@ class LangTreeMessage(LangTreeElement):
         self,
         user_role: popenai.OpenAiRole,
         content,
-        user_name=None):
+        user_name = None):
 
         ''' Creates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
@@ -355,9 +355,9 @@ class LangTreeMessage(LangTreeElement):
     def generate_sibling_message_with_messages(
         self,
         messages,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
@@ -370,9 +370,9 @@ class LangTreeMessage(LangTreeElement):
     def generate_sibling_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
@@ -384,9 +384,9 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_sibling_message(
         self,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
@@ -399,9 +399,9 @@ class LangTreeMessage(LangTreeElement):
     def start_generating_message_with_messages(
         self,
         messages,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         return popenai.openai_chat_completions_create_with_settings(
             settings=self._get_chat_settings(chat_settings),
@@ -413,9 +413,9 @@ class LangTreeMessage(LangTreeElement):
     def start_generating_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         return self.start_generating_message_with_messages(
             context_builder.build_messages(self),
@@ -426,9 +426,9 @@ class LangTreeMessage(LangTreeElement):
 
     def start_generating_message(
         self,
-        client: openai.OpenAI=None,
-        chat_settings: popenai.OpenAiChatSettings=None,
-        timeout=None):
+        client: openai.OpenAI = None,
+        chat_settings: popenai.OpenAiChatSettings = None,
+        timeout = None):
 
         return self.start_generating_message_with_context_builder(
             context_builder=get_langtree_default_context_builder(),
@@ -532,8 +532,8 @@ class LangTreeAttribute(LangTreeElement):
         name,
         value,
 
-        guid=None,
-        creation_utc=None):
+        guid = None,
+        creation_utc = None):
 
         super().__init__(
             guid=guid,
@@ -583,8 +583,8 @@ class LangTreeTranslation(LangTreeElement):
         language: typing.Union[popenai.OpenAiLanguage, str],
         content,
 
-        guid=None,
-        creation_utc=None):
+        guid = None,
+        creation_utc = None):
 
         super().__init__(
             guid=guid,
@@ -644,8 +644,8 @@ class LangTreeContextBuilder:
 
         # Refer to the episodic comments regarding the default values.
 
-        max_number_of_system_messages=None, # No limit.
-        max_total_tokens_of_system_messages=None, # No limit.
+        max_number_of_system_messages = None, # No limit.
+        max_total_tokens_of_system_messages = None, # No limit.
 
         max_number_of_user_messages=3,
         max_total_tokens_of_user_messages=4096,
@@ -674,7 +674,7 @@ class LangTreeContextBuilder:
     def build(
         self,
         message: LangTreeMessage,
-        token_counter: popenai.OpenAiTokenCounter=None) -> LangTreeContext:
+        token_counter: popenai.OpenAiTokenCounter = None) -> LangTreeContext:
 
         # All younger siblings and the root element.
         elements = []

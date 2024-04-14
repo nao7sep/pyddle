@@ -220,7 +220,7 @@ def get_openai_default_token_counter():
 
 # https://github.com/openai/openai-python/blob/main/src/openai/_client.py
 
-def create_openai_client(api_key=None, organization=None, base_url=None, timeout=None):
+def create_openai_client(api_key = None, organization = None, base_url = None, timeout = None):
     ''' If the arguments are falsy and cant be retrieved from "get_openai_default_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
 
     if not api_key:
@@ -293,11 +293,11 @@ def openai_audio_speech_create(
     # Based on the audio format, the user also has to choose the right file extension.
 
     # Optional parameters:
-    speed=None,
+    speed = None,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    timeout = None):
 
     # Checked: all, order, named, falsy
     # Meaning: all parameters in the API reference are supported, their order is natural,
@@ -420,14 +420,14 @@ def openai_audio_transcriptions_create(
     response_format: OpenAiTranscriptFormat,
 
     # Optional parameters:
-    language=None,
-    prompt=None,
-    temperature=None,
-    timestamp_granularities=None,
+    language = None,
+    prompt = None,
+    temperature = None,
+    timestamp_granularities = None,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    timeout = None):
 
     with open(file_path, "rb") as file:
         # Checked: all, order, named, falsy
@@ -457,12 +457,12 @@ def openai_audio_translations_create(
     response_format: OpenAiTranscriptFormat,
 
     # Optional parameters:
-    prompt=None,
-    temperature=None,
+    prompt = None,
+    temperature = None,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    timeout = None):
 
     with open(file_path, "rb") as file:
         # Checked: all, order, named, falsy
@@ -507,24 +507,24 @@ def openai_chat_completions_create(
 
     # Optional parameters:
     # In order of appearance in the API reference.
-    frequency_penalty=None,
-    logit_bias=None,
-    logprobs=None,
-    top_logprobs=None,
-    max_tokens=None,
-    n=None,
-    presence_penalty=None,
-    response_format: OpenAiChatFormat=None,
-    seed=None,
-    stop=None,
-    stream=None,
-    temperature=None,
-    top_p=None,
-    user=None,
+    frequency_penalty = None,
+    logit_bias = None,
+    logprobs = None,
+    top_logprobs = None,
+    max_tokens = None,
+    n = None,
+    presence_penalty = None,
+    response_format: OpenAiChatFormat = None,
+    seed = None,
+    stop = None,
+    stream = None,
+    temperature = None,
+    top_p = None,
+    user = None,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    timeout = None):
 
     # Checked: all, order, named, falsy
 
@@ -602,9 +602,9 @@ def openai_chat_completions_create_with_settings(
     messages,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    stream_override=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    stream_override = None,
+    timeout = None):
 
     return openai_chat_completions_create(
         model=settings.model,
@@ -626,7 +626,7 @@ def openai_chat_completions_create_with_settings(
         client=client,
         timeout=timeout)
 
-def openai_build_message(role: OpenAiRole, content, name=None):
+def openai_build_message(role: OpenAiRole, content, name = None):
     message = {}
 
     if name:
@@ -638,19 +638,19 @@ def openai_build_message(role: OpenAiRole, content, name=None):
 
     return message
 
-def openai_add_message(messages, role: OpenAiRole, content, name=None):
+def openai_add_message(messages, role: OpenAiRole, content, name = None):
     messages.append(openai_build_message(role=role, content=content, name=name))
 
-def openai_add_system_message(messages, system_message, name=None):
+def openai_add_system_message(messages, system_message, name = None):
     openai_add_message(messages, role=OpenAiRole.SYSTEM, content=system_message, name=name)
 
-def openai_add_user_message(messages, user_message, name=None):
+def openai_add_user_message(messages, user_message, name = None):
     openai_add_message(messages, role=OpenAiRole.USER, content=user_message, name=name)
 
-def openai_add_assistant_message(messages, assistant_message, name=None):
+def openai_add_assistant_message(messages, assistant_message, name = None):
     openai_add_message(messages, role=OpenAiRole.ASSISTANT, content=assistant_message, name=name)
 
-def openai_build_messages(user_message, user_message_name=None, system_message=None, system_message_name=None):
+def openai_build_messages(user_message, user_message_name = None, system_message = None, system_message_name = None):
     messages = []
 
     if system_message:
@@ -684,8 +684,8 @@ class OpenAiVisionDetail(enum.Enum):
     LOW = "low"
 
 def openai_build_messages_for_vision(image_file_paths, user_message,
-                                     detail: OpenAiVisionDetail=None,
-                                     system_message=None):
+                                     detail: OpenAiVisionDetail = None,
+                                     system_message = None):
     messages = []
 
     if system_message:
@@ -801,15 +801,15 @@ def openai_images_generate(
     prompt,
 
     # Optional parameters:
-    n=None,
-    quality: OpenAiImageQuality=None,
-    size: OpenAiImageSize=None,
-    style: OpenAiImageStyle=None,
-    user=None,
+    n = None,
+    quality: OpenAiImageQuality = None,
+    size: OpenAiImageSize = None,
+    style: OpenAiImageStyle = None,
+    user = None,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    timeout = None):
 
     ''' Returns a list of file paths. '''
 
@@ -848,14 +848,14 @@ def openai_images_edit(
     prompt,
 
     # Optional parameters:
-    mask_file_path=None,
-    n=None,
-    size: OpenAiImageSize=None,
-    user=None,
+    mask_file_path = None,
+    n = None,
+    size: OpenAiImageSize = None,
+    user = None,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    timeout = None):
 
     ''' Returns a list of file paths. '''
 
@@ -898,13 +898,13 @@ def openai_images_create_variation(
     model: OpenAiModel,
 
     # Optional parameters:
-    n=None,
-    size: OpenAiImageSize=None,
-    user=None,
+    n = None,
+    size: OpenAiImageSize = None,
+    user = None,
 
     # Optional settings:
-    client: openai.OpenAI=None,
-    timeout=None):
+    client: openai.OpenAI = None,
+    timeout = None):
 
     ''' Returns a list of file paths. '''
 

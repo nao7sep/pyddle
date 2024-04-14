@@ -14,7 +14,7 @@ IMPORTANT_COLORS = [colorama.Back.BLUE, colorama.Fore.WHITE]
 WARNING_COLORS = [colorama.Back.YELLOW, colorama.Fore.BLACK]
 ERROR_COLORS = [colorama.Back.RED, colorama.Fore.WHITE]
 
-def print(str_: str, indents="", colors: list[str]=None, end="\n"): # pylint: disable=redefined-builtin
+def print(str_: str, indents = "", colors: list[str] = None, end="\n"): # pylint: disable=redefined-builtin
     # A frequently used method that should almost always be called like "pconsole.print".
 
     if str_:
@@ -27,7 +27,7 @@ def print(str_: str, indents="", colors: list[str]=None, end="\n"): # pylint: di
     else:
         builtin_print("", end=end)
 
-def print_lines(str_: list[str], indents="", colors: list[str]=None, trailing="", end="\n"):
+def print_lines(str_: list[str], indents = "", colors: list[str] = None, trailing = "", end="\n"):
     if str_:
         if colors:
             colors_string = "".join(colors)
@@ -61,7 +61,7 @@ def print_lines(str_: list[str], indents="", colors: list[str]=None, trailing=""
 #     Typical output/input operations
 # ------------------------------------------------------------------------------
 
-def print_numbered_options(options, indents="", end="\n"):
+def print_numbered_options(options, indents = "", end="\n"):
     ''' Space-pads the indices. '''
 
     digit_count = len(str(len(options))) # Wont be a negative number.
@@ -70,7 +70,7 @@ def print_numbered_options(options, indents="", end="\n"):
         padded_index_str = str(index + 1).rjust(digit_count, " ")
         print(f"{indents}{padded_index_str}. {option}", end=end)
 
-def input_number(prompt, indents=""):
+def input_number(prompt, indents = ""):
     ''' Returns None if the input is not a number. '''
 
     return ptype.str_to_int_or_default(input(f"{indents}{prompt}"), None)
@@ -140,7 +140,7 @@ class CommandInfo:
     def get_remaining_args_as_str(self, index, separator=" "):
         return separator.join(self.get_remaining_args(index))
 
-    def to_string(self, indents=""):
+    def to_string(self, indents = ""):
         ''' For debugging purposes. '''
 
         lines = []
@@ -173,5 +173,5 @@ def parse_command_str(str_):
 
     return None
 
-def input_command(prompt, indents=""):
+def input_command(prompt, indents = ""):
     return parse_command_str(input(f"{indents}{prompt}"))

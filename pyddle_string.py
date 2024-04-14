@@ -556,7 +556,7 @@ def get_line_break_len(str_, str_len, first_line_break_char_index):
     return 1
 
 class ChunkStrReader:
-    def __init__(self, indents=""):
+    def __init__(self, indents = ""):
         self.chunks = []
         self.indents = indents
         self.__first_indents_consumed = False # We must consider as if there had been a line break before the beginning of the string.

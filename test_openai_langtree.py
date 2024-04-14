@@ -87,7 +87,7 @@ def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popena
                 chunk_str_reader.add_chunk(chunk_delta)
 
                 chunk_str = chunk_str_reader.read_str()
-                pconsole.print(chunk_str, end="")
+                pconsole.print(chunk_str, end = "")
                 sys.stdout.flush() # Without this, output may come out line by line.
 
         # ChunkStrReader doesnt return the remaining chunk if it ends with a line break and waits for the next one to determine whether indents must be added or not.
@@ -144,7 +144,7 @@ try:
         command = pconsole.parse_command_str(command_str)
 
         if not command:
-            pconsole.print("Invalid command.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.ERROR_COLORS)
+            pconsole.print("Invalid command.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
 
         else:
             if pstring.equals_ignore_case(command.command, "system"):
@@ -167,16 +167,16 @@ try:
                     else:
                         current_message = None # pylint: disable=invalid-name
 
-                    pconsole.print("Deleted message.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.IMPORTANT_COLORS)
+                    pconsole.print("Deleted message.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
                     if current_message:
                         pconsole.print(f"Current message: {pstring.extract_first_part(current_message.content)}", indents=pstring.LEVELED_INDENTS[1])
 
                     else:
-                        pconsole.print("No current message.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.IMPORTANT_COLORS)
+                        pconsole.print("No current message.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
                 else:
-                    pconsole.print("No messages to delete.", indents=pstring.LEVELED_INDENTS[1], colors=pconsole.ERROR_COLORS)
+                    pconsole.print("No messages to delete.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
 
             elif pstring.equals_ignore_case(command.command, "exit") and len(command.args) == 0:
                 break
@@ -201,7 +201,7 @@ try:
         pconsole.print(f"new_json_str == json_str: {new_json_str == json_str}", colors=colors)
 
 except Exception: # pylint: disable=broad-except
-    pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
+    pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:
     pdebugging.display_press_enter_key_to_continue_if_not_debugging()

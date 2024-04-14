@@ -60,7 +60,7 @@ class SolutionInfo:
 
         return self.__source_archive_file_path
 
-    def archive(self, not_archived_directory_names=None, not_archived_file_names=None):
+    def archive(self, not_archived_directory_names = None, not_archived_file_names = None):
         return archive_solution(self, not_archived_directory_names, not_archived_file_names)
 
 class ProjectInfo:
@@ -153,7 +153,7 @@ class ProjectInfo:
     def clean(self, supported_runtimes, delete_obj_directory):
         return clean(self, supported_runtimes, delete_obj_directory)
 
-    def rebuild_and_archive(self, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
+    def rebuild_and_archive(self, supported_runtimes, not_archived_directory_names = None, not_archived_file_names = None):
         return rebuild_and_archive_project(self, supported_runtimes, not_archived_directory_names, not_archived_file_names)
 
 # ------------------------------------------------------------------------------
@@ -364,7 +364,7 @@ def sort_projects_to_build(projects):
 #     Solution-related operations
 # ------------------------------------------------------------------------------
 
-def archive_solution(solution, not_archived_directory_names=None, not_archived_file_names=None):
+def archive_solution(solution, not_archived_directory_names = None, not_archived_file_names = None):
     messages = []
 
     solution_archives_directory_path = ppath.dirname(solution.source_archive_file_path)
@@ -490,7 +490,7 @@ def clean(project, supported_runtimes, delete_obj_directory):
 
     return messages
 
-def rebuild_and_archive_project(project, supported_runtimes, not_archived_directory_names=None, not_archived_file_names=None):
+def rebuild_and_archive_project(project, supported_runtimes, not_archived_directory_names = None, not_archived_file_names = None):
     messages = []
 
     # For testing purposes only.
@@ -558,5 +558,5 @@ def subprocess_result_into_messages(result):
 
     return messages
 
-def format_result_string_from_messages(messages, indents="", end="\n"):
+def format_result_string_from_messages(messages, indents = "", end="\n"):
     return end.join(f"{indents}{message}" for message in messages)

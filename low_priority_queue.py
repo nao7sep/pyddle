@@ -440,10 +440,10 @@ def show_statistics(handled_task_list_, task_list_, days):
             pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1])
 
         elif completion_rate >= (100 / 3):
-            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors=pconsole.WARNING_COLORS)
+            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.WARNING_COLORS)
 
         else:
-            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors=pconsole.ERROR_COLORS)
+            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
 
 # ------------------------------------------------------------------------------
 #     Application
@@ -500,7 +500,7 @@ try:
 
             shows_all_next_time = False # pylint: disable=invalid-name
 
-            pconsole.print("Command", colors=pconsole.IMPORTANT_COLORS, end="")
+            pconsole.print("Command", colors = pconsole.IMPORTANT_COLORS, end = "")
             command_str = input(": ")
 
             command, number, parameter = parse_command_str(command_str)
@@ -619,8 +619,8 @@ try:
                         task_list.delete_task(task)
 
                     else:
-                        pconsole.print("Destructive operation.", colors=pconsole.WARNING_COLORS)
-                        pconsole.print("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.", colors=pconsole.WARNING_COLORS)
+                        pconsole.print("Destructive operation.", colors = pconsole.WARNING_COLORS)
+                        pconsole.print("Consider deactivating the task instead or confirm deletion by adding 'confirm' to the command string.", colors = pconsole.WARNING_COLORS)
 
                     continue
 
@@ -630,7 +630,7 @@ try:
                     continue
 
                 elif number is None:
-                    show_statistics(handled_task_list, task_list, days=None)
+                    show_statistics(handled_task_list, task_list, days = None)
                     continue
 
             elif pstring.equals_ignore_case(command, "exit"):
@@ -642,13 +642,13 @@ try:
             # Now, without changing the regex and still disallowing negative numbers, anything other than "" must be a valid command string.
 
             if command_str:
-                pconsole.print("Invalid command string.", colors=pconsole.ERROR_COLORS)
+                pconsole.print("Invalid command string.", colors = pconsole.ERROR_COLORS)
 
         except Exception: # pylint: disable=broad-except
-            pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
+            pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 except Exception: # pylint: disable=broad-except
-    pconsole.print(traceback.format_exc(), colors=pconsole.ERROR_COLORS)
+    pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:
     pdebugging.display_press_enter_key_to_continue_if_not_debugging()

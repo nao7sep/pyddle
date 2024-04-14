@@ -14,7 +14,7 @@ def create_parent_directory(path):
     if parent_directory_path:
         os.makedirs(parent_directory_path, exist_ok=True)
 
-def make_and_move_to_output_subdirectory(subdirectory=None):
+def make_and_move_to_output_subdirectory(subdirectory = None):
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
 
     # No lazy loading required.
@@ -193,7 +193,7 @@ def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
 #     ZIP archives
 # ------------------------------------------------------------------------------
 
-def zip_archive_directory(directory_path, archive_file_path, not_archived_directory_names=None, not_archived_file_names=None):
+def zip_archive_directory(directory_path, archive_file_path, not_archived_directory_names = None, not_archived_file_names = None):
     archive_directory_path = ppath.dirname(archive_file_path)
     os.makedirs(archive_directory_path, exist_ok=True)
 
