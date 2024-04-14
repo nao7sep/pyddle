@@ -8,6 +8,7 @@ import os
 import random
 import string
 import traceback
+import typing
 import uuid
 
 import pyperclip # type: ignore
@@ -163,7 +164,7 @@ class NoteInfo(EntryInfo):
 
     def save(self):
         # Calls the parent's save method recursively until it reaches the episode.
-        self.parent.save()
+        typing.cast(EntryInfo, self.parent).save()
 
 def generate_random_code(episodes_):
     while True:
@@ -407,7 +408,7 @@ def episodes_open_command(episodes_, command_):
                                         try:
                                             parent_note.create_note(note)
                                             parent_note.notes.sort(key = lambda note: note.creation_utc)
-                                            old_parent.delete_note(note)
+                                            typing.cast(EntryInfo, old_parent).delete_note(note)
 
                                         except Exception: # pylint: disable = broad-except
                                             try:
@@ -461,7 +462,7 @@ def episodes_open_command(episodes_, command_):
                                     note.content = content
 
                                     try:
-                                        note.parent.update_note(note)
+                                        typing.cast(EntryInfo, note.parent).update_note(note)
 
                                     except Exception: # pylint: disable = broad-except
                                         note.content = old_content
@@ -487,7 +488,7 @@ def episodes_open_command(episodes_, command_):
 
                             if note:
                                 try:
-                                    note.parent.delete_note(note)
+                                    typing.cast(EntryInfo, note.parent).delete_note(note)
 
                                 except Exception: # pylint: disable = broad-except
                                     pconsole.print("Failed to delete note.", colors = pconsole.ERROR_COLORS)

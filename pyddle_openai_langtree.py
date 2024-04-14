@@ -2,6 +2,7 @@
 # A module that helps us organize knowledge in a tree structure.
 
 from __future__ import annotations
+import typing
 import uuid
 
 import openai
@@ -346,7 +347,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Creates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return self.parent_element.create_child_message(user_role = user_role, content = content, user_name = user_name)
+            typing.cast(LangTreeMessage, self.parent_element).create_child_message(user_role = user_role, content = content, user_name = user_name)
 
         else:
             return self.create_child_message(user_role = user_role, content = content, user_name = user_name)
@@ -361,7 +362,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return self.parent_element.generate_child_message_with_messages(messages, client = client, chat_settings = chat_settings, timeout = timeout)
+            return typing.cast(LangTreeMessage, self.parent_element).generate_child_message_with_messages(messages, client = client, chat_settings = chat_settings, timeout = timeout)
 
         else:
             return self.generate_child_message_with_messages(messages, client = client, chat_settings = chat_settings, timeout = timeout)
@@ -376,7 +377,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return self.parent_element.generate_child_message_with_context_builder(context_builder, client = client, chat_settings = chat_settings, timeout = timeout)
+            return typing.cast(LangTreeMessage, self.parent_element).generate_child_message_with_context_builder(context_builder, client = client, chat_settings = chat_settings, timeout = timeout)
 
         else:
             return self.generate_child_message_with_context_builder(context_builder, client = client, chat_settings = chat_settings, timeout = timeout)
@@ -390,7 +391,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return self.parent_element.generate_child_message(client = client, chat_settings = chat_settings, timeout = timeout)
+            return typing.cast(LangTreeMessage, self.parent_element).generate_child_message(client = client, chat_settings = chat_settings, timeout = timeout)
 
         else:
             return self.generate_child_message(client = client, chat_settings = chat_settings, timeout = timeout)
@@ -440,13 +441,15 @@ class LangTreeMessage(LangTreeElement):
         ''' Assumes child messages at each level are ordered by "creation_utc". '''
 
         if self.parent_element:
-            index = self.parent_element.child_messages.index(self)
+            parent_element = typing.cast(LangTreeMessage, self.parent_element)
+
+            index = parent_element.child_messages.index(self)
 
             if index >= 1:
-                return self.parent_element.child_messages[index - 1]
+                return parent_element.child_messages[index - 1]
 
             else:
-                return self.parent_element
+                return parent_element
 
         return None
 
@@ -455,10 +458,12 @@ class LangTreeMessage(LangTreeElement):
 
         def _get_sibling():
             if self.parent_element:
-                index = self.parent_element.child_messages.index(self)
+                parent_element = typing.cast(LangTreeMessage, self.parent_element)
 
-                if index + 1 < len(self.parent_element.child_messages):
-                    return self.parent_element.child_messages[index + 1]
+                index = parent_element.child_messages.index(self)
+
+                if index + 1 < len(parent_element.child_messages):
+                    return parent_element.child_messages[index + 1]
 
             return None
 
@@ -689,13 +694,15 @@ class LangTreeContextBuilder:
             #           the search should properly go up to the root element including only what it should
 
             if element.parent_element:
-                for sibling in element.parent_element.child_messages:
+                parent_element = typing.cast(LangTreeMessage, element.parent_element)
+
+                for sibling in parent_element.child_messages:
                     if sibling.creation_utc < element.creation_utc:
                         elements.append(sibling)
 
                 elements.append(element) # As an element that has a parent and may have younger siblings.
 
-                element = element.parent_element
+                element = parent_element
 
             else:
                 elements.append(element) # As the root element.

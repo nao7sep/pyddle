@@ -343,7 +343,7 @@ def sort_projects_to_build(projects):
     # Extracts each project's referenced projects beforehand.
     reference_table = { project: get_all_referenced_projects(project) for project in projects }
 
-    sorted_projects = []
+    sorted_projects: list[ProjectInfo] = []
 
     for project in projects:
         is_referenced = False

@@ -4,8 +4,6 @@
 import re
 import unicodedata
 
-import pyddle_debugging as pdebugging
-
 LEVELED_INDENTS = [
     "",
     "    ",
@@ -527,12 +525,12 @@ def split_line_into_parts(str_):
 
     match = COMPILED_REGEX_FOR_SPLIT_LINE_INTO_PARTS.match(str_)
 
-    if pdebugging.is_debugging():
-        if not match:
-            # Unless the "re" module is implemented incorrectly, the number of groups should always be 3.
-            raise RuntimeError(f"Line parts could not be extracted from \"{str_}\".")
+    if match:
+        return match.groups()
 
-    return match.groups()
+    else:
+        # Unless the "re" module is implemented incorrectly, the number of groups should always be 3.
+        raise RuntimeError(f"Line parts could not be extracted from \"{str_}\".")
 
 # ------------------------------------------------------------------------------
 #     ChunkStrReader

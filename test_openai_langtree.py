@@ -6,6 +6,7 @@ import os
 import sys
 import threading
 import traceback
+import typing
 
 import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
@@ -125,7 +126,7 @@ try:
         current_message = plangtree.LangTreeMessage.deserialize_from_dict(json_dictionary)
 
         while True:
-            if current_message.child_messages:
+            if current_message and current_message.child_messages:
                 current_message = current_message.child_messages[-1]
 
             else:
@@ -134,7 +135,8 @@ try:
     threads: list[threading.Thread] = []
 
     def _save():
-        root_message = current_message.get_root_element()
+        root_message = typing.cast(plangtree.LangTreeMessage, current_message).get_root_element() # For MyPy.
+        # If current_message is None, this line must raise an exception.
         json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii = False, indent = 4)
         pfs.write_all_text_to_file(JSON_FILE_PATH, json_str_)
         return json_str_
@@ -160,7 +162,7 @@ try:
                     # If not, it automatically means it's the root element, so we set it to None.
 
                     if previous_message:
-                        current_message.parent_element.child_messages.remove(current_message)
+                        typing.cast(plangtree.LangTreeMessage, current_message.parent_element).child_messages.remove(current_message)
                         current_message = previous_message
                         _save() # Only when the JSON file has been affected.
 
