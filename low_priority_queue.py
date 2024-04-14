@@ -254,7 +254,7 @@ def select_shown_tasks(handled_task_list_, task_list_, shows_all):
     seven_days_ago_utc = pdatetime.get_utc_now() - datetime.timedelta(days = 7)
     handled_tasks_in_last_seven_days = [task for task in handled_task_list_.tasks if task.handled_utc is not None and task.handled_utc > seven_days_ago_utc]
 
-    execution_counts_ = {}
+    execution_counts_: dict = {}
 
     for task_ in handled_tasks_in_last_seven_days:
         if task_.guid in execution_counts_:
@@ -330,7 +330,7 @@ def show_statistics(handled_task_list_, task_list_, days):
     else:
         not_too_old_handled_tasks = handled_task_list_.tasks
 
-    execution_counts_and_more = {}
+    execution_counts_and_more: dict = {}
     first_handled_utc = pdatetime.get_utc_now()
 
     for task_ in not_too_old_handled_tasks:

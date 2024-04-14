@@ -651,7 +651,7 @@ def openai_add_assistant_message(messages, assistant_message, name = None):
     openai_add_message(messages, role = OpenAiRole.ASSISTANT, content = assistant_message, name = name)
 
 def openai_build_messages(user_message, user_message_name = None, system_message = None, system_message_name = None):
-    messages = []
+    messages: list[dict] = []
 
     if system_message:
         openai_add_system_message(messages, system_message, system_message_name)
@@ -666,7 +666,7 @@ def openai_extract_messages(response: openai.types.chat.ChatCompletion):
 def openai_extract_first_message(response: openai.types.chat.ChatCompletion):
     return response.choices[0].message.content
 
-def openai_extract_deltas(response: openai.types.chat.ChatCompletion):
+def openai_extract_deltas(response: openai.types.chat.ChatCompletionChunk):
     return [choice.delta.content for choice in response.choices]
 
 def openai_extract_first_delta(chunk: openai.types.chat.ChatCompletionChunk):

@@ -10,7 +10,7 @@ import string
 import traceback
 import uuid
 
-import pyperclip
+import pyperclip # type: ignore
 
 import pyddle_console as pconsole
 import pyddle_datetime as pdatetime
@@ -132,10 +132,10 @@ class EpisodeInfo(EntryInfo):
     def __init__(self):
         super().__init__()
         self.title = None
-        self.file_path = None
+        self.file_path: str | None = None
 
     def load(self):
-        if os.path.isfile(self.file_path):
+        if self.file_path and os.path.isfile(self.file_path):
             with pfs.open_file_and_detect_utf_encoding(self.file_path) as episode_file:
                 data_from_json = json.load(episode_file)
 

@@ -117,7 +117,7 @@ try:
 
     JSON_FILE_PATH = "test_openai_langtree.json"
 
-    current_message = None # pylint: disable = invalid-name
+    current_message: plangtree.LangTreeMessage | None = None # pylint: disable = invalid-name
 
     if os.path.isfile(JSON_FILE_PATH):
         json_file_contents = pfs.read_all_text_from_file(JSON_FILE_PATH)

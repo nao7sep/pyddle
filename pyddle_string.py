@@ -345,7 +345,7 @@ def last_index_of_any_casefold(str_, substrings):
 #     because there's a high chance that the developer is doing something wrong.
 # Like, startswith(None, "a") is most likely not an intended operation.
 
-def splitlines(str_: str, trim_line_start = False, trim_line_end = True,
+def splitlines(str_: str | None, trim_line_start = False, trim_line_end = True,
                remove_empty_lines_at_start = True, remove_redundant_empty_lines = True, remove_empty_lines_at_end = True):
     ''' Splits a multiline string into lines and normalizes them. '''
 
