@@ -353,8 +353,8 @@ def splitlines(str_: str, trim_line_start = False, trim_line_end = True,
         # "".splitlines() returns an empty list.
         return []
 
-    return normalize_lines(str_.splitlines(), trim_line_start=trim_line_start, trim_line_end = trim_line_end,
-                           remove_empty_lines_at_start=remove_empty_lines_at_start, remove_redundant_empty_lines=remove_redundant_empty_lines, remove_empty_lines_at_end = remove_empty_lines_at_end)
+    return normalize_lines(str_.splitlines(), trim_line_start = trim_line_start, trim_line_end = trim_line_end,
+                           remove_empty_lines_at_start = remove_empty_lines_at_start, remove_redundant_empty_lines = remove_redundant_empty_lines, remove_empty_lines_at_end = remove_empty_lines_at_end)
 
 # The method below was originally a part of the "splitlines" method.
 # As Python doesnt have C#'s StringBuilder and such mechanisms may not be efficient,

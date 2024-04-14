@@ -390,7 +390,7 @@ def build_project(project, no_restore = False):
 
     # "--nologo" isnt included so that we can log the version of the tool.
     # It should look like: MSBuild のバージョン 17.9.4+90725d08d (.NET)
-    args = [ "dotnet", "build", project.file_path, "--configuration", "Release" ]
+    args = ["dotnet", "build", project.file_path, "--configuration", "Release"]
 
     if no_restore:
         args.append("--no-restore")
@@ -403,11 +403,11 @@ def update_nuget_packages_in_project(project):
 
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-list-package
 
-    args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "console" ] # Output for display.
+    args = ["dotnet", "list", project.file_path, "package", "--outdated", "--format", "console"] # Output for display.
     result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
     messages.extend(subprocess_result_into_messages(result))
 
-    args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "json" ] # For parsing.
+    args = ["dotnet", "list", project.file_path, "package", "--outdated", "--format", "json"] # For parsing.
     result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
 
     # When an old project contains "package.config", which isnt supported by the "dotnet" command, we get a string like the following set to "stderr":
@@ -440,7 +440,7 @@ def update_nuget_packages_in_project(project):
 
                         # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package
 
-                        args = [ "dotnet", "add", project.file_path, "package", id_, "--version", latest_version ]
+                        args = ["dotnet", "add", project.file_path, "package", id_, "--version", latest_version]
                         result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
                         messages.extend(subprocess_result_into_messages(result))
 
@@ -474,12 +474,12 @@ def clean(project, supported_runtimes, delete_obj_directory):
     if not delete_obj_directory:
         # BR08 dotnet Commands.json contains (excessively) detailed comments.
 
-        args = [ "dotnet", "clean", project.file_path, "--configuration", "Release" ]
+        args = ["dotnet", "clean", project.file_path, "--configuration", "Release"]
         result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
         messages.extend(subprocess_result_into_messages(result))
 
         for supported_runtime in supported_runtimes:
-            args = [ "dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime ]
+            args = ["dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime]
             result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
             messages.extend(subprocess_result_into_messages(result))
 
@@ -521,7 +521,7 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
         if os.path.isdir(runtime_specific_publish_directory_path):
             shutil.rmtree(runtime_specific_publish_directory_path)
 
-        args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
+        args = ["dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime]
         result = subprocess.run(args, capture_output = True, cwd = project.directory_path, check = False)
         messages.extend(subprocess_result_into_messages(result))
 
