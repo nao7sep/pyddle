@@ -114,7 +114,7 @@ for key, value in data.items():
 
 # Convert to pretty XML.
 
-pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'UTF-8')).toprettyxml(indent=pstring.LEVELED_INDENTS[1])
+pretty_xml = xml.dom.minidom.parseString (xml.etree.ElementTree.tostring(root, 'UTF-8')).toprettyxml(indent = pstring.LEVELED_INDENTS[1])
 
 with pfs.open_file_and_write_utf_encoding_bom("write_and_read_settings.xml") as xml_file:
     xml_file.write(pretty_xml)

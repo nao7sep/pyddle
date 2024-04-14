@@ -12,7 +12,7 @@ def create_parent_directory(path):
     parent_directory_path = ppath.dirname(path)
 
     if parent_directory_path:
-        os.makedirs(parent_directory_path, exist_ok=True)
+        os.makedirs(parent_directory_path, exist_ok = True)
 
 def make_and_move_to_output_subdirectory(subdirectory = None):
     """ A lazy method that alters the current working directory and therefore must be used with caution. """
@@ -23,7 +23,7 @@ def make_and_move_to_output_subdirectory(subdirectory = None):
     if subdirectory:
         directory_path = os.path.join(directory_path, subdirectory)
 
-    os.makedirs(directory_path, exist_ok=True)
+    os.makedirs(directory_path, exist_ok = True)
     os.chdir(directory_path)
 
 # ------------------------------------------------------------------------------
@@ -90,7 +90,7 @@ def detect_utf_encoding_of_file(file):
 
     return encoding, bom
 
-def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append=False):
+def open_file_and_write_utf_encoding_bom(path, encoding="UTF-8", append = False):
     """
         Raises a RuntimeError if the encoding is not supported.
         If 'append' is True and the file already has content without a BOM, the BOM will NOT be written.
@@ -152,7 +152,7 @@ def read_all_bytes_from_file(path):
     with open(path, "rb") as file:
         return file.read()
 
-def read_all_text_from_file(path, detect_encoding=True, fallback_encoding="UTF-8"):
+def read_all_text_from_file(path, detect_encoding = True, fallback_encoding="UTF-8"):
     if detect_encoding:
         with open_file_and_detect_utf_encoding(path, fallback_encoding) as file:
             return file.read()
@@ -165,7 +165,7 @@ def write_all_bytes_to_file(path, bytes_):
     with open(path, "wb") as file:
         file.write(bytes_)
 
-def write_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
+def write_all_text_to_file(path, text, encoding="UTF-8", write_bom = True):
     if write_bom:
         with open_file_and_write_utf_encoding_bom(path, encoding) as file:
             file.write(text)
@@ -178,11 +178,11 @@ def append_all_bytes_to_file(path, bytes_):
     with open(path, "ab") as file:
         file.write(bytes_)
 
-def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
+def append_all_text_to_file(path, text, encoding="UTF-8", write_bom = True):
     """ If the file already has content without a BOM, the BOM will NOT be written. """
 
     if write_bom:
-        with open_file_and_write_utf_encoding_bom(path, encoding, append=True) as file:
+        with open_file_and_write_utf_encoding_bom(path, encoding, append = True) as file:
             file.write(text)
 
     else:
@@ -195,7 +195,7 @@ def append_all_text_to_file(path, text, encoding="UTF-8", write_bom=True):
 
 def zip_archive_directory(directory_path, archive_file_path, not_archived_directory_names = None, not_archived_file_names = None):
     archive_directory_path = ppath.dirname(archive_file_path)
-    os.makedirs(archive_directory_path, exist_ok=True)
+    os.makedirs(archive_directory_path, exist_ok = True)
 
     # https://docs.python.org/3/library/zipfile.html
 

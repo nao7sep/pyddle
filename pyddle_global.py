@@ -14,7 +14,7 @@ def set_main_script_file_path(file_path):
     # "global" lets us modify the global variables outside of the function.
     # https://www.w3schools.com/python/python_variables_global.asp
 
-    global MAIN_SCRIPT_FILE_PATH # pylint: disable=global-statement
+    global MAIN_SCRIPT_FILE_PATH # pylint: disable = global-statement
     # Expecting MAIN_SCRIPT_FILE_PATH to work like a field of a class.
 
     if not os.path.isfile(file_path):

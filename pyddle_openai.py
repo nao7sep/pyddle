@@ -79,10 +79,10 @@ class OpenAiSettings:
         return self.__base_url
 
 # Lazy loading:
-__openai_default_settings = None # pylint: disable=invalid-name
+__openai_default_settings = None # pylint: disable = invalid-name
 
 def get_openai_default_settings():
-    global __openai_default_settings # pylint: disable=global-statement
+    global __openai_default_settings # pylint: disable = global-statement
 
     if __openai_default_settings is None:
         __openai_default_settings = OpenAiSettings(
@@ -146,10 +146,10 @@ class OpenAiTokenCounter:
         return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str_)]
 
 # Lazy loading:
-__gpt_3_5_turbo_token_counter = None # pylint: disable=invalid-name
+__gpt_3_5_turbo_token_counter = None # pylint: disable = invalid-name
 
 def get_gpt_3_5_turbo_token_counter():
-    global __gpt_3_5_turbo_token_counter # pylint: disable=global-statement
+    global __gpt_3_5_turbo_token_counter # pylint: disable = global-statement
 
     if __gpt_3_5_turbo_token_counter is None:
         __gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_3_5_TURBO)
@@ -157,10 +157,10 @@ def get_gpt_3_5_turbo_token_counter():
     return __gpt_3_5_turbo_token_counter
 
 # Lazy loading:
-__gpt_4_token_counter = None # pylint: disable=invalid-name
+__gpt_4_token_counter = None # pylint: disable = invalid-name
 
 def get_gpt_4_token_counter():
-    global __gpt_4_token_counter # pylint: disable=global-statement
+    global __gpt_4_token_counter # pylint: disable = global-statement
 
     if __gpt_4_token_counter is None:
         __gpt_4_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4)
@@ -168,10 +168,10 @@ def get_gpt_4_token_counter():
     return __gpt_4_token_counter
 
 # Lazy loading:
-__gpt_4_turbo_token_counter = None # pylint: disable=invalid-name
+__gpt_4_turbo_token_counter = None # pylint: disable = invalid-name
 
 def get_gpt_4_turbo_token_counter():
-    global __gpt_4_turbo_token_counter # pylint: disable=global-statement
+    global __gpt_4_turbo_token_counter # pylint: disable = global-statement
 
     if __gpt_4_turbo_token_counter is None:
         __gpt_4_turbo_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_TURBO)
@@ -180,10 +180,10 @@ def get_gpt_4_turbo_token_counter():
 
 # Lazy loading:
 # May be unnecessary.
-__gpt_4_vision_token_counter = None # pylint: disable=invalid-name
+__gpt_4_vision_token_counter = None # pylint: disable = invalid-name
 
 def get_gpt_4_vision_token_counter():
-    global __gpt_4_vision_token_counter # pylint: disable=global-statement
+    global __gpt_4_vision_token_counter # pylint: disable = global-statement
 
     if __gpt_4_vision_token_counter is None:
         __gpt_4_vision_token_counter = OpenAiTokenCounter(model=OpenAiModel.GPT_4_VISION)
@@ -191,10 +191,10 @@ def get_gpt_4_vision_token_counter():
     return __gpt_4_vision_token_counter
 
 # Lazy loading:
-__openai_default_token_counter = None # pylint: disable=invalid-name
+__openai_default_token_counter = None # pylint: disable = invalid-name
 
 def get_openai_default_token_counter():
-    global __openai_default_token_counter # pylint: disable=global-statement
+    global __openai_default_token_counter # pylint: disable = global-statement
 
     if __openai_default_token_counter is None:
         if DEFAULT_GPT_MODEL == OpenAiModel.GPT_3_5_TURBO:
@@ -247,10 +247,10 @@ def create_openai_client(api_key = None, organization = None, base_url = None, t
     return openai.OpenAI(**args.args)
 
 # Lazy loading:
-__openai_default_client = None # pylint: disable=invalid-name
+__openai_default_client = None # pylint: disable = invalid-name
 
 def get_openai_default_client():
-    global __openai_default_client # pylint: disable=global-statement
+    global __openai_default_client # pylint: disable = global-statement
 
     if __openai_default_client is None:
         __openai_default_client = create_openai_client()
@@ -318,7 +318,7 @@ def openai_audio_speech_create(
 
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.speech.create(**args.args) # pylint: disable=missing-kwoa
+    return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.speech.create(**args.args) # pylint: disable = missing-kwoa
 
 def openai_save_audio(file_path, response):
     pfs.create_parent_directory(file_path)
@@ -444,7 +444,7 @@ def openai_audio_transcriptions_create(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.transcriptions.create(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.transcriptions.create(**args.args) # pylint: disable = missing-kwoa
 
 def openai_audio_translations_create(
     # Input:
@@ -477,7 +477,7 @@ def openai_audio_translations_create(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.translations.create(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.translations.create(**args.args) # pylint: disable = missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Chat
@@ -587,10 +587,10 @@ class OpenAiChatSettings:
 DEFAULT_GPT_MODEL = OpenAiModel.GPT_4_TURBO
 
 # Lazy loading:
-__openai_default_chat_settings = None # pylint: disable=invalid-name
+__openai_default_chat_settings = None # pylint: disable = invalid-name
 
 def get_openai_default_chat_settings():
-    global __openai_default_chat_settings # pylint: disable=global-statement
+    global __openai_default_chat_settings # pylint: disable = global-statement
 
     if __openai_default_chat_settings is None:
         __openai_default_chat_settings = OpenAiChatSettings(model=DEFAULT_GPT_MODEL)
@@ -776,7 +776,7 @@ def openai_save_images(file_path, response):
         else:
             new_file_path = os.path.join(dirname, f"{root}-{index}{extension}")
 
-        with requests.get(image.url, stream=True, timeout=pweb.DEFAULT_TIMEOUT) as downloader:
+        with requests.get(image.url, stream = True, timeout=pweb.DEFAULT_TIMEOUT) as downloader:
             # If it fails with the second image, the user might leave the first one on the disk.
             # I will not take care of that for 2 reasons:
             #     1. If the first one was saved, the rest should usually be saved as well
@@ -831,7 +831,7 @@ def openai_images_generate(
     # It takes care of saving the images as well.
     args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-    return putility.get_not_none_or_call_func(get_openai_default_client, client).images.generate(**args.args) # pylint: disable=missing-kwoa
+    return putility.get_not_none_or_call_func(get_openai_default_client, client).images.generate(**args.args) # pylint: disable = missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -879,10 +879,10 @@ def openai_images_edit(
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
+                return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable = missing-kwoa
 
         else:
-            return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable=missing-kwoa
+            return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable = missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -923,4 +923,4 @@ def openai_images_create_variation(
 
         args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
 
-        return putility.get_not_none_or_call_func(get_openai_default_client, client).images.create_variation(**args.args) # pylint: disable=missing-kwoa
+        return putility.get_not_none_or_call_func(get_openai_default_client, client).images.create_variation(**args.args) # pylint: disable = missing-kwoa

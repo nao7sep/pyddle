@@ -34,7 +34,7 @@ def get_all_drive_or_volume_paths():
         for volume_name in os.listdir('/Volumes'):
             yield os.path.join('/Volumes', volume_name) # As a string.
 
-scanned_directory_count = 0 # pylint: disable=invalid-name
+scanned_directory_count = 0 # pylint: disable = invalid-name
 
 for drive_or_volume_path in get_all_drive_or_volume_paths():
     # I dont mind using os.walk, which should be relatively slow, because this is a once-in-a-while script.

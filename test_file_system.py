@@ -12,7 +12,7 @@ pglobal.set_main_script_file_path(__file__)
 pfs.make_and_move_to_output_subdirectory()
 
 for encoding, bom in pfs.UTF_ENCODINGS_AND_BOMS:
-    encoding_in_lowercase = encoding.lower() # pylint: disable=invalid-name
+    encoding_in_lowercase = encoding.lower() # pylint: disable = invalid-name
     file_name = f"test_file_system_{encoding_in_lowercase.replace("-", "_")}.txt"
 
     with pfs.open_file_and_write_utf_encoding_bom(file_name, encoding) as file:

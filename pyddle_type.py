@@ -14,7 +14,7 @@ def str_to_int(str_):
 def str_to_int_or_default(str_, default):
     try:
         return int(str_)
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable = broad-except
         return default
 
 def str_to_float(str_):
@@ -23,7 +23,7 @@ def str_to_float(str_):
 def str_to_float_or_default(str_, default):
     try:
         return float(str_)
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable = broad-except
         return default
 
 def str_to_complex(str_):
@@ -32,7 +32,7 @@ def str_to_complex(str_):
 def str_to_complex_or_default(str_, default):
     try:
         return complex(str_)
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable = broad-except
         return default
 
 # Properly capitalized string representations of boolean values.
@@ -57,7 +57,7 @@ def str_to_bool(str_):
 def str_to_bool_or_default(str_, default):
     try:
         return str_to_bool(str_)
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable = broad-except
         return default
 
 # ------------------------------------------------------------------------------
@@ -75,7 +75,7 @@ def str_to_bool_or_default(str_, default):
 
 # The following methods will help us handle either case:
 
-def str_to_enum_by_name(str_, enum_type, ignore_case=True):
+def str_to_enum_by_name(str_, enum_type, ignore_case = True):
     member = try_str_to_enum_by_name(str_, enum_type=enum_type, ignore_case=ignore_case)
 
     if member:
@@ -83,7 +83,7 @@ def str_to_enum_by_name(str_, enum_type, ignore_case=True):
 
     raise RuntimeError(f"Invalid enum name: {str_}")
 
-def try_str_to_enum_by_name(str_, enum_type, ignore_case=True):
+def try_str_to_enum_by_name(str_, enum_type, ignore_case = True):
     for member in enum_type:
         if ignore_case:
             if pstring.equals_ignore_case(member.name, str_):
@@ -95,7 +95,7 @@ def try_str_to_enum_by_name(str_, enum_type, ignore_case=True):
 
     return None
 
-def str_to_enum_by_str_value(str_, enum_type, ignore_case=True):
+def str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
     member = try_str_to_enum_by_str_value(str_, enum_type=enum_type, ignore_case=ignore_case)
 
     if member:
@@ -103,7 +103,7 @@ def str_to_enum_by_str_value(str_, enum_type, ignore_case=True):
 
     raise RuntimeError(f"Invalid enum value: {str_}")
 
-def try_str_to_enum_by_str_value(str_, enum_type, ignore_case=True):
+def try_str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
     for member in enum_type:
         if ignore_case:
             if pstring.equals_ignore_case(member.value, str_):

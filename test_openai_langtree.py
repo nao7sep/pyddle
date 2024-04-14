@@ -60,14 +60,14 @@ def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popena
         context_builder = plangtree.get_langtree_default_context_builder()
         context = context_builder.build(new_current_message)
 
-        statistics_lines = plangtree.LangTreeContext.statistics_to_lines(context.get_statistics(), all_tokens=True)
+        statistics_lines = plangtree.LangTreeContext.statistics_to_lines(context.get_statistics(), all_tokens = True)
 
         plogging.log("[Statistics]") # [Content Statistics] sounds a little redundant.
-        plogging.log_lines(statistics_lines, indents=pstring.LEVELED_INDENTS[1])
-        plogging.log("", flush_=True)
+        plogging.log_lines(statistics_lines, indents = pstring.LEVELED_INDENTS[1])
+        plogging.log("", flush_ = True)
 
-        messages_json_str = json.dumps(context.messages, ensure_ascii=False, indent=4)
-        plogging.log(f"[Context]\n{messages_json_str}", end="\n\n", flush_=True)
+        messages_json_str = json.dumps(context.messages, ensure_ascii = False, indent=4)
+        plogging.log(f"[Context]\n{messages_json_str}", end="\n\n", flush_ = True)
 
         response = new_current_message.start_generating_message_with_messages(context.messages)
 
@@ -75,7 +75,7 @@ def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popena
         # As of 2024-04-12, at least one time, None is returned.
         chunk_deltas = []
 
-        chunk_str_reader = pstring.ChunkStrReader(indents=pstring.LEVELED_INDENTS[1])
+        chunk_str_reader = pstring.ChunkStrReader(indents = pstring.LEVELED_INDENTS[1])
 
         pconsole.print("Response:")
 
@@ -92,13 +92,13 @@ def create_sibling_message(element: plangtree.LangTreeMessage, user_role: popena
 
         # ChunkStrReader doesnt return the remaining chunk if it ends with a line break and waits for the next one to determine whether indents must be added or not.
         # When the interaction has ended, we need to receive the last chunk (if any) and print it as-is because it may contain a visible character right before the line break.
-        chunk_str = chunk_str_reader.read_str(force=True)
+        chunk_str = chunk_str_reader.read_str(force = True)
         end_ = "" if chunk_str.endswith("\n") else "\n" # If we want to do this precisely, we'd need to analyze the last part of "content".
         pconsole.print(chunk_str, end=end_)
 
         content = "".join(chunk_deltas)
 
-        plogging.log(f"[Response]\n{content}", end="\n\n", flush_=True)
+        plogging.log(f"[Response]\n{content}", end="\n\n", flush_ = True)
 
         new_current_message = new_current_message.create_sibling_message(
             user_role=popenai.OpenAiRole.ASSISTANT,
@@ -117,7 +117,7 @@ try:
 
     JSON_FILE_PATH = "test_openai_langtree.json"
 
-    current_message = None # pylint: disable=invalid-name
+    current_message = None # pylint: disable = invalid-name
 
     if os.path.isfile(JSON_FILE_PATH):
         json_file_contents = pfs.read_all_text_from_file(JSON_FILE_PATH)
@@ -135,7 +135,7 @@ try:
 
     def _save():
         root_message = current_message.get_root_element()
-        json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii=False, indent=4)
+        json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii = False, indent=4)
         pfs.write_all_text_to_file(JSON_FILE_PATH, json_str_)
         return json_str_
 
@@ -144,7 +144,7 @@ try:
         command = pconsole.parse_command_str(command_str)
 
         if not command:
-            pconsole.print("Invalid command.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
+            pconsole.print("Invalid command.", indents = pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
 
         else:
             if pstring.equals_ignore_case(command.command, "system"):
@@ -165,18 +165,18 @@ try:
                         _save() # Only when the JSON file has been affected.
 
                     else:
-                        current_message = None # pylint: disable=invalid-name
+                        current_message = None # pylint: disable = invalid-name
 
-                    pconsole.print("Deleted message.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
+                    pconsole.print("Deleted message.", indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
                     if current_message:
-                        pconsole.print(f"Current message: {pstring.extract_first_part(current_message.content)}", indents=pstring.LEVELED_INDENTS[1])
+                        pconsole.print(f"Current message: {pstring.extract_first_part(current_message.content)}", indents = pstring.LEVELED_INDENTS[1])
 
                     else:
-                        pconsole.print("No current message.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print("No current message.", indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
                 else:
-                    pconsole.print("No messages to delete.", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
+                    pconsole.print("No messages to delete.", indents = pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
 
             elif pstring.equals_ignore_case(command.command, "exit") and len(command.args) == 0:
                 break
@@ -195,12 +195,12 @@ try:
         json_str = _save() # Saving the translations.
 
         new_root_message = plangtree.LangTreeMessage.deserialize_from_dict(json.loads(json_str))
-        new_json_str = json.dumps(new_root_message.serialize_to_dict(), ensure_ascii=False, indent=4)
+        new_json_str = json.dumps(new_root_message.serialize_to_dict(), ensure_ascii = False, indent=4)
 
         colors = pconsole.IMPORTANT_COLORS if new_json_str == json_str else pconsole.ERROR_COLORS
         pconsole.print(f"new_json_str == json_str: {new_json_str == json_str}", colors=colors)
 
-except Exception: # pylint: disable=broad-except
+except Exception: # pylint: disable = broad-except
     pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:

@@ -11,10 +11,10 @@ import pyddle_global as pglobal
 import pyddle_path as ppath
 
 # Lazy loading:
-__executing_script_files_directory_path = None # pylint: disable=invalid-name
+__executing_script_files_directory_path = None # pylint: disable = invalid-name
 
 def get_executing_script_files_directory_path():
-    global __executing_script_files_directory_path # pylint: disable=global-statement
+    global __executing_script_files_directory_path # pylint: disable = global-statement
 
     if not __executing_script_files_directory_path:
         __executing_script_files_directory_path = ppath.dirname(pglobal.get_main_script_file_path())
@@ -22,10 +22,10 @@ def get_executing_script_files_directory_path():
     return __executing_script_files_directory_path
 
 # Lazy loading:
-__first_kvs_file_path = None # pylint: disable=invalid-name
+__first_kvs_file_path = None # pylint: disable = invalid-name
 
 def get_first_kvs_file_path():
-    global __first_kvs_file_path # pylint: disable=global-statement
+    global __first_kvs_file_path # pylint: disable = global-statement
 
     if not __first_kvs_file_path:
         __first_kvs_file_path = os.path.join(get_executing_script_files_directory_path(), ".pyddle_kvs.json")
@@ -33,10 +33,10 @@ def get_first_kvs_file_path():
     return __first_kvs_file_path
 
 # Lazy loading:
-__second_kvs_file_path = None # pylint: disable=invalid-name
+__second_kvs_file_path = None # pylint: disable = invalid-name
 
 def get_second_kvs_file_path():
-    global __second_kvs_file_path # pylint: disable=global-statement
+    global __second_kvs_file_path # pylint: disable = global-statement
 
     if not __second_kvs_file_path:
         # https://docs.python.org/3/library/os.path.html#os.path.expanduser
@@ -45,10 +45,10 @@ def get_second_kvs_file_path():
     return __second_kvs_file_path
 
 # Lazy loading:
-__first_kvs_data = None # pylint: disable=invalid-name
+__first_kvs_data = None # pylint: disable = invalid-name
 
 def get_first_kvs_data():
-    global __first_kvs_data # pylint: disable=global-statement
+    global __first_kvs_data # pylint: disable = global-statement
 
     if not __first_kvs_data:
         first_kvs_file_path = get_first_kvs_file_path()
@@ -60,10 +60,10 @@ def get_first_kvs_data():
     return __first_kvs_data
 
 # Lazy loading:
-__second_kvs_data = None # pylint: disable=invalid-name
+__second_kvs_data = None # pylint: disable = invalid-name
 
 def get_second_kvs_data():
-    global __second_kvs_data # pylint: disable=global-statement
+    global __second_kvs_data # pylint: disable = global-statement
 
     if not __second_kvs_data:
         second_kvs_file_path = get_second_kvs_file_path()
@@ -75,10 +75,10 @@ def get_second_kvs_data():
     return __second_kvs_data
 
 # Lazy loading:
-__merged_kvs_data = None # pylint: disable=invalid-name
+__merged_kvs_data = None # pylint: disable = invalid-name
 
 def get_merged_kvs_data():
-    global __merged_kvs_data # pylint: disable=global-statement
+    global __merged_kvs_data # pylint: disable = global-statement
 
     if not __merged_kvs_data:
         # https://stackoverflow.com/questions/38987/how-do-i-merge-two-dictionaries-in-a-single-expression-in-python
@@ -154,7 +154,7 @@ def delete_from_second_kvs_data(key):
 # ------------------------------------------------------------------------------
 
 def save_kvs_data_to_file(path, data):
-    json_string = json.dumps(data, ensure_ascii=False, indent=4)
+    json_string = json.dumps(data, ensure_ascii = False, indent=4)
     pfs.write_all_text_to_file(path, json_string)
 
     # Saves the data to a SQLite database file for backup purposes.
@@ -178,7 +178,7 @@ def save_kvs_data_to_file(path, data):
 
             connection.commit()
 
-    except Exception: # pylint: disable=broad-except
+    except Exception: # pylint: disable = broad-except
         pass
 
 def save_first_kvs_data_to_file():

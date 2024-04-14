@@ -144,7 +144,7 @@ class ProjectInfo:
 
         return self.__referenced_projects
 
-    def build(self, no_restore=False):
+    def build(self, no_restore = False):
         return build_project(self, no_restore)
 
     def update_nuget_packages(self):
@@ -368,7 +368,7 @@ def archive_solution(solution, not_archived_directory_names = None, not_archived
     messages = []
 
     solution_archives_directory_path = ppath.dirname(solution.source_archive_file_path)
-    os.makedirs(solution_archives_directory_path, exist_ok=True)
+    os.makedirs(solution_archives_directory_path, exist_ok = True)
 
     archived_file_count = pfs.zip_archive_directory(solution.directory_path, solution.source_archive_file_path, not_archived_directory_names, not_archived_file_names)
 
@@ -385,7 +385,7 @@ def archive_solution(solution, not_archived_directory_names = None, not_archived
 #     Project-related operations
 # ------------------------------------------------------------------------------
 
-def build_project(project, no_restore=False):
+def build_project(project, no_restore = False):
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-build
 
     # "--nologo" isnt included so that we can log the version of the tool.
@@ -395,7 +395,7 @@ def build_project(project, no_restore=False):
     if no_restore:
         args.append("--no-restore")
 
-    result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
+    result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
     return subprocess_result_into_messages(result)
 
 def update_nuget_packages_in_project(project):
@@ -404,11 +404,11 @@ def update_nuget_packages_in_project(project):
     # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-list-package
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "console" ] # Output for display.
-    result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
+    result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
     messages.extend(subprocess_result_into_messages(result))
 
     args = [ "dotnet", "list", project.file_path, "package", "--outdated", "--format", "json" ] # For parsing.
-    result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
+    result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
 
     # When an old project contains "package.config", which isnt supported by the "dotnet" command, we get a string like the following set to "stderr":
     #     プロジェクト 'C:\Repositories\Nekote2018\Nekote2018\Nekote2018.csproj' では NuGet パッケージに package.config を使用しますが、コマンドはパッケージ参照プロジェクトでのみ動作します。
@@ -441,7 +441,7 @@ def update_nuget_packages_in_project(project):
                         # https://learn.microsoft.com/en-us/dotnet/core/tools/dotnet-add-package
 
                         args = [ "dotnet", "add", project.file_path, "package", id_, "--version", latest_version ]
-                        result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
+                        result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
                         messages.extend(subprocess_result_into_messages(result))
 
     return messages
@@ -475,17 +475,17 @@ def clean(project, supported_runtimes, delete_obj_directory):
         # BR08 dotnet Commands.json contains (excessively) detailed comments.
 
         args = [ "dotnet", "clean", project.file_path, "--configuration", "Release" ]
-        result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
+        result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
         messages.extend(subprocess_result_into_messages(result))
 
         for supported_runtime in supported_runtimes:
             args = [ "dotnet", "clean", project.file_path, "--configuration", "Release", "--runtime", supported_runtime ]
-            result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
+            result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
             messages.extend(subprocess_result_into_messages(result))
 
     else:
         obj_directory_path = os.path.join(project.directory_path, "obj")
-        shutil.rmtree(obj_directory_path, ignore_errors=True)
+        shutil.rmtree(obj_directory_path, ignore_errors = True)
         messages.append(f"Directory deleted: {obj_directory_path}")
 
     return messages
@@ -498,13 +498,13 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
     #     I had to make sure I wasnt unintentionally linking old binaries of class libraries to newly built apps.
 
     # vs_directory_path = os.path.join(project.solution.directory_path, ".vs")
-    # shutil.rmtree(vs_directory_path, ignore_errors=True)
+    # shutil.rmtree(vs_directory_path, ignore_errors = True)
 
     # bin_directory_path = os.path.join(project.directory_path, "bin")
-    # shutil.rmtree(bin_directory_path, ignore_errors=True)
+    # shutil.rmtree(bin_directory_path, ignore_errors = True)
 
     # obj_directory_path = os.path.join(project.directory_path, "obj")
-    # shutil.rmtree(obj_directory_path, ignore_errors=True)
+    # shutil.rmtree(obj_directory_path, ignore_errors = True)
 
     # "Episodic comments" have been moved to: BR08 dotnet Commands.json
     # The document shares everything I have tried to clean and rebuild .NET projects.
@@ -522,11 +522,11 @@ def rebuild_and_archive_project(project, supported_runtimes, not_archived_direct
             shutil.rmtree(runtime_specific_publish_directory_path)
 
         args = [ "dotnet", "publish", project.file_path, "--configuration", "Release", "--output", runtime_specific_publish_directory_path, "--runtime", supported_runtime ]
-        result = subprocess.run(args, capture_output=True, cwd=project.directory_path, check=False)
+        result = subprocess.run(args, capture_output = True, cwd=project.directory_path, check = False)
         messages.extend(subprocess_result_into_messages(result))
 
         solution_archives_directory_path = ppath.dirname(project.solution.source_archive_file_path)
-        os.makedirs(solution_archives_directory_path, exist_ok=True)
+        os.makedirs(solution_archives_directory_path, exist_ok = True)
 
         binaries_archive_file_name = f"{project.name}-v{project.version_string}-{supported_runtime}.zip"
         binaries_archive_file_path = os.path.join(solution_archives_directory_path, binaries_archive_file_name)

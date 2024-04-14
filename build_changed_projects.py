@@ -111,7 +111,7 @@ try:
             poutput.print_and_log(f"Multiple solution files found in directory: {directory_name}", colors = pconsole.WARNING_COLORS)
             continue
 
-        is_obsolete_solution = pstring.contains_ignore_case(obsolete_solution_names, directory_name) # pylint: disable=invalid-name
+        is_obsolete_solution = pstring.contains_ignore_case(obsolete_solution_names, directory_name) # pylint: disable = invalid-name
         solutions.append(pdotnet.SolutionInfo(solutions, archives_directory_path, directory_name, possible_solution_directory_path, solution_file_paths[0], is_obsolete_solution))
 
     if not solutions:
@@ -164,37 +164,37 @@ try:
     #     Read version strings, references, etc
     # ------------------------------------------------------------------------------
 
-    valid_project_count = 0 # pylint: disable=invalid-name
+    valid_project_count = 0 # pylint: disable = invalid-name
 
     for solution in sorted(solutions, key=lambda x: x.name):
         try:
             poutput.print_and_log(f"{solution.name} v{solution.common_version_string}")
 
             if not os.path.isfile(solution.source_archive_file_path):
-                poutput.print_and_log(solution.source_archive_file_path, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
+                poutput.print_and_log(solution.source_archive_file_path, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
             for project in sorted(solution.projects, key=lambda x: x.name):
                 try:
-                    poutput.print_and_log(f"{project.name} v{project.version_string}", indents=pstring.LEVELED_INDENTS[1])
+                    poutput.print_and_log(f"{project.name} v{project.version_string}", indents = pstring.LEVELED_INDENTS[1])
 
                     try:
                         if project.referenced_projects:
                             for referenced_project in sorted(project.referenced_projects, key=lambda x: x.name):
-                                poutput.print_and_log(f"{referenced_project.name} v{referenced_project.version_string}", indents=pstring.LEVELED_INDENTS[2])
+                                poutput.print_and_log(f"{referenced_project.name} v{referenced_project.version_string}", indents = pstring.LEVELED_INDENTS[2])
 
                         else:
-                            poutput.print_and_log("No referenced projects found.", indents=pstring.LEVELED_INDENTS[2])
+                            poutput.print_and_log("No referenced projects found.", indents = pstring.LEVELED_INDENTS[2])
 
                         valid_project_count += 1
 
-                    except Exception as exception: # pylint: disable=broad-except
+                    except Exception as exception: # pylint: disable = broad-except
                         # Looks prettier without the project name.
-                        poutput.print_and_log(f"{exception}", indents=pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
+                        poutput.print_and_log(f"{exception}", indents = pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
 
-                except Exception as exception: # pylint: disable=broad-except
-                    poutput.print_and_log(f"{project.name}: {exception}", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
+                except Exception as exception: # pylint: disable = broad-except
+                    poutput.print_and_log(f"{project.name}: {exception}", indents = pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
 
-        except Exception as exception: # pylint: disable=broad-except
+        except Exception as exception: # pylint: disable = broad-except
             poutput.print_and_log(f"{solution.name}: {exception}", colors = pconsole.ERROR_COLORS)
 
     if valid_project_count:
@@ -243,14 +243,14 @@ try:
     poutput.print_and_log("Projects to build:")
 
     for project in projects_to_build:
-        poutput.print_and_log(project.name, indents=pstring.LEVELED_INDENTS[1])
+        poutput.print_and_log(project.name, indents = pstring.LEVELED_INDENTS[1])
 
     plogging.flush()
 
     # Incremented at the end of EVERY iteration to avoid restoring the same packages repeatedly.
     # Restoration is automatically executed by SOME of the .NET commands; not all.
     # "build" is almost always the first command we choose, effectively ensuring the first restoration is executed.
-    iteration_count = 0 # pylint: disable=invalid-name
+    iteration_count = 0 # pylint: disable = invalid-name
 
     while True:
         try:
@@ -272,23 +272,23 @@ try:
 
                 for project in projects_to_build:
                     try:
-                        poutput.print_and_log(f"{project.name}:", indents=pstring.LEVELED_INDENTS[1])
-                        no_restore = iteration_count >= 1 # pylint: disable=invalid-name
-                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.build(no_restore), indents=pstring.LEVELED_INDENTS[2]))
+                        poutput.print_and_log(f"{project.name}:", indents = pstring.LEVELED_INDENTS[1])
+                        no_restore = iteration_count >= 1 # pylint: disable = invalid-name
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.build(no_restore), indents = pstring.LEVELED_INDENTS[2]))
 
-                    except Exception as exception: # pylint: disable=broad-except
-                        poutput.print_and_log(f"{exception}", indents=pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
+                    except Exception as exception: # pylint: disable = broad-except
+                        poutput.print_and_log(f"{exception}", indents = pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
 
             elif choice == "2":
                 poutput.print_and_log("Updating NuGet packages...", colors = pconsole.IMPORTANT_COLORS)
 
                 for project in projects_to_build:
                     try:
-                        poutput.print_and_log(f"{project.name}:", indents=pstring.LEVELED_INDENTS[1])
-                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.update_nuget_packages(), indents=pstring.LEVELED_INDENTS[2]))
+                        poutput.print_and_log(f"{project.name}:", indents = pstring.LEVELED_INDENTS[1])
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.update_nuget_packages(), indents = pstring.LEVELED_INDENTS[2]))
 
-                    except Exception as exception: # pylint: disable=broad-except
-                        poutput.print_and_log(f"{exception}", indents=pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
+                    except Exception as exception: # pylint: disable = broad-except
+                        poutput.print_and_log(f"{exception}", indents = pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
 
             elif choice == "3":
                 poutput.print_and_log("Rebuilding and archiving...", colors = pconsole.IMPORTANT_COLORS)
@@ -299,26 +299,26 @@ try:
 
                 for project in projects_to_build:
                     try:
-                        poutput.print_and_log(f"Cleaning {project.name}:", indents=pstring.LEVELED_INDENTS[1])
-                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory=False), indents=pstring.LEVELED_INDENTS[2]))
+                        poutput.print_and_log(f"Cleaning {project.name}:", indents = pstring.LEVELED_INDENTS[1])
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.clean(supported_runtimes, delete_obj_directory = False), indents = pstring.LEVELED_INDENTS[2]))
 
-                    except Exception as exception: # pylint: disable=broad-except
-                        poutput.print_and_log(f"{exception}", indents=pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
+                    except Exception as exception: # pylint: disable = broad-except
+                        poutput.print_and_log(f"{exception}", indents = pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
 
                 for project in projects_to_build:
                     try:
-                        poutput.print_and_log(f"Rebuilding and archiving {project.name}:", indents=pstring.LEVELED_INDENTS[1])
-                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents=pstring.LEVELED_INDENTS[2]))
+                        poutput.print_and_log(f"Rebuilding and archiving {project.name}:", indents = pstring.LEVELED_INDENTS[1])
+                        poutput.print_and_log(pdotnet.format_result_string_from_messages(project.rebuild_and_archive(supported_runtimes, not_archived_directory_names, not_archived_file_names), indents = pstring.LEVELED_INDENTS[2]))
 
                         # When we archive source code, usually, tests have been done and the projects can be built without issues.
                         # So, I wont be implementing one more loop to complicate the interaction.
 
                         if project.solution not in archived_solutions:
-                            poutput.print_and_log(pdotnet.format_result_string_from_messages(project.solution.archive(not_archived_directory_names, not_archived_file_names), indents=pstring.LEVELED_INDENTS[2]))
+                            poutput.print_and_log(pdotnet.format_result_string_from_messages(project.solution.archive(not_archived_directory_names, not_archived_file_names), indents = pstring.LEVELED_INDENTS[2]))
                             archived_solutions.append(project.solution)
 
-                    except Exception as exception: # pylint: disable=broad-except
-                        poutput.print_and_log(f"{exception}", indents=pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
+                    except Exception as exception: # pylint: disable = broad-except
+                        poutput.print_and_log(f"{exception}", indents = pstring.LEVELED_INDENTS[2], colors = pconsole.ERROR_COLORS)
 
             elif choice == "4":
                 print("Projects:")
@@ -336,13 +336,13 @@ try:
                     else:
                         pconsole.print("Invalid index.", colors = pconsole.WARNING_COLORS) # Not logged.
 
-                except Exception: # pylint: disable=broad-except
+                except Exception: # pylint: disable = broad-except
                     pconsole.print("Invalid input.", colors = pconsole.WARNING_COLORS)
 
             elif choice == "5":
                 break
 
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable = broad-except
             poutput.print_and_log(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
         # Within the loop, at the end of each iteration.
@@ -351,7 +351,7 @@ try:
         iteration_count += 1
 
 # If we dont specify the exception type, things such as KeyboardInterrupt and SystemExit too may be caught.
-except Exception: # pylint: disable=broad-except
+except Exception: # pylint: disable = broad-except
     poutput.print_and_log(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:

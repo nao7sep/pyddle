@@ -14,10 +14,10 @@ import pyddle_string as pstring
 # I think it's OK; it's quick, runs at negligible cost and certainly improves the usability of the log file.
 
 # Lazy loading:
-__logs_directory_path = None # pylint: disable=invalid-name
+__logs_directory_path = None # pylint: disable = invalid-name
 
 def get_logs_directory_path():
-    global __logs_directory_path # pylint: disable=global-statement
+    global __logs_directory_path # pylint: disable = global-statement
 
     if not __logs_directory_path:
         __logs_directory_path = os.path.join(ppath.dirname(pglobal.get_main_script_file_path()), "logs")
@@ -31,10 +31,10 @@ def get_logs_directory_path():
 # The following file name format is reasonable as the script file name may not contain hyphens while file name elements should be separated by hyphens.
 
 # Lazy loading:
-__log_file_path = None # pylint: disable=invalid-name
+__log_file_path = None # pylint: disable = invalid-name
 
 def get_log_file_path():
-    global __log_file_path # pylint: disable=global-statement
+    global __log_file_path # pylint: disable = global-statement
 
     if not __log_file_path:
         utc_timestamp = pdatetime.utc_to_roundtrip_file_name_string(datetime.datetime.now(datetime.UTC))
@@ -45,7 +45,7 @@ def get_log_file_path():
 
 pending_logs = []
 
-def log(str_: str, indents = "", end="\n", flush_=False):
+def log(str_: str, indents = "", end="\n", flush_ = False):
     if str_:
         pending_logs.append(f"{indents}{str_}{end}")
 
@@ -55,7 +55,7 @@ def log(str_: str, indents = "", end="\n", flush_=False):
     if flush_:
         flush()
 
-def log_lines(str_: list[str], indents = "", trailing = "", end="\n", flush_=False):
+def log_lines(str_: list[str], indents = "", trailing = "", end="\n", flush_ = False):
     if str_:
         for line in str_:
             parts = pstring.split_line_into_parts(line)
@@ -72,9 +72,9 @@ def log_lines(str_: list[str], indents = "", trailing = "", end="\n", flush_=Fal
 
 def flush():
     if pending_logs:
-        os.makedirs(get_logs_directory_path(), exist_ok=True)
+        os.makedirs(get_logs_directory_path(), exist_ok = True)
 
-        with pfs.open_file_and_write_utf_encoding_bom(get_log_file_path(), append=True) as file:
+        with pfs.open_file_and_write_utf_encoding_bom(get_log_file_path(), append = True) as file:
             for log_ in pending_logs:
                 file.write(log_)
 

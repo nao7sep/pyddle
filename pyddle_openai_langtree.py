@@ -407,7 +407,7 @@ class LangTreeMessage(LangTreeElement):
             settings=self._get_chat_settings(chat_settings),
             messages=messages,
             client=self._get_client(client),
-            stream_override=True,
+            stream_override = True,
             timeout=self._get_chunk_timeout(timeout)) # Timeout for chunks.
 
     def start_generating_message_with_context_builder(
@@ -451,7 +451,7 @@ class LangTreeMessage(LangTreeElement):
 
         return None
 
-    def get_next_message(self, sibling_first=True):
+    def get_next_message(self, sibling_first = True):
         ''' Assumes child messages at each level are ordered by "creation_utc". '''
 
         def _get_sibling():
@@ -620,7 +620,7 @@ class LangTreeTranslation(LangTreeElement):
 
     @staticmethod
     def deserialize_from_dict(dictionary):
-        language = ptype.str_to_enum_by_str_value(dictionary["language"], popenai.OpenAiLanguage, ignore_case=True)
+        language = ptype.str_to_enum_by_str_value(dictionary["language"], popenai.OpenAiLanguage, ignore_case = True)
 
         if language is None:
             language = dictionary["language"]
@@ -704,7 +704,7 @@ class LangTreeContextBuilder:
                 break
 
         # No matter how the tree structure has been built, no child is older than its parent.
-        elements.sort(key=lambda element: element.creation_utc, reverse=True)
+        elements.sort(key=lambda element: element.creation_utc, reverse = True)
 
         # Reducing the "if" statements:
 
@@ -751,10 +751,10 @@ class LangTreeContextBuilder:
             messages=messages)
 
 # Lazy loading:
-__langtree_default_context_builder = None # pylint: disable=invalid-name
+__langtree_default_context_builder = None # pylint: disable = invalid-name
 
 def get_langtree_default_context_builder():
-    global __langtree_default_context_builder # pylint: disable=global-statement
+    global __langtree_default_context_builder # pylint: disable = global-statement
 
     if __langtree_default_context_builder is None:
         __langtree_default_context_builder = LangTreeContextBuilder()
@@ -793,7 +793,7 @@ class LangTreeContext:
         return statistics
 
     @staticmethod
-    def statistics_to_lines(statistics, all_tokens=False):
+    def statistics_to_lines(statistics, all_tokens = False):
         def _get_line(role: popenai.OpenAiRole):
             number = statistics[role]["number"]
             total_tokens = statistics[role]["total_tokens"]

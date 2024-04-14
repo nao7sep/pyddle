@@ -3,7 +3,7 @@
 
 import os
 
-import pyddle_path as ppath # pylint: disable=unused-import
+import pyddle_path as ppath # pylint: disable = unused-import
 # pyddle_path is required for test_path.py.
 import pyddle_string as pstring
 
@@ -18,10 +18,10 @@ def is_debugging():
 
 def try_evaluate(code):
     try:
-        print(f"{code} => {eval(code)}") # pylint: disable=eval-used
+        print(f"{code} => {eval(code)}") # pylint: disable = eval-used
         # Needed for testing purposes.
 
-    except Exception as exception: # pylint: disable=broad-except
+    except Exception as exception: # pylint: disable = broad-except
         print(f"{code} => {exception}")
 
 # For console apps not to close immediately after execution.

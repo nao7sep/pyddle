@@ -39,7 +39,7 @@ class RepositoryInfo:
 
         # HEAD@{upstream} refers to the upstream branch of the currently checked-out branch.
         # {upstream} refers to the default remote branch associated with the local branch the user is currently on.
-        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "HEAD@{upstream}"], capture_output=True, check=False)
+        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "--symbolic-full-name", "HEAD@{upstream}"], capture_output = True, check = False)
 
         # If something is wrong like no upstream branch is configured, we just let the script crash.
         # Git is excessively complicated and a lot of things are one-time errors.
@@ -57,7 +57,7 @@ class RepositoryInfo:
         os.chdir(self.directory_path)
 
         # HEAD refers to the current branch's latest commit.
-        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output=True, check=False)
+        result = subprocess.run(["git", "rev-parse", "--abbrev-ref", "HEAD"], capture_output = True, check = False)
 
         self.__local_branch_name = result.stdout.decode("utf-8").strip()
 
@@ -79,7 +79,7 @@ class RepositoryInfo:
 
         # https://git-scm.com/docs/git-status
 
-        result = subprocess.run(["git", "status", "--porcelain"], capture_output=True, check=False)
+        result = subprocess.run(["git", "status", "--porcelain"], capture_output = True, check = False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -200,7 +200,7 @@ class RepositoryInfo:
 
         # https://git-scm.com/docs/git-stash
 
-        result = subprocess.run(["git", "stash", "list"], capture_output=True, check=False)
+        result = subprocess.run(["git", "stash", "list"], capture_output = True, check = False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -225,10 +225,10 @@ class RepositoryInfo:
         remote_name = self.remote_branch_name.split("/")[0]
 
         # Fetches updates from all branches from the specified remote.
-        result = subprocess.run(["git", "fetch", remote_name], check=False)
+        result = subprocess.run(["git", "fetch", remote_name], check = False)
 
         # Getting the commits that are on the remote branch but not in HEAD, which points to the tip of the local branch.
-        result = subprocess.run(["git", "log", f"HEAD..{self.remote_branch_name}", "--oneline"], capture_output=True, check=False)
+        result = subprocess.run(["git", "log", f"HEAD..{self.remote_branch_name}", "--oneline"], capture_output = True, check = False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -253,7 +253,7 @@ class RepositoryInfo:
         # https://git-scm.com/docs/git-log
 
         # Getting the commits that are in HEAD but not on the remote branch.
-        result = subprocess.run(["git", "log", f"{self.remote_branch_name}..HEAD", "--oneline"], capture_output=True, check=False)
+        result = subprocess.run(["git", "log", f"{self.remote_branch_name}..HEAD", "--oneline"], capture_output = True, check = False)
 
         for line in result.stdout.decode("utf-8").split("\n"):
             if not line:
@@ -317,66 +317,66 @@ try:
                 pconsole.print(f"Repository: {repository.name}")
 
                 if is_good_remote_branch_name(repository.remote_branch_name):
-                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents = pstring.LEVELED_INDENTS[1])
 
                 else:
-                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
+                    pconsole.print(f"Remote: {repository.remote_branch_name}", indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
                 if is_good_local_branch_name(repository.local_branch_name):
-                    pconsole.print(f"Local: {repository.local_branch_name}", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print(f"Local: {repository.local_branch_name}", indents = pstring.LEVELED_INDENTS[1])
 
                 else:
-                    pconsole.print(f"Local: {repository.local_branch_name}", indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
+                    pconsole.print(f"Local: {repository.local_branch_name}", indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.untracked_files:
-                    pconsole.print("Untracked files:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Untracked files:", indents = pstring.LEVELED_INDENTS[1])
 
                     for file in repository.untracked_files:
-                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(file, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.conflicted_files:
-                    pconsole.print("Conflicted files:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Conflicted files:", indents = pstring.LEVELED_INDENTS[1])
 
                     for file in repository.conflicted_files:
-                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(file, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.modified_files:
-                    pconsole.print("Modified files:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Modified files:", indents = pstring.LEVELED_INDENTS[1])
 
                     for file in repository.modified_files:
-                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(file, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.deleted_files:
-                    pconsole.print("Deleted files:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Deleted files:", indents = pstring.LEVELED_INDENTS[1])
 
                     for file in repository.deleted_files:
-                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(file, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.staged_files:
-                    pconsole.print("Staged files:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Staged files:", indents = pstring.LEVELED_INDENTS[1])
 
                     for file in repository.staged_files:
-                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(file, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.stashed_files:
-                    pconsole.print("Stashed files:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Stashed files:", indents = pstring.LEVELED_INDENTS[1])
 
                     for file in repository.stashed_files:
-                        pconsole.print(file, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(file, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.unpulled_commits:
-                    pconsole.print("Unpulled commits:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Unpulled commits:", indents = pstring.LEVELED_INDENTS[1])
 
                     for commit in repository.unpulled_commits:
-                        pconsole.print(commit, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(commit, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
                 if repository.unpushed_commits:
-                    pconsole.print("Unpushed commits:", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("Unpushed commits:", indents = pstring.LEVELED_INDENTS[1])
 
                     for commit in repository.unpushed_commits:
-                        pconsole.print(commit, indents=pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
+                        pconsole.print(commit, indents = pstring.LEVELED_INDENTS[2], colors = pconsole.IMPORTANT_COLORS)
 
-except Exception: # pylint: disable=broad-except
+except Exception: # pylint: disable = broad-except
     pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:

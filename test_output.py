@@ -31,7 +31,7 @@ poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 
 # One additional parameter.
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE, indents=pstring.LEVELED_INDENTS[1])
+poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE, indents = pstring.LEVELED_INDENTS[1])
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE, colors = pconsole.IMPORTANT_COLORS)
 poutput.print_and_log(BORDERLINE)
@@ -42,7 +42,7 @@ poutput.print_and_log("b") # Makes sure "end" was effective.
 # One pair of parameters.
 # Probably, this is the only meaningful pair.
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
+poutput.print_and_log(LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 
 # ------------------------------------------------------------------------------
 #     print_and_log_lines
@@ -71,7 +71,7 @@ poutput.print_and_log_lines(NORMALIZED_MULTILINE_LIST)
 
 # One additional parameter.
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents=pstring.LEVELED_INDENTS[1])
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1])
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, colors = pconsole.IMPORTANT_COLORS)
 poutput.print_and_log(BORDERLINE)
@@ -85,15 +85,15 @@ poutput.print_and_log("b") # Makes sure "end" was effective.
 # One pair of parameters.
 # 2nd-3rd, 2nd-4th, 3rd-4th only.
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS)
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents=pstring.LEVELED_INDENTS[1], trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 poutput.print_and_log(BORDERLINE)
 poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, colors = pconsole.IMPORTANT_COLORS, trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 
 # 3 parameters.
 poutput.print_and_log(BORDERLINE)
-poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS, trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
+poutput.print_and_log_lines(MULTILINE_LIST_WITH_REDUNDANT_LINES, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.IMPORTANT_COLORS, trailing=LINE_WITH_INDENTS_AND_TRAILING_WHITESPACE)
 
 plogging.flush()
 

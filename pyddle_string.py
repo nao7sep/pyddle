@@ -345,8 +345,8 @@ def last_index_of_any_casefold(str_, substrings):
 #     because there's a high chance that the developer is doing something wrong.
 # Like, startswith(None, "a") is most likely not an intended operation.
 
-def splitlines(str_: str, trim_line_start=False, trim_line_end=True,
-               remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
+def splitlines(str_: str, trim_line_start = False, trim_line_end = True,
+               remove_empty_lines_at_start = True, remove_redundant_empty_lines = True, remove_empty_lines_at_end = True):
     ''' Splits a multiline string into lines and normalizes them. '''
 
     if not str_:
@@ -360,8 +360,8 @@ def splitlines(str_: str, trim_line_start=False, trim_line_end=True,
 # As Python doesnt have C#'s StringBuilder and such mechanisms may not be efficient,
 #     I expect there'll be situations where strings are built line by line.
 
-def normalize_lines(lines: list[str], trim_line_start=False, trim_line_end=True,
-               remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
+def normalize_lines(lines: list[str], trim_line_start = False, trim_line_end = True,
+               remove_empty_lines_at_start = True, remove_redundant_empty_lines = True, remove_empty_lines_at_end = True):
     ''' Normalizes a list of lines by trimming them and removing empty lines. '''
 
     if not lines:
@@ -420,8 +420,8 @@ def normalize_lines(lines: list[str], trim_line_start=False, trim_line_end=True,
 
     return new_lines
 
-def normalize_multiline_str(str_, trim_line_start=False, trim_line_end=True,
-                            remove_empty_lines_at_start=True, remove_redundant_empty_lines=True, remove_empty_lines_at_end=True):
+def normalize_multiline_str(str_, trim_line_start = False, trim_line_end = True,
+                            remove_empty_lines_at_start = True, remove_redundant_empty_lines = True, remove_empty_lines_at_end = True):
     ''' Splits a multiline string into lines, normalizes them and joins them back. '''
 
     if not str_:
@@ -473,7 +473,7 @@ COMPILED_REGEX_FOR_NORMALIZE_SINGLELINE_STR = re.compile(r"\s+")
 
 # Use this method only in cases where normalizing mid-string whitespace increases security significantly.
 
-def normalize_singleline_str(str_, trim_start=True, remove_redundant_whitespace_chars=True, trim_end=True):
+def normalize_singleline_str(str_, trim_start = True, remove_redundant_whitespace_chars = True, trim_end = True):
     ''' Call me only if you really need me. Otherwise, call "strip" instead. '''
 
     if not str_:
@@ -565,7 +565,7 @@ class ChunkStrReader:
         if chunk:
             self.chunks.append(chunk)
 
-    def read_str(self, force=False):
+    def read_str(self, force = False):
         # If no chunk contains a line break char, it would be a singleline string when joined.
 
         for chunk_index, chunk in enumerate(self.chunks):

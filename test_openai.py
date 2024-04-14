@@ -132,7 +132,7 @@ def compare_original_and_translated_texts():
     print("Text comparison results:")
 
     for line in pstring.splitlines(comparison_text):
-        pconsole.print(line, indents=pstring.LEVELED_INDENTS[1])
+        pconsole.print(line, indents = pstring.LEVELED_INDENTS[1])
 
 def test_chat():
     # Converse to get 3 different household tools.
@@ -170,7 +170,7 @@ def test_chat():
         print(f"Tool {index + 1}:")
 
         for line in pstring.splitlines(different_tool_answers[index]):
-            pconsole.print(line, indents=pstring.LEVELED_INDENTS[1])
+            pconsole.print(line, indents = pstring.LEVELED_INDENTS[1])
 
     # Summarizes the answers.
 
@@ -209,7 +209,7 @@ def test_chat():
         print(f"Tool {index + 1} summary:")
 
         for line in pstring.splitlines(summarization_answers[index]):
-            pconsole.print(line, indents=pstring.LEVELED_INDENTS[1])
+            pconsole.print(line, indents = pstring.LEVELED_INDENTS[1])
 
     # Asks to select the most suitable tool based on the summaries.
 
@@ -228,7 +228,7 @@ def test_chat():
     suitable_tool_response = openai.openai_chat_completions_create(
         model=openai.OpenAiModel.GPT_4_TURBO,
         messages=messages,
-        stream=True)
+        stream = True)
 
     # Displays the chunks as they come in.
 
@@ -238,7 +238,7 @@ def test_chat():
 
     chunk_models = []
 
-    for chunk in suitable_tool_response: # pylint: disable=not-an-iterable
+    for chunk in suitable_tool_response: # pylint: disable = not-an-iterable
         # The internally called method returns ChatCompletion or Stream[ChatCompletionChunk] depending on "stream".
         # Iterating over the response object is correct:
         # https://cookbook.openai.com/examples/how_to_stream_completions
@@ -302,7 +302,7 @@ def test_images_and_vision():
     print("Image prompts:")
 
     for index, prompt in enumerate(image_generation_prompts):
-        pconsole.print(f"Prompt {index + 1}: {prompt}", indents=pstring.LEVELED_INDENTS[1])
+        pconsole.print(f"Prompt {index + 1}: {prompt}", indents = pstring.LEVELED_INDENTS[1])
 
     # Generates images from the prompts.
 
@@ -427,7 +427,7 @@ def test_images_and_vision():
         print(f"Vision results for image {index + 1}:")
 
         for line in pstring.splitlines(vision_each_image_answers[index]):
-            pconsole.print(line, indents=pstring.LEVELED_INDENTS[1])
+            pconsole.print(line, indents = pstring.LEVELED_INDENTS[1])
 
     # Asks Vision about 3 images at once.
 
@@ -451,7 +451,7 @@ def test_images_and_vision():
     print("Vision results for all images:")
 
     for line in pstring.splitlines(vision_all_images_answer):
-        pconsole.print(line, indents=pstring.LEVELED_INDENTS[1])
+        pconsole.print(line, indents = pstring.LEVELED_INDENTS[1])
 
 # ------------------------------------------------------------------------------
 #     Tests
@@ -468,7 +468,7 @@ try:
 
     test_images_and_vision()
 
-except Exception: # pylint: disable=broad-except
+except Exception: # pylint: disable = broad-except
     pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:

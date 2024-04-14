@@ -80,7 +80,7 @@ def deserialize_task(task_data):
         task_data["times_per_week"],
         # Enum objects should be represented as integers in databases,
         #     but in text files, I believe strings would be more user-friendly.
-        ptype.str_to_enum_by_name(task_data["result"], enum_type=TaskResult, ignore_case=True) if task_data["result"] is not None else None)
+        ptype.str_to_enum_by_name(task_data["result"], enum_type=TaskResult, ignore_case = True) if task_data["result"] is not None else None)
 
 class TaskList:
     def __init__(self, file_path, backups):
@@ -95,7 +95,7 @@ class TaskList:
                 self.tasks = [deserialize_task(task_data) for task_data in data_from_json]
 
     def save(self):
-        json_string = json.dumps(self.tasks, ensure_ascii=False, indent=4, default=serialize_task)
+        json_string = json.dumps(self.tasks, ensure_ascii = False, indent=4, default=serialize_task)
 
         pfs.create_parent_directory(self.file_path)
         pfs.write_all_text_to_file(self.file_path, json_string)
@@ -117,7 +117,7 @@ class TaskList:
 
                 connection.commit()
 
-    def create_task(self, task_, no_save=False):
+    def create_task(self, task_, no_save = False):
         self.tasks.append(task_)
 
         if not no_save:
@@ -191,7 +191,7 @@ def generate_sample_data(handled_task_list_, task_list_):
     for content, times_per_week in tasks:
         # As the goal of the sample data is to test the app's "stat" command,
         #     trivial attributes such as creation_utc and is_active are not randomized here.
-        task_list_.create_task(TaskInfo(uuid.uuid4(), pdatetime.get_utc_now(), None, True, True, content, times_per_week, None), no_save=True)
+        task_list_.create_task(TaskInfo(uuid.uuid4(), pdatetime.get_utc_now(), None, True, True, content, times_per_week, None), no_save = True)
 
     task_list_.save()
 
@@ -246,7 +246,7 @@ def generate_sample_data(handled_task_list_, task_list_):
             else:
                 handled_task_.result = TaskResult.CHECKED
 
-            handled_task_list_.create_task(handled_task_, no_save=True)
+            handled_task_list_.create_task(handled_task_, no_save = True)
 
     handled_task_list_.save()
 
@@ -301,7 +301,7 @@ def parse_command_str(command_str_):
 
                 return match.group("command"), number_, parameter_str
 
-            except Exception: # pylint: disable=broad-except
+            except Exception: # pylint: disable = broad-except
                 pass
 
         else:
@@ -397,7 +397,7 @@ def show_statistics(handled_task_list_, task_list_, days):
         statistics[index_] = (task_, execution_count_, last_done_utc, completion_rate)
 
     # Sorting by completion_rate.
-    statistics = sorted(statistics, key=lambda x: x[3], reverse=True)
+    statistics = sorted(statistics, key=lambda x: x[3], reverse = True)
 
     if days:
         pconsole.print(f"Past {days} days:")
@@ -408,7 +408,7 @@ def show_statistics(handled_task_list_, task_list_, days):
     # This could be checked a few blocks earlier,
     #     but the statistics are unavailable only in the beginning.
     if not statistics:
-        pconsole.print("No data available.", indents=pstring.LEVELED_INDENTS[1])
+        pconsole.print("No data available.", indents = pstring.LEVELED_INDENTS[1])
         return
 
     for task_, execution_count_, last_done_utc, completion_rate in statistics:
@@ -437,13 +437,13 @@ def show_statistics(handled_task_list_, task_list_, days):
         output_str = f"{task_.content}, {completion_rate}%{past_time_string}"
 
         if completion_rate >= (200 / 3):
-            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1])
+            pconsole.print(output_str, indents = pstring.LEVELED_INDENTS[1])
 
         elif completion_rate >= (100 / 3):
-            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.WARNING_COLORS)
+            pconsole.print(output_str, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.WARNING_COLORS)
 
         else:
-            pconsole.print(output_str, indents=pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
+            pconsole.print(output_str, indents = pstring.LEVELED_INDENTS[1], colors = pconsole.ERROR_COLORS)
 
 # ------------------------------------------------------------------------------
 #     Application
@@ -469,7 +469,7 @@ try:
 
     pconsole.print("Type 'help' for a list of commands.")
 
-    shows_all_next_time = False # pylint: disable=invalid-name
+    shows_all_next_time = False # pylint: disable = invalid-name
 
     while True:
         try:
@@ -483,9 +483,9 @@ try:
                         execution_count = execution_counts[task.guid]
 
                     else:
-                        execution_count = 0 # pylint: disable=invalid-name
+                        execution_count = 0 # pylint: disable = invalid-name
 
-                    additional_info = "" # pylint: disable=invalid-name
+                    additional_info = "" # pylint: disable = invalid-name
 
                     if not task.is_active:
                         additional_info += ", inactive"
@@ -496,9 +496,9 @@ try:
                     if execution_count >= task.times_per_week:
                         additional_info += ", good"
 
-                    pconsole.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print(f"{index + 1}. {task.content} ({execution_count}/{task.times_per_week}{additional_info})", indents = pstring.LEVELED_INDENTS[1])
 
-            shows_all_next_time = False # pylint: disable=invalid-name
+            shows_all_next_time = False # pylint: disable = invalid-name
 
             pconsole.print("Command", colors = pconsole.IMPORTANT_COLORS, end = "")
             command_str = input(": ")
@@ -507,24 +507,24 @@ try:
 
             if pstring.equals_ignore_case(command, "help"):
                 pconsole.print("Commands:")
-                pconsole.print("help", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("help", indents = pstring.LEVELED_INDENTS[1])
 
                 if pdebugging.is_debugging():
-                    pconsole.print("sample => Generates sample data.", indents=pstring.LEVELED_INDENTS[1])
+                    pconsole.print("sample => Generates sample data.", indents = pstring.LEVELED_INDENTS[1])
 
-                pconsole.print("create <times_per_week> <content>", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("all => Shows all tasks including inactive/hidden ones.", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("done <task_number> => Means you have done it.", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("activate <task_number>", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("show <task_number>", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("content <task_number> <content>", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("times <task_number> <times_per_week>", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("stat (<days>) => Uses all data if no number is provided.", indents=pstring.LEVELED_INDENTS[1])
-                pconsole.print("exit", indents=pstring.LEVELED_INDENTS[1])
+                pconsole.print("create <times_per_week> <content>", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("all => Shows all tasks including inactive/hidden ones.", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("done <task_number> => Means you have done it.", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("check <task_number> => Means you have at least acknowledged it, which can be good enough.", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("deactivate <task_number> => Hides the task permanently; until you activate it again.", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("activate <task_number>", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("hide <task_number> => Hides the task temporarily; until you show it again or restart the app.", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("show <task_number>", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("content <task_number> <content>", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("times <task_number> <times_per_week>", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("delete <task_number> confirm => Use deactivate instead unless you have a reason for this destructive operation.", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("stat (<days>) => Uses all data if no number is provided.", indents = pstring.LEVELED_INDENTS[1])
+                pconsole.print("exit", indents = pstring.LEVELED_INDENTS[1])
                 continue
 
             elif pdebugging.is_debugging() and pstring.equals_ignore_case(command, "sample"):
@@ -537,7 +537,7 @@ try:
                     continue
 
             elif pstring.equals_ignore_case(command, "all"):
-                shows_all_next_time = True # pylint: disable=invalid-name
+                shows_all_next_time = True # pylint: disable = invalid-name
                 continue
 
             elif pstring.equals_ignore_case(command, "done"):
@@ -609,7 +609,7 @@ try:
                         task_list.update_task(task)
                         continue
 
-                    except Exception: # pylint: disable=broad-except
+                    except Exception: # pylint: disable = broad-except
                         pass
 
             elif pstring.equals_ignore_case(command, "delete"):
@@ -644,10 +644,10 @@ try:
             if command_str:
                 pconsole.print("Invalid command string.", colors = pconsole.ERROR_COLORS)
 
-        except Exception: # pylint: disable=broad-except
+        except Exception: # pylint: disable = broad-except
             pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
-except Exception: # pylint: disable=broad-except
+except Exception: # pylint: disable = broad-except
     pconsole.print(traceback.format_exc(), colors = pconsole.ERROR_COLORS)
 
 finally:
