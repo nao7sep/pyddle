@@ -25,17 +25,17 @@ try:
 
     KVS_KEY_PREFIX = "build_changed_projects/"
 
-    repositories_directory_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}repositories_directory_path")
+    repositories_directory_path = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}repositories_directory_path")
     poutput.print_and_log(f"repositories_directory_path: {repositories_directory_path}")
 
-    archives_directory_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}archives_directory_path")
+    archives_directory_path = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}archives_directory_path")
     poutput.print_and_log(f"archives_directory_path: {archives_directory_path}")
 
     # A neutral character that is rarely used in solution/project names.
     VALUE_SEPARATOR = "|"
 
     ignored_directory_names = []
-    ignored_directory_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}ignored_directory_names")
+    ignored_directory_names_string = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}ignored_directory_names")
 
     if ignored_directory_names_string:
         ignored_directory_names = [value.strip() for value in ignored_directory_names_string.split(VALUE_SEPARATOR) if value.strip()]
@@ -44,7 +44,7 @@ try:
             poutput.print_and_log(f"ignored_directory_names: {ignored_directory_names}")
 
     obsolete_solution_names = []
-    obsolete_solution_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}obsolete_solution_names")
+    obsolete_solution_names_string = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}obsolete_solution_names")
 
     if obsolete_solution_names_string:
         obsolete_solution_names = [value.strip() for value in obsolete_solution_names_string.split(VALUE_SEPARATOR) if value.strip()]
@@ -53,7 +53,7 @@ try:
             poutput.print_and_log(f"obsolete_solution_names: {obsolete_solution_names}")
 
     supported_runtimes = []
-    supported_runtimes_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}supported_runtimes")
+    supported_runtimes_string = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}supported_runtimes")
 
     if supported_runtimes_string:
         supported_runtimes = [value.strip() for value in supported_runtimes_string.split(VALUE_SEPARATOR) if value.strip()]
@@ -62,7 +62,7 @@ try:
             poutput.print_and_log(f"supported_runtimes: {supported_runtimes}")
 
     not_archived_directory_names = []
-    not_archived_directory_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}not_archived_directory_names")
+    not_archived_directory_names_string = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}not_archived_directory_names")
 
     if not_archived_directory_names_string:
         not_archived_directory_names = [value.strip() for value in not_archived_directory_names_string.split(VALUE_SEPARATOR) if value.strip()]
@@ -71,7 +71,7 @@ try:
             poutput.print_and_log(f"not_archived_directory_names: {not_archived_directory_names}")
 
     not_archived_file_names = []
-    not_archived_file_names_string = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}not_archived_file_names")
+    not_archived_file_names_string = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}not_archived_file_names")
 
     if not_archived_file_names_string:
         not_archived_file_names = [value.strip() for value in not_archived_file_names_string.split(VALUE_SEPARATOR) if value.strip()]

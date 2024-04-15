@@ -439,13 +439,13 @@ def show_statistics(handled_task_list_, task_list_, days):
 try:
     KVS_KEY_PREFIX = "low_priority_queue/"
 
-    tasks_file_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}tasks_file_path")
+    tasks_file_path = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}tasks_file_path")
     pconsole.print(f"tasks_file_path: {tasks_file_path}")
 
-    handled_tasks_file_path = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}handled_tasks_file_path")
+    handled_tasks_file_path = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}handled_tasks_file_path")
     pconsole.print(f"handled_tasks_file_path: {handled_tasks_file_path}")
 
-    backups_task_lists = pkvs.read_from_merged_kvs_data(f"{KVS_KEY_PREFIX}backups_task_lists")
+    backups_task_lists = pkvs.read_from_merged_data(f"{KVS_KEY_PREFIX}backups_task_lists")
     pconsole.print(f"backups_task_lists: {backups_task_lists}")
 
     task_list = TaskList(tasks_file_path, backups_task_lists)

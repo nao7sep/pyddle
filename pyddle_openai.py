@@ -83,7 +83,7 @@ def get_default_connection_settings():
 
     if __default_connection_settings is None:
         __default_connection_settings = ConnectionSettings(
-            kvs_data = pkvs.get_merged_kvs_data(),
+            kvs_data = pkvs.get_merged_data(),
             kvs_key_prefix = KVS_KEY_PREFIX)
 
     return __default_connection_settings
