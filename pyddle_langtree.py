@@ -32,13 +32,13 @@ class LangTreeElement:
 
         # Required, nullable (but not encouraged), can be empty:
         self.attributes: dict[str, LangTreeAttribute] = {}
-        self.translations: dict[popenai.OpenAiLanguage | str, LangTreeTranslation] = {}
+        self.translations: dict[popenai.Language | str, LangTreeTranslation] = {}
         # These should be dictionaries for performance.
         # Dictionary keys and their corresponding values' internal keys must match.
 
         # Optional:
         self.client: openai.OpenAI | None = None
-        self.chat_settings: popenai.OpenAiChatSettings | None = None
+        self.chat_settings: popenai.ChatSettings | None = None
         self.timeout = None
 
     def get_root_element(self):
@@ -65,7 +65,7 @@ class LangTreeElement:
 
         return attribute
 
-    def create_translation(self, language: popenai.OpenAiLanguage | str, content):
+    def create_translation(self, language: popenai.Language | str, content):
         translation = LangTreeTranslation(
             language = language,
             content = content)
@@ -83,13 +83,13 @@ class LangTreeElement:
 
     def _get_client(self, client: openai.OpenAI | None):
         return putility.get_not_none_or_call_func(
-            popenai.get_openai_default_client,
+            popenai.get_default_client,
             client,
             self.client)
 
-    def _get_chat_settings(self, chat_settings: popenai.OpenAiChatSettings | None):
+    def _get_chat_settings(self, chat_settings: popenai.ChatSettings | None):
         return putility.get_not_none_or_call_func(
-            popenai.get_openai_default_chat_settings,
+            popenai.get_default_chat_settings,
             chat_settings,
             self.chat_settings)
 
@@ -112,36 +112,36 @@ class LangTreeElement:
         prompt,
 
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
-        response = popenai.openai_chat_completions_create_with_settings(
+        response = popenai.create_chat_completions_with_settings(
             settings = self._get_chat_settings(chat_settings),
-            messages = popenai.openai_build_messages(prompt),
+            messages = popenai.build_messages(prompt),
             client = self._get_client(client),
             timeout = self._get_response_timeout(timeout))
 
-        value = popenai.openai_extract_first_message(response)
+        value = popenai.extract_first_message(response)
 
         return self.create_attribute(name, value)
 
     def generate_translation_with_prompt(
         self,
 
-        language: popenai.OpenAiLanguage | str,
+        language: popenai.Language | str,
         prompt,
 
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
-        response = popenai.openai_chat_completions_create_with_settings(
+        response = popenai.create_chat_completions_with_settings(
             settings = self._get_chat_settings(chat_settings),
-            messages = popenai.openai_build_messages(prompt),
+            messages = popenai.build_messages(prompt),
             client = self._get_client(client),
             timeout = self._get_response_timeout(timeout))
 
-        content = popenai.openai_extract_first_message(response)
+        content = popenai.extract_first_message(response)
 
         return self.create_translation(language, content)
 
@@ -237,7 +237,7 @@ class LangTreeMessage(LangTreeElement):
         self,
 
         # "user_name" is optional.
-        user_role: popenai.OpenAiRole,
+        user_role: popenai.Role,
         content,
 
         guid = None,
@@ -251,7 +251,7 @@ class LangTreeMessage(LangTreeElement):
         self.user_name = None
 
         # Required, not nullable:
-        self.user_role: popenai.OpenAiRole = user_role
+        self.user_role: popenai.Role = user_role
         self.content = content
 
         # Optional, nullable, not serialized:
@@ -264,7 +264,7 @@ class LangTreeMessage(LangTreeElement):
 
     def create_child_message(
         self,
-        user_role: popenai.OpenAiRole,
+        user_role: popenai.Role,
         content,
         user_name = None):
 
@@ -291,28 +291,28 @@ class LangTreeMessage(LangTreeElement):
         self,
         messages,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         ''' Consider using "generate_sibling_message_with_messages" instead. '''
 
-        response = popenai.openai_chat_completions_create_with_settings(
+        response = popenai.create_chat_completions_with_settings(
             settings = self._get_chat_settings(chat_settings),
             messages = messages,
             client = self._get_client(client),
             timeout = self._get_response_timeout(timeout))
 
-        content = popenai.openai_extract_first_message(response)
+        content = popenai.extract_first_message(response)
 
         return self.create_child_message(
-            user_role = popenai.OpenAiRole.ASSISTANT,
+            user_role = popenai.Role.ASSISTANT,
             content = content)
 
     def generate_child_message_with_context_builder(
         self,
         context_builder: LangTreeContextBuilder,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         ''' Consider using "generate_sibling_message_with_context_builder" instead. '''
@@ -327,7 +327,7 @@ class LangTreeMessage(LangTreeElement):
     def generate_child_message(
         self,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         ''' Consider using "generate_sibling_message" instead. '''
@@ -341,7 +341,7 @@ class LangTreeMessage(LangTreeElement):
 
     def create_sibling_message(
         self,
-        user_role: popenai.OpenAiRole,
+        user_role: popenai.Role,
         content,
         user_name = None):
 
@@ -357,7 +357,7 @@ class LangTreeMessage(LangTreeElement):
         self,
         messages,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
@@ -372,7 +372,7 @@ class LangTreeMessage(LangTreeElement):
         self,
         context_builder: LangTreeContextBuilder,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
@@ -386,7 +386,7 @@ class LangTreeMessage(LangTreeElement):
     def generate_sibling_message(
         self,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
@@ -401,10 +401,10 @@ class LangTreeMessage(LangTreeElement):
         self,
         messages,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
-        return popenai.openai_chat_completions_create_with_settings(
+        return popenai.create_chat_completions_with_settings(
             settings = self._get_chat_settings(chat_settings),
             messages = messages,
             client = self._get_client(client),
@@ -415,7 +415,7 @@ class LangTreeMessage(LangTreeElement):
         self,
         context_builder: LangTreeContextBuilder,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         return self.start_generating_message_with_messages(
@@ -428,7 +428,7 @@ class LangTreeMessage(LangTreeElement):
     def start_generating_message(
         self,
         client: openai.OpenAI | None = None,
-        chat_settings: popenai.OpenAiChatSettings | None = None,
+        chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
 
         return self.start_generating_message_with_context_builder(
@@ -508,7 +508,7 @@ class LangTreeMessage(LangTreeElement):
     @staticmethod
     def deserialize_from_dict(dictionary):
         message = LangTreeMessage(
-            user_role = popenai.OpenAiRole(dictionary["user_role"]),
+            user_role = popenai.Role(dictionary["user_role"]),
             content = dictionary["content"],
 
             guid = uuid.UUID(dictionary["guid"]),
@@ -585,7 +585,7 @@ class LangTreeTranslation(LangTreeElement):
     def __init__(
         self,
 
-        language: popenai.OpenAiLanguage | str,
+        language: popenai.Language | str,
         content,
 
         guid = None,
@@ -596,7 +596,7 @@ class LangTreeTranslation(LangTreeElement):
             creation_utc = creation_utc)
 
         # Required, not nullable:
-        self.language: popenai.OpenAiLanguage | str = language
+        self.language: popenai.Language | str = language
         self.content = content
 
         # Optional, nullable, not serialized:
@@ -605,7 +605,7 @@ class LangTreeTranslation(LangTreeElement):
 
     @property
     def language_str(self):
-        if isinstance(self.language, popenai.OpenAiLanguage):
+        if isinstance(self.language, popenai.Language):
             return self.language.value
 
         return self.language
@@ -625,7 +625,7 @@ class LangTreeTranslation(LangTreeElement):
 
     @staticmethod
     def deserialize_from_dict(dictionary):
-        language = ptype.str_to_enum_by_str_value(dictionary["language"], popenai.OpenAiLanguage, ignore_case = True)
+        language = ptype.str_to_enum_by_str_value(dictionary["language"], popenai.Language, ignore_case = True)
 
         if language is None:
             language = dictionary["language"]
@@ -670,16 +670,16 @@ class LangTreeContextBuilder:
         # Optional:
         self.token_counter = None
 
-    def _get_token_counter(self, token_counter: popenai.OpenAiTokenCounter | None):
+    def _get_token_counter(self, token_counter: popenai.TokenCounter | None):
         return putility.get_not_none_or_call_func(
-            popenai.get_openai_default_token_counter,
+            popenai.get_default_token_counter,
             token_counter,
             self.token_counter)
 
     def build(
         self,
         message: LangTreeMessage,
-        token_counter: popenai.OpenAiTokenCounter | None = None) -> LangTreeContext:
+        token_counter: popenai.TokenCounter | None = None) -> LangTreeContext:
 
         # All younger siblings and the root element.
         elements = []
@@ -727,13 +727,13 @@ class LangTreeContextBuilder:
         token_counter_to_use = self._get_token_counter(token_counter)
 
         for element in elements:
-            if element.user_role == popenai.OpenAiRole.SYSTEM:
+            if element.user_role == popenai.Role.SYSTEM:
                 index = 0
 
-            elif element.user_role == popenai.OpenAiRole.USER:
+            elif element.user_role == popenai.Role.USER:
                 index = 1
 
-            elif element.user_role == popenai.OpenAiRole.ASSISTANT:
+            elif element.user_role == popenai.Role.ASSISTANT:
                 index = 2
 
             else:
@@ -751,7 +751,7 @@ class LangTreeContextBuilder:
 
         elements_to_include.sort(key = lambda element: element.creation_utc)
 
-        messages = [popenai.openai_build_message(role = element.user_role, content = element.content, name = element.user_name) for element in elements_to_include]
+        messages = [popenai.create_message(role = element.user_role, content = element.content, name = element.user_name) for element in elements_to_include]
 
         return LangTreeContext(
             elements = elements_to_include,
@@ -778,13 +778,13 @@ class LangTreeContext:
         self.elements = elements
         self.messages = messages
 
-    def get_elements_by_role(self, role: popenai.OpenAiRole):
+    def get_elements_by_role(self, role: popenai.Role):
         return [element for element in self.elements if element.user_role == role]
 
     def get_statistics(self):
         statistics = {}
 
-        def _add(role: popenai.OpenAiRole):
+        def _add(role: popenai.Role):
             elements = self.get_elements_by_role(role)
 
             statistics[role] = {
@@ -793,15 +793,15 @@ class LangTreeContext:
                 "tokens": [element.token_count for element in elements]
             }
 
-        _add(popenai.OpenAiRole.SYSTEM)
-        _add(popenai.OpenAiRole.USER)
-        _add(popenai.OpenAiRole.ASSISTANT)
+        _add(popenai.Role.SYSTEM)
+        _add(popenai.Role.USER)
+        _add(popenai.Role.ASSISTANT)
 
         return statistics
 
     @staticmethod
     def statistics_to_lines(statistics, all_tokens = False):
-        def _get_line(role: popenai.OpenAiRole):
+        def _get_line(role: popenai.Role):
             number = statistics[role]["number"]
             total_tokens = statistics[role]["total_tokens"]
 
@@ -814,7 +814,7 @@ class LangTreeContext:
                 return f"{role.value.capitalize()}: {number} messages ({total_tokens} tokens)"
 
         return [
-            _get_line(popenai.OpenAiRole.SYSTEM),
-            _get_line(popenai.OpenAiRole.USER),
-            _get_line(popenai.OpenAiRole.ASSISTANT)
+            _get_line(popenai.Role.SYSTEM),
+            _get_line(popenai.Role.USER),
+            _get_line(popenai.Role.ASSISTANT)
         ]

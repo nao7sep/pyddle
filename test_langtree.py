@@ -12,9 +12,9 @@ import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
+import pyddle_langtree as plangtree
 import pyddle_logging as plogging
 import pyddle_openai as popenai
-import pyddle_langtree as plangtree
 import pyddle_string as pstring
 
 pglobal.set_main_script_file_path(__file__)
@@ -23,13 +23,13 @@ pglobal.set_main_script_file_path(__file__)
 JAPANESE_TRANSLATION_PROMPT = "Translate the following text into Japanese:"
 RUSSIAN_TRANSLATION_PROMPT = "Translate the following text into Russian:"
 
-def translate(element: plangtree.LangTreeMessage, language: popenai.OpenAiLanguage):
-    client = popenai.create_openai_client()
+def translate(element: plangtree.LangTreeMessage, language: popenai.Language):
+    client = popenai.create_client()
 
-    if language == popenai.OpenAiLanguage.JAPANESE:
+    if language == popenai.Language.JAPANESE:
         prompt = JAPANESE_TRANSLATION_PROMPT
 
-    elif language == popenai.OpenAiLanguage.RUSSIAN:
+    elif language == popenai.Language.RUSSIAN:
         prompt = RUSSIAN_TRANSLATION_PROMPT
 
     else:
@@ -40,7 +40,7 @@ def translate(element: plangtree.LangTreeMessage, language: popenai.OpenAiLangua
         prompt = f"{prompt}\n\n{element.content}",
         client = client)
 
-def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role: popenai.OpenAiRole, content: str):
+def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role: popenai.Role, content: str):
     if element is None:
         new_current_message = plangtree.LangTreeMessage(user_role = user_role, content = content)
 
@@ -49,13 +49,13 @@ def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role:
 
     # System messages arent translated.
 
-    if user_role == popenai.OpenAiRole.USER:
+    if user_role == popenai.Role.USER:
         # Comments: SH77 langtree-related Comments.json
 
-        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.JAPANESE)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.Language.JAPANESE)))
         threads[-1].start()
 
-        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.RUSSIAN)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.Language.RUSSIAN)))
         threads[-1].start()
 
         context_builder = plangtree.get_langtree_default_context_builder()
@@ -81,7 +81,7 @@ def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role:
         pconsole.print("Response:")
 
         for chunk in response:
-            chunk_delta = popenai.openai_extract_first_delta(chunk)
+            chunk_delta = popenai.extract_first_delta(chunk)
 
             if chunk_delta:
                 chunk_deltas.append(chunk_delta)
@@ -102,13 +102,13 @@ def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role:
         plogging.log(f"[Response]\n{content}", end = "\n\n", flush_ = True)
 
         new_current_message = new_current_message.create_sibling_message(
-            user_role = popenai.OpenAiRole.ASSISTANT,
+            user_role = popenai.Role.ASSISTANT,
             content = content)
 
-        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.JAPANESE)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.Language.JAPANESE)))
         threads[-1].start()
 
-        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.OpenAiLanguage.RUSSIAN)))
+        threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.Language.RUSSIAN)))
         threads[-1].start()
 
     return new_current_message
@@ -149,7 +149,7 @@ try:
 
         else:
             if pstring.equals_ignore_case(command.command, "system"):
-                current_message = create_sibling_message(current_message, popenai.OpenAiRole.SYSTEM, command.get_remaining_args_as_str(0))
+                current_message = create_sibling_message(current_message, popenai.Role.SYSTEM, command.get_remaining_args_as_str(0))
                 _save()
 
             elif pstring.equals_ignore_case(command.command, "delete") and len(command.args) == 0:
@@ -183,7 +183,7 @@ try:
                 break
 
             else:
-                current_message = create_sibling_message(current_message, popenai.OpenAiRole.USER, command_str)
+                current_message = create_sibling_message(current_message, popenai.Role.USER, command_str)
                 _save()
 
     # If at least one thread has become a zombie, this operation might not end.

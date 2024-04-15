@@ -24,11 +24,11 @@ ENGLISH_TEXT_FOR_AUDIO = "Hello, my name is Pyddle. I am a Python library for cr
 def test_audio():
     # Makes audio.
 
-    audio_response = openai.openai_audio_speech_create(
+    audio_response = openai.create_audio_speech(
         input_ = ENGLISH_TEXT_FOR_AUDIO,
-        model = openai.OpenAiModel.TTS_1_HD,
-        voice = openai.OpenAiVoice.NOVA,
-        response_format = openai.OpenAiAudioFormat.MP3)
+        model = openai.Model.TTS_1_HD,
+        voice = openai.Voice.NOVA,
+        response_format = openai.AudioFormat.MP3)
 
     # Saves the audio to a file.
 
@@ -38,10 +38,10 @@ def test_audio():
 
     # Transcribes the audio file.
 
-    transcription = openai.openai_audio_transcriptions_create(
+    transcription = openai.create_audio_transcription(
         file_path = audio_file_name,
-        model = openai.OpenAiModel.WHISPER_1,
-        response_format = openai.OpenAiTranscriptFormat.VERBOSE_JSON)
+        model = openai.Model.WHISPER_1,
+        response_format = openai.TranscriptFormat.VERBOSE_JSON)
 
     # Saves the transcription to a file.
 
@@ -57,9 +57,9 @@ def test_audio():
     # Translate the transcription into Japanese.
     # We'll use Chat here, but Chat will be tested later.
 
-    translated_transcription_response = openai.openai_chat_completions_create(
-        model = openai.OpenAiModel.GPT_4_TURBO,
-        messages = openai.openai_build_messages(
+    translated_transcription_response = openai.create_chat_completions(
+        model = openai.Model.GPT_4_TURBO,
+        messages = openai.build_messages(
             # Based on my comments, GitHub Copilot generated this.
             user_message = f"Translate the following text into Japanese: {transcription.text}"))
 
@@ -72,16 +72,16 @@ def test_audio():
 
     # Displays the translated transcription.
 
-    translated_transcription_text = openai.openai_extract_first_message(translated_transcription_response)
+    translated_transcription_text = openai.extract_first_message(translated_transcription_response)
     print(f"Japanese translation by Chat: {translated_transcription_text}")
 
     # Makes new audio from the translated transcription.
 
-    translated_audio_response = openai.openai_audio_speech_create(
+    translated_audio_response = openai.create_audio_speech(
         input_ = translated_transcription_text,
-        model = openai.OpenAiModel.TTS_1_HD,
-        voice = openai.OpenAiVoice.ALLOY,
-        response_format = openai.OpenAiAudioFormat.MP3)
+        model = openai.Model.TTS_1_HD,
+        voice = openai.Voice.ALLOY,
+        response_format = openai.AudioFormat.MP3)
 
     # Saves the translated audio to a file.
 
@@ -91,10 +91,10 @@ def test_audio():
 
     # Translates the new audio file.
 
-    translation = openai.openai_audio_translations_create(
+    translation = openai.create_audio_translation(
         file_path = translated_audio_file_name,
-        model = openai.OpenAiModel.WHISPER_1,
-        response_format = openai.OpenAiTranscriptFormat.VERBOSE_JSON)
+        model = openai.Model.WHISPER_1,
+        response_format = openai.TranscriptFormat.VERBOSE_JSON)
 
     # Saves the translation to a file.
 
@@ -114,9 +114,9 @@ def compare_original_and_translated_texts():
 
     # Compare the text:
 
-    comparison_response = openai.openai_chat_completions_create(
-        model = openai.OpenAiModel.GPT_4_TURBO,
-        messages = openai.openai_build_messages(f"Compare the following texts:\n\n{ENGLISH_TEXT_FOR_AUDIO}\n\n {translation_text}"))
+    comparison_response = openai.create_chat_completions(
+        model = openai.Model.GPT_4_TURBO,
+        messages = openai.build_messages(f"Compare the following texts:\n\n{ENGLISH_TEXT_FOR_AUDIO}\n\n {translation_text}"))
 
     # Saves the comparison results to a file.
 
@@ -127,7 +127,7 @@ def compare_original_and_translated_texts():
 
     # Displays the comparison results.
 
-    comparison_text = openai.openai_extract_first_message(comparison_response)
+    comparison_text = openai.extract_first_message(comparison_response)
 
     print("Text comparison results:")
 
@@ -140,21 +140,21 @@ def test_chat():
     messages: list[dict[str, str]] = []
 
     common_system_message = "No affirmative interjections such as 'certainly'."
-    openai.openai_add_system_message(messages, common_system_message)
+    openai.add_system_message(messages, common_system_message)
 
     different_tool_prompt = "Talk about one household tool we havent discussed yet."
     different_tool_responses = []
     different_tool_answers = []
 
     for index in range(3):
-        openai.openai_add_user_message(messages, different_tool_prompt)
+        openai.add_user_message(messages, different_tool_prompt)
 
-        different_tool_responses.append(openai.openai_chat_completions_create(
-            model = openai.OpenAiModel.GPT_4_TURBO,
+        different_tool_responses.append(openai.create_chat_completions(
+            model = openai.Model.GPT_4_TURBO,
             messages = messages))
 
-        different_tool_answers.append(openai.openai_extract_first_message(different_tool_responses[index]))
-        openai.openai_add_assistant_message(messages, different_tool_answers[index])
+        different_tool_answers.append(openai.extract_first_message(different_tool_responses[index]))
+        openai.add_assistant_message(messages, different_tool_answers[index])
 
     # Saves the responses to files.
 
@@ -176,23 +176,23 @@ def test_chat():
 
     messages = []
 
-    openai.openai_add_system_message(messages, common_system_message)
+    openai.add_system_message(messages, common_system_message)
 
     summarization_responses = []
     summarization_answers = []
 
     for index in range(3):
         summarization_prompt = f"Summarize the following text: {different_tool_answers[index]}"
-        openai.openai_add_user_message(messages, summarization_prompt)
+        openai.add_user_message(messages, summarization_prompt)
 
-        summarization_responses.append(openai.openai_chat_completions_create(
-            model = openai.OpenAiModel.GPT_4_TURBO,
+        summarization_responses.append(openai.create_chat_completions(
+            model = openai.Model.GPT_4_TURBO,
             messages = messages,
             max_tokens = 100)) # Limited length.
             # As a result, the summaries will be incomplete.
             # "finish_reason" will be set to "length".
 
-        summarization_answers.append(openai.openai_extract_first_message(summarization_responses[index]))
+        summarization_answers.append(openai.extract_first_message(summarization_responses[index]))
         messages.pop()
 
     # Saves the summarization responses to files.
@@ -215,18 +215,18 @@ def test_chat():
 
     messages = []
 
-    openai.openai_add_system_message(messages, common_system_message)
+    openai.add_system_message(messages, common_system_message)
 
     for index in range(3):
-        openai.openai_add_user_message(messages, different_tool_prompt)
+        openai.add_user_message(messages, different_tool_prompt)
         # Sometimes, the summary is focused on the speaker's intention rather than the content, but it works just fine.
-        openai.openai_add_assistant_message(messages, summarization_answers[index])
+        openai.add_assistant_message(messages, summarization_answers[index])
 
     suitable_tool_prompt = "Out of the 3, which tool would be most suitable for a picnic and why?"
-    openai.openai_add_user_message(messages, suitable_tool_prompt)
+    openai.add_user_message(messages, suitable_tool_prompt)
 
-    suitable_tool_response = openai.openai_chat_completions_create(
-        model = openai.OpenAiModel.GPT_4_TURBO,
+    suitable_tool_response = openai.create_chat_completions(
+        model = openai.Model.GPT_4_TURBO,
         messages = messages,
         stream = True)
 
@@ -284,9 +284,9 @@ def test_chat():
 def test_images_and_vision():
     # Asks for 3 random prompts for image generation.
 
-    prompt_generation_response = openai.openai_chat_completions_create(
-        model = openai.OpenAiModel.GPT_4_TURBO,
-        messages = openai.openai_build_messages(
+    prompt_generation_response = openai.create_chat_completions(
+        model = openai.Model.GPT_4_TURBO,
+        messages = openai.build_messages(
             # Generated by ChatGPT:
             user_message = "Craft three unique prompts for image generation, each on a separate line without leading numbers or indentation, and no trailing white space."))
 
@@ -295,7 +295,7 @@ def test_images_and_vision():
     pfs.write_all_text_to_file(prompt_generation_file_name, prompt_generation_json)
     print(f"Image prompts saved to: {prompt_generation_file_name}")
 
-    prompt_generation_answer = openai.openai_extract_first_message(prompt_generation_response)
+    prompt_generation_answer = openai.extract_first_message(prompt_generation_response)
     # Sometimes, I still get 5 lines containing 3 prompts and 2 empty lines.
     image_generation_prompts = [line for line in pstring.splitlines(prompt_generation_answer) if line]
 
@@ -310,14 +310,14 @@ def test_images_and_vision():
     image_generation_file_names = []
 
     for index in range(3):
-        image_generation_responses.append(openai.openai_images_generate(
-            model = openai.OpenAiModel.DALL_E_3,
+        image_generation_responses.append(openai.generate_images(
+            model = openai.Model.DALL_E_3,
             prompt = image_generation_prompts[index],
-            quality = openai.OpenAiImageQuality.HD))
+            quality = openai.ImageQuality.HD))
             # => The default size (1024x1024) will be applied.
 
         image_generation_file_names.append(f"test_openai_image_{index + 1}.png")
-        openai.openai_save_images(image_generation_file_names[index], image_generation_responses[index])
+        openai.save_images(image_generation_file_names[index], image_generation_responses[index])
         print(f"Image {index + 1} saved to: {image_generation_file_names[index]}")
 
     # Generates RGBA images, masking certain areas for editing.
@@ -382,14 +382,14 @@ def test_images_and_vision():
     edited_image_file_names = []
 
     for index in range(3):
-        image_editing_responses.append(openai.openai_images_edit(
+        image_editing_responses.append(openai.edit_image(
             input_file_path = masked_image_file_names[index],
-            model = openai.OpenAiModel.DALL_E_2,
+            model = openai.Model.DALL_E_2,
             # Generated by ChatGPT:
             prompt = "Using the context provided by the unmasked portions of the image, completely reimagine and recreate the content within the masked area to blend seamlessly and coherently with its surroundings."))
 
         edited_image_file_names.append(masked_image_file_names[index].replace("_masked.png", "_edited.png"))
-        openai.openai_save_images(edited_image_file_names[index], image_editing_responses[index])
+        openai.save_images(edited_image_file_names[index], image_editing_responses[index])
         print(f"Edited image {index + 1} saved to: {edited_image_file_names[index]}")
 
     # Generates variations.
@@ -397,12 +397,12 @@ def test_images_and_vision():
     image_variation_responses = []
 
     for index in range(3):
-        image_variation_responses.append(openai.openai_images_create_variation(
+        image_variation_responses.append(openai.create_image_variations(
             input_file_path = image_generation_file_names[index],
-            model = openai.OpenAiModel.DALL_E_2))
+            model = openai.Model.DALL_E_2))
 
         variation_file_name = image_generation_file_names[index].replace(".png", "_variation.png")
-        openai.openai_save_images(variation_file_name, image_variation_responses[index])
+        openai.save_images(variation_file_name, image_variation_responses[index])
         print(f"Image variation {index + 1} saved to: {variation_file_name}")
 
     # Asks Vision about each image.
@@ -411,9 +411,9 @@ def test_images_and_vision():
     vision_each_image_answers = []
 
     for index in range(3):
-        vision_each_image_responses.append(openai.openai_chat_completions_create(
-            model = openai.OpenAiModel.GPT_4_VISION,
-            messages = openai.openai_build_messages_for_vision(
+        vision_each_image_responses.append(openai.create_chat_completions(
+            model = openai.Model.GPT_4_VISION,
+            messages = openai.build_messages_for_vision(
                 image_file_paths = [image_generation_file_names[index]],
                 user_message = "What do you see in this image?")))
 
@@ -422,7 +422,7 @@ def test_images_and_vision():
         pfs.write_all_text_to_file(vision_each_image_file_name, vision_each_image_json)
         print(f"Vision results for image {index + 1} saved to: {vision_each_image_file_name}")
 
-        vision_each_image_answers.append(openai.openai_extract_first_message(vision_each_image_responses[index]))
+        vision_each_image_answers.append(openai.extract_first_message(vision_each_image_responses[index]))
 
         print(f"Vision results for image {index + 1}:")
 
@@ -431,9 +431,9 @@ def test_images_and_vision():
 
     # Asks Vision about 3 images at once.
 
-    vision_all_images_response = openai.openai_chat_completions_create(
-        model = openai.OpenAiModel.GPT_4_VISION,
-        messages = openai.openai_build_messages_for_vision(
+    vision_all_images_response = openai.create_chat_completions(
+        model = openai.Model.GPT_4_VISION,
+        messages = openai.build_messages_for_vision(
             image_file_paths = image_generation_file_names,
             user_message = "What do you find in common among these images?"))
             # => I once got a response like: I'm sorry, I can't help with identifying or making assumptions about these images.
@@ -443,7 +443,7 @@ def test_images_and_vision():
     pfs.write_all_text_to_file(vision_all_images_file_name, vision_all_images_json)
     print(f"Vision results for all images saved to: {vision_all_images_file_name}")
 
-    vision_all_images_answer = openai.openai_extract_first_message(vision_all_images_response)
+    vision_all_images_answer = openai.extract_first_message(vision_all_images_response)
 
     # Added: I've implemented multiline output after the results have been saved.
     # New results would look slightly different from the old ones.

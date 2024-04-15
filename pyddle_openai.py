@@ -19,9 +19,6 @@ import pyddle_path as ppath
 import pyddle_utility as putility
 import pyddle_web as pweb
 
-# This script contains some one-liners.
-# I will keep their names simple and stupid because I might want to add more later.
-
 # ------------------------------------------------------------------------------
 #     Constants
 # ------------------------------------------------------------------------------
@@ -39,7 +36,7 @@ KVS_KEY_PREFIX = "pyddle_openai/"
 # https://platform.openai.com/docs/api-reference
 # https://platform.openai.com/docs/guides/production-best-practices
 
-class OpenAiSettings:
+class ConnectionSettings:
     def __init__(self, kvs_data, kvs_key_prefix):
         self.kvs_data = kvs_data
         self.kvs_key_prefix = kvs_key_prefix
@@ -79,17 +76,17 @@ class OpenAiSettings:
         return self.__base_url
 
 # Lazy loading:
-__openai_default_settings: OpenAiSettings | None = None # pylint: disable = invalid-name
+__default_connection_settings: ConnectionSettings | None = None # pylint: disable = invalid-name
 
-def get_openai_default_settings():
-    global __openai_default_settings # pylint: disable = global-statement
+def get_default_connection_settings():
+    global __default_connection_settings # pylint: disable = global-statement
 
-    if __openai_default_settings is None:
-        __openai_default_settings = OpenAiSettings(
+    if __default_connection_settings is None:
+        __default_connection_settings = ConnectionSettings(
             kvs_data = pkvs.get_merged_kvs_data(),
             kvs_key_prefix = KVS_KEY_PREFIX)
 
-    return __openai_default_settings
+    return __default_connection_settings
 
 # ------------------------------------------------------------------------------
 #     Models
@@ -97,7 +94,7 @@ def get_openai_default_settings():
 
 # https://platform.openai.com/docs/models
 
-class OpenAiModel(enum.Enum):
+class Model(enum.Enum):
     TTS_1 = "tts-1"
     TTS_1_HD = "tts-1-hd"
     WHISPER_1 = "whisper-1"
@@ -115,9 +112,9 @@ class OpenAiModel(enum.Enum):
 # https://github.com/openai/tiktoken
 # https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
 
-class OpenAiTokenCounter:
-    def __init__(self, model: OpenAiModel):
-        self.model: OpenAiModel = model
+class TokenCounter:
+    def __init__(self, model: Model):
+        self.model: Model = model
         self.__encoding: tiktoken.Encoding | None = None
 
     @property
@@ -146,73 +143,73 @@ class OpenAiTokenCounter:
         return [self.encoding.decode_single_token_bytes(token).decode("utf-8") for token in self.encode(str_)]
 
 # Lazy loading:
-__gpt_3_5_turbo_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
+__gpt_3_5_turbo_token_counter: TokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_3_5_turbo_token_counter():
     global __gpt_3_5_turbo_token_counter # pylint: disable = global-statement
 
     if __gpt_3_5_turbo_token_counter is None:
-        __gpt_3_5_turbo_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_3_5_TURBO)
+        __gpt_3_5_turbo_token_counter = TokenCounter(model = Model.GPT_3_5_TURBO)
 
     return __gpt_3_5_turbo_token_counter
 
 # Lazy loading:
-__gpt_4_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
+__gpt_4_token_counter: TokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_4_token_counter():
     global __gpt_4_token_counter # pylint: disable = global-statement
 
     if __gpt_4_token_counter is None:
-        __gpt_4_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_4)
+        __gpt_4_token_counter = TokenCounter(model = Model.GPT_4)
 
     return __gpt_4_token_counter
 
 # Lazy loading:
-__gpt_4_turbo_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
+__gpt_4_turbo_token_counter: TokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_4_turbo_token_counter():
     global __gpt_4_turbo_token_counter # pylint: disable = global-statement
 
     if __gpt_4_turbo_token_counter is None:
-        __gpt_4_turbo_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_4_TURBO)
+        __gpt_4_turbo_token_counter = TokenCounter(model = Model.GPT_4_TURBO)
 
     return __gpt_4_turbo_token_counter
 
 # Lazy loading:
 # May be unnecessary.
-__gpt_4_vision_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
+__gpt_4_vision_token_counter: TokenCounter | None = None # pylint: disable = invalid-name
 
 def get_gpt_4_vision_token_counter():
     global __gpt_4_vision_token_counter # pylint: disable = global-statement
 
     if __gpt_4_vision_token_counter is None:
-        __gpt_4_vision_token_counter = OpenAiTokenCounter(model = OpenAiModel.GPT_4_VISION)
+        __gpt_4_vision_token_counter = TokenCounter(model = Model.GPT_4_VISION)
 
     return __gpt_4_vision_token_counter
 
 # Lazy loading:
-__openai_default_token_counter: OpenAiTokenCounter | None = None # pylint: disable = invalid-name
+__default_token_counter: TokenCounter | None = None # pylint: disable = invalid-name
 
-def get_openai_default_token_counter():
-    global __openai_default_token_counter # pylint: disable = global-statement
+def get_default_token_counter():
+    global __default_token_counter # pylint: disable = global-statement
 
-    if __openai_default_token_counter is None:
-        if DEFAULT_GPT_MODEL == OpenAiModel.GPT_3_5_TURBO:
-            __openai_default_token_counter = get_gpt_3_5_turbo_token_counter()
+    if __default_token_counter is None:
+        if DEFAULT_GPT_MODEL == Model.GPT_3_5_TURBO:
+            __default_token_counter = get_gpt_3_5_turbo_token_counter()
 
-        elif DEFAULT_GPT_MODEL == OpenAiModel.GPT_4:
-            __openai_default_token_counter = get_gpt_4_token_counter()
+        elif DEFAULT_GPT_MODEL == Model.GPT_4:
+            __default_token_counter = get_gpt_4_token_counter()
 
-        elif DEFAULT_GPT_MODEL == OpenAiModel.GPT_4_TURBO:
-            __openai_default_token_counter = get_gpt_4_turbo_token_counter()
+        elif DEFAULT_GPT_MODEL == Model.GPT_4_TURBO:
+            __default_token_counter = get_gpt_4_turbo_token_counter()
 
-        elif DEFAULT_GPT_MODEL == OpenAiModel.GPT_4_VISION:
-            __openai_default_token_counter = get_gpt_4_vision_token_counter()
+        elif DEFAULT_GPT_MODEL == Model.GPT_4_VISION:
+            __default_token_counter = get_gpt_4_vision_token_counter()
 
         else:
             raise RuntimeError(f"Unsupported model: {DEFAULT_GPT_MODEL}")
 
-    return __openai_default_token_counter
+    return __default_token_counter
 
 # ------------------------------------------------------------------------------
 #     Clients
@@ -220,17 +217,17 @@ def get_openai_default_token_counter():
 
 # https://github.com/openai/openai-python/blob/main/src/openai/_client.py
 
-def create_openai_client(api_key = None, organization = None, base_url = None, timeout = None):
-    ''' If the arguments are falsy and cant be retrieved from "get_openai_default_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
+def create_client(api_key = None, organization = None, base_url = None, timeout = None):
+    ''' If the arguments are falsy and cant be retrieved from "get_default_connection_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
 
     if not api_key:
-        api_key = get_openai_default_settings().api_key
+        api_key = get_default_connection_settings().api_key
 
     if not organization:
-        organization = get_openai_default_settings().organization
+        organization = get_default_connection_settings().organization
 
     if not base_url:
-        base_url = get_openai_default_settings().base_url
+        base_url = get_default_connection_settings().base_url
 
     args = pcollections.PotentiallyFalsyArgs()
     args.may_contain("api_key", api_key)
@@ -247,15 +244,15 @@ def create_openai_client(api_key = None, organization = None, base_url = None, t
     return openai.OpenAI(**args.args)
 
 # Lazy loading:
-__openai_default_client: openai.OpenAI | None = None # pylint: disable = invalid-name
+__default_client: openai.OpenAI | None = None # pylint: disable = invalid-name
 
-def get_openai_default_client():
-    global __openai_default_client # pylint: disable = global-statement
+def get_default_client():
+    global __default_client # pylint: disable = global-statement
 
-    if __openai_default_client is None:
-        __openai_default_client = create_openai_client()
+    if __default_client is None:
+        __default_client = create_client()
 
-    return __openai_default_client
+    return __default_client
 
 # ------------------------------------------------------------------------------
 #     Text to speech
@@ -266,7 +263,7 @@ def get_openai_default_client():
 # https://github.com/openai/openai-python/blob/main/examples/audio.py
 # https://github.com/openai/openai-python/blob/main/src/openai/resources/audio/speech.py
 
-class OpenAiVoice(enum.Enum):
+class Voice(enum.Enum):
     ALLOY = "alloy"
     ECHO = "echo"
     FABLE = "fable"
@@ -274,7 +271,7 @@ class OpenAiVoice(enum.Enum):
     ONYX = "onyx"
     SHIMMER = "shimmer"
 
-class OpenAiAudioFormat(enum.Enum):
+class AudioFormat(enum.Enum):
     AAC = "aac"
     FLAC = "flac"
     MP3 = "mp3"
@@ -282,14 +279,14 @@ class OpenAiAudioFormat(enum.Enum):
     PCM = "pcm"
     WAV = "wav"
 
-def openai_audio_speech_create(
+def create_audio_speech(
     # Input:
     input_,
 
     # Parameters:
-    model: OpenAiModel,
-    voice: OpenAiVoice,
-    response_format: OpenAiAudioFormat, # Defaults to "mp3" in the API, but the user should specify one.
+    model: Model,
+    voice: Voice,
+    response_format: AudioFormat, # Defaults to "mp3" in the API, but the user should specify one.
     # Based on the audio format, the user also has to choose the right file extension.
 
     # Optional parameters:
@@ -318,7 +315,7 @@ def openai_audio_speech_create(
 
     # "create" returns HttpxBinaryResponseContent.
     # https://github.com/openai/openai-python/blob/main/src/openai/_legacy_response.py
-    return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.speech.create(**args.args) # pylint: disable = missing-kwoa
+    return putility.get_not_none_or_call_func(get_default_client, client).audio.speech.create(**args.args) # pylint: disable = missing-kwoa
 
 def openai_save_audio(file_path, response):
     pfs.create_parent_directory(file_path)
@@ -345,7 +342,7 @@ def openai_save_audio(file_path, response):
 
 # The rest of the comments have become "episodic" and been moved to: RK32 OpenAI Supported Languages.json
 
-class OpenAiLanguage(enum.Enum):
+class Language(enum.Enum):
     AFRIKAANS = "afrikaans"
     ARABIC = "arabic"
     ARMENIAN = "armenian"
@@ -404,20 +401,20 @@ class OpenAiLanguage(enum.Enum):
     VIETNAMESE = "vietnamese"
     WELSH = "welsh"
 
-class OpenAiTranscriptFormat(enum.Enum):
+class TranscriptFormat(enum.Enum):
     JSON = "json"
     SRT = "srt"
     TEXT = "text"
     VERBOSE_JSON = "verbose_json"
     VTT = "vtt"
 
-def openai_audio_transcriptions_create(
+def create_audio_transcription(
     # Input:
     file_path,
 
     # Parameters:
-    model: OpenAiModel,
-    response_format: OpenAiTranscriptFormat,
+    model: Model,
+    response_format: TranscriptFormat,
 
     # Optional parameters:
     language = None,
@@ -444,17 +441,17 @@ def openai_audio_transcriptions_create(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.transcriptions.create(**args.args) # pylint: disable = missing-kwoa
+        return putility.get_not_none_or_call_func(get_default_client, client).audio.transcriptions.create(**args.args) # pylint: disable = missing-kwoa
 
-def openai_audio_translations_create(
+def create_audio_translation(
     # Input:
     file_path,
 
     # Parameters:
-    model: OpenAiModel,
+    model: Model,
     # Using the same enum type.
     # Audio translation is basically transcription + translation.
-    response_format: OpenAiTranscriptFormat,
+    response_format: TranscriptFormat,
 
     # Optional parameters:
     prompt = None,
@@ -477,7 +474,7 @@ def openai_audio_translations_create(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        return putility.get_not_none_or_call_func(get_openai_default_client, client).audio.translations.create(**args.args) # pylint: disable = missing-kwoa
+        return putility.get_not_none_or_call_func(get_default_client, client).audio.translations.create(**args.args) # pylint: disable = missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Chat
@@ -491,18 +488,18 @@ def openai_audio_translations_create(
 # Just like assistants, they must be useful in certain situations, but I currently dont need them.
 # https://platform.openai.com/docs/api-reference/assistants
 
-class OpenAiRole(enum.Enum):
+class Role(enum.Enum):
     ASSISTANT = "assistant"
     SYSTEM = "system"
     USER = "user"
 
-class OpenAiChatFormat(enum.Enum):
+class ChatFormat(enum.Enum):
     JSON_OBJECT = "json_object"
     TEXT = "text"
 
-def openai_chat_completions_create(
+def create_chat_completions(
     # Parameters:
-    model: OpenAiModel,
+    model: Model,
     messages,
 
     # Optional parameters:
@@ -514,7 +511,7 @@ def openai_chat_completions_create(
     max_tokens = None,
     n = None,
     presence_penalty = None,
-    response_format: OpenAiChatFormat | None = None,
+    response_format: ChatFormat | None = None,
     seed = None,
     stop = None,
     stream = None,
@@ -553,11 +550,11 @@ def openai_chat_completions_create(
         if stream:
             args.must_contain("timeout", httpx.Timeout(timeout = pweb.DEFAULT_TIMEOUT, read = DEFAULT_CHUNK_TIMEOUT))
 
-    return putility.get_not_none_or_call_func(get_openai_default_client, client).chat.completions.create(**args.args)
+    return putility.get_not_none_or_call_func(get_default_client, client).chat.completions.create(**args.args)
 
-class OpenAiChatSettings:
-    def __init__(self, model: OpenAiModel):
-        self.model: OpenAiModel = model
+class ChatSettings:
+    def __init__(self, model: Model):
+        self.model: Model = model
 
         # Optional:
         self.frequency_penalty = None
@@ -567,7 +564,7 @@ class OpenAiChatSettings:
         self.max_tokens = None
         self.n = None
         self.presence_penalty = None
-        self.response_format: OpenAiChatFormat | None = None
+        self.response_format: ChatFormat | None = None
         self.seed = None
         self.stop = None
         self.stream = None
@@ -584,21 +581,21 @@ class OpenAiChatSettings:
 
 # When we use a GPT model for work, we usually care about quality rather than quantity.
 
-DEFAULT_GPT_MODEL = OpenAiModel.GPT_4_TURBO
+DEFAULT_GPT_MODEL = Model.GPT_4_TURBO
 
 # Lazy loading:
-__openai_default_chat_settings: OpenAiChatSettings | None = None # pylint: disable = invalid-name
+__default_chat_settings: ChatSettings | None = None # pylint: disable = invalid-name
 
-def get_openai_default_chat_settings():
-    global __openai_default_chat_settings # pylint: disable = global-statement
+def get_default_chat_settings():
+    global __default_chat_settings # pylint: disable = global-statement
 
-    if __openai_default_chat_settings is None:
-        __openai_default_chat_settings = OpenAiChatSettings(model = DEFAULT_GPT_MODEL)
+    if __default_chat_settings is None:
+        __default_chat_settings = ChatSettings(model = DEFAULT_GPT_MODEL)
 
-    return __openai_default_chat_settings
+    return __default_chat_settings
 
-def openai_chat_completions_create_with_settings(
-    settings: OpenAiChatSettings,
+def create_chat_completions_with_settings(
+    settings: ChatSettings,
     messages,
 
     # Optional settings:
@@ -606,7 +603,7 @@ def openai_chat_completions_create_with_settings(
     stream_override = None,
     timeout = None):
 
-    return openai_chat_completions_create(
+    return create_chat_completions(
         model = settings.model,
         messages = messages,
         frequency_penalty = settings.frequency_penalty,
@@ -626,7 +623,7 @@ def openai_chat_completions_create_with_settings(
         client = client,
         timeout = timeout)
 
-def openai_build_message(role: OpenAiRole, content, name = None):
+def create_message(role: Role, content, name = None):
     message = {}
 
     if name:
@@ -638,38 +635,38 @@ def openai_build_message(role: OpenAiRole, content, name = None):
 
     return message
 
-def openai_add_message(messages, role: OpenAiRole, content, name = None):
-    messages.append(openai_build_message(role = role, content = content, name = name))
+def add_message(messages, role: Role, content, name = None):
+    messages.append(create_message(role = role, content = content, name = name))
 
-def openai_add_system_message(messages, system_message, name = None):
-    openai_add_message(messages, role = OpenAiRole.SYSTEM, content = system_message, name = name)
+def add_system_message(messages, system_message, name = None):
+    add_message(messages, role = Role.SYSTEM, content = system_message, name = name)
 
-def openai_add_user_message(messages, user_message, name = None):
-    openai_add_message(messages, role = OpenAiRole.USER, content = user_message, name = name)
+def add_user_message(messages, user_message, name = None):
+    add_message(messages, role = Role.USER, content = user_message, name = name)
 
-def openai_add_assistant_message(messages, assistant_message, name = None):
-    openai_add_message(messages, role = OpenAiRole.ASSISTANT, content = assistant_message, name = name)
+def add_assistant_message(messages, assistant_message, name = None):
+    add_message(messages, role = Role.ASSISTANT, content = assistant_message, name = name)
 
-def openai_build_messages(user_message, user_message_name = None, system_message = None, system_message_name = None):
+def build_messages(user_message, user_message_name = None, system_message = None, system_message_name = None):
     messages: list[dict[str, str]] = []
 
     if system_message:
-        openai_add_system_message(messages, system_message, system_message_name)
+        add_system_message(messages, system_message, system_message_name)
 
-    openai_add_user_message(messages, user_message, user_message_name)
+    add_user_message(messages, user_message, user_message_name)
 
     return messages
 
-def openai_extract_messages(response: openai.types.chat.ChatCompletion):
+def extract_messages(response: openai.types.chat.ChatCompletion):
     return [choice.message.content for choice in response.choices]
 
-def openai_extract_first_message(response: openai.types.chat.ChatCompletion):
+def extract_first_message(response: openai.types.chat.ChatCompletion):
     return response.choices[0].message.content
 
-def openai_extract_deltas(response: openai.types.chat.ChatCompletionChunk):
+def extract_deltas(response: openai.types.chat.ChatCompletionChunk):
     return [choice.delta.content for choice in response.choices]
 
-def openai_extract_first_delta(chunk: openai.types.chat.ChatCompletionChunk):
+def extract_first_delta(chunk: openai.types.chat.ChatCompletionChunk):
     return chunk.choices[0].delta.content
 
 # ------------------------------------------------------------------------------
@@ -678,19 +675,19 @@ def openai_extract_first_delta(chunk: openai.types.chat.ChatCompletionChunk):
 
 # https://platform.openai.com/docs/guides/vision
 
-class OpenAiVisionDetail(enum.Enum):
+class VisionDetail(enum.Enum):
     AUTO = "auto"
     HIGH = "high"
     LOW = "low"
 
-def openai_build_messages_for_vision(image_file_paths, user_message,
-                                     detail: OpenAiVisionDetail | None = None,
+def build_messages_for_vision(image_file_paths, user_message,
+                                     detail: VisionDetail | None = None,
                                      system_message = None):
     messages = []
 
     if system_message:
         messages.append({
-            "role": OpenAiRole.SYSTEM.value,
+            "role": Role.SYSTEM.value,
             "content": system_message
         })
 
@@ -721,7 +718,7 @@ def openai_build_messages_for_vision(image_file_paths, user_message,
             })
 
     messages.append({
-        "role": OpenAiRole.USER.value,
+        "role": Role.USER.value,
         "content": content
     })
 
@@ -735,11 +732,11 @@ def openai_build_messages_for_vision(image_file_paths, user_message,
 # https://platform.openai.com/docs/api-reference/images/create
 # https://github.com/openai/openai-python/blob/main/src/openai/resources/images.py
 
-class OpenAiImageQuality(enum.Enum):
+class ImageQuality(enum.Enum):
     HD = "hd"
     STANDARD = "standard"
 
-class OpenAiImageSize(enum.Enum):
+class ImageSize(enum.Enum):
     # The only way to start the names with numbers without adding meanings.
     _256X256 = "256x256"
     _512X512 = "512x512"
@@ -747,17 +744,17 @@ class OpenAiImageSize(enum.Enum):
     _1792X1024 = "1792x1024"
     _1024X1792 = "1024x1792"
 
-class OpenAiImageStyle(enum.Enum):
+class ImageStyle(enum.Enum):
     NATURAL = "natural"
     VIVID = "vivid"
 
 # Used internally.
 # It's more like how the image is returned, but I like the simplicity of the name.
-class OpenAiImageFormat(enum.Enum):
+class ImageFormat(enum.Enum):
     B64_JSON = "b64_json"
     URL = "url"
 
-def openai_save_images(file_path, response):
+def save_images(file_path, response):
     ''' Returns a list of file paths. '''
 
     file_paths = []
@@ -795,16 +792,16 @@ def openai_save_images(file_path, response):
 
     return file_paths
 
-def openai_images_generate(
+def generate_images(
     # Parameters:
-    model: OpenAiModel,
+    model: Model,
     prompt,
 
     # Optional parameters:
     n = None,
-    quality: OpenAiImageQuality | None = None,
-    size: OpenAiImageSize | None = None,
-    style: OpenAiImageStyle | None = None,
+    quality: ImageQuality | None = None,
+    size: ImageSize | None = None,
+    style: ImageStyle | None = None,
     user = None,
 
     # Optional settings:
@@ -829,9 +826,9 @@ def openai_images_generate(
 
     # This is a one-liner.
     # It takes care of saving the images as well.
-    args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
+    args.must_contain_enum_value("response_format", ImageFormat.URL)
 
-    return putility.get_not_none_or_call_func(get_openai_default_client, client).images.generate(**args.args) # pylint: disable = missing-kwoa
+    return putility.get_not_none_or_call_func(get_default_client, client).images.generate(**args.args) # pylint: disable = missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image edit
@@ -839,18 +836,18 @@ def openai_images_generate(
 
 # https://platform.openai.com/docs/api-reference/images/createEdit
 
-def openai_images_edit(
+def edit_image(
     # Input:
     input_file_path,
 
     # Parameters:
-    model: OpenAiModel,
+    model: Model,
     prompt,
 
     # Optional parameters:
     mask_file_path = None,
     n = None,
-    size: OpenAiImageSize | None = None,
+    size: ImageSize | None = None,
     user = None,
 
     # Optional settings:
@@ -873,16 +870,16 @@ def openai_images_edit(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
+        args.must_contain_enum_value("response_format", ImageFormat.URL)
 
         if mask_file_path:
             with open(mask_file_path, "rb") as mask_file:
                 args.must_contain("mask", mask_file)
 
-                return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable = missing-kwoa
+                return putility.get_not_none_or_call_func(get_default_client, client).images.edit(**args.args) # pylint: disable = missing-kwoa
 
         else:
-            return putility.get_not_none_or_call_func(get_openai_default_client, client).images.edit(**args.args) # pylint: disable = missing-kwoa
+            return putility.get_not_none_or_call_func(get_default_client, client).images.edit(**args.args) # pylint: disable = missing-kwoa
 
 # ------------------------------------------------------------------------------
 #     Create image variation
@@ -890,16 +887,16 @@ def openai_images_edit(
 
 # https://platform.openai.com/docs/api-reference/images/createVariation
 
-def openai_images_create_variation(
+def create_image_variations(
     # Input:
     input_file_path,
 
     # Parameters:
-    model: OpenAiModel,
+    model: Model,
 
     # Optional parameters:
     n = None,
-    size: OpenAiImageSize | None = None,
+    size: ImageSize | None = None,
     user = None,
 
     # Optional settings:
@@ -921,6 +918,6 @@ def openai_images_create_variation(
         if timeout:
             args.must_contain("timeout", timeout)
 
-        args.must_contain_enum_value("response_format", OpenAiImageFormat.URL)
+        args.must_contain_enum_value("response_format", ImageFormat.URL)
 
-        return putility.get_not_none_or_call_func(get_openai_default_client, client).images.create_variation(**args.args) # pylint: disable = missing-kwoa
+        return putility.get_not_none_or_call_func(get_default_client, client).images.create_variation(**args.args) # pylint: disable = missing-kwoa
