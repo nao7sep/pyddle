@@ -166,6 +166,7 @@ class LangTreeElement:
             dictionary["child_messages"] = child_messages
 
     def serialize_to_dict(self):
+        # Values will be strings and dictionaries.
         dictionary: dict[str, typing.Any] = {}
 
         # Not nullable:
@@ -347,7 +348,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Creates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            typing.cast(LangTreeMessage, self.parent_element).create_child_message(user_role = user_role, content = content, user_name = user_name)
+            return typing.cast(LangTreeMessage, self.parent_element).create_child_message(user_role = user_role, content = content, user_name = user_name)
 
         else:
             return self.create_child_message(user_role = user_role, content = content, user_name = user_name)

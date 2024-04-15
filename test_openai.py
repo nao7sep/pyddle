@@ -137,7 +137,7 @@ def compare_original_and_translated_texts():
 def test_chat():
     # Converse to get 3 different household tools.
 
-    messages: list[dict] = []
+    messages: list[dict[str, str]] = []
 
     common_system_message = "No affirmative interjections such as 'certainly'."
     openai.openai_add_system_message(messages, common_system_message)

@@ -651,7 +651,7 @@ def openai_add_assistant_message(messages, assistant_message, name = None):
     openai_add_message(messages, role = OpenAiRole.ASSISTANT, content = assistant_message, name = name)
 
 def openai_build_messages(user_message, user_message_name = None, system_message = None, system_message_name = None):
-    messages: list[dict] = []
+    messages: list[dict[str, str]] = []
 
     if system_message:
         openai_add_system_message(messages, system_message, system_message_name)
