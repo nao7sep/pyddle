@@ -13,8 +13,8 @@ import openai
 import openai.types.chat
 
 import pyddle_collections as pcollections
-import pyddle_json_based_kvs as pkvs
 import pyddle_file_system as pfs
+import pyddle_kvs as pkvs
 import pyddle_path as ppath
 import pyddle_utility as putility
 import pyddle_web as pweb

@@ -19,7 +19,7 @@ import pyddle_datetime as pdatetime
 import pyddle_debugging as pdebugging
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
-import pyddle_json_based_kvs as pkvs
+import pyddle_kvs as pkvs
 import pyddle_string as pstring
 import pyddle_type as ptype
 

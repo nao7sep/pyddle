@@ -11,7 +11,7 @@ import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
 import pyddle_dotnet as pdotnet
 import pyddle_global as pglobal
-import pyddle_json_based_kvs as pkvs
+import pyddle_kvs as pkvs
 import pyddle_logging as plogging
 import pyddle_output as poutput
 import pyddle_string as pstring
