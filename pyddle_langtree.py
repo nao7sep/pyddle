@@ -15,7 +15,7 @@ import pyddle_utility as putility
 # The comments regarding this module werent particularly "episodic",
 #     but they were moved to BX24 in SH77 langtree-related Comments.json.
 
-class LangTreeElement:
+class Element:
     def __init__(
         self,
 
@@ -28,11 +28,11 @@ class LangTreeElement:
 
         # Required, nullable:
         self.parent_element_guid = None
-        self.parent_element: LangTreeElement | None = None
+        self.parent_element: Element | None = None
 
         # Required, nullable (but not encouraged), can be empty:
-        self.attributes: dict[str, LangTreeAttribute] = {}
-        self.translations: dict[popenai.Language | str, LangTreeTranslation] = {}
+        self.attributes: dict[str, Attribute] = {}
+        self.translations: dict[popenai.Language | str, Translation] = {}
         # These should be dictionaries for performance.
         # Dictionary keys and their corresponding values' internal keys must match.
 
@@ -50,7 +50,7 @@ class LangTreeElement:
         return element
 
     def create_attribute(self, name, value):
-        attribute = LangTreeAttribute(
+        attribute = Attribute(
             name = name,
             value = value)
 
@@ -66,7 +66,7 @@ class LangTreeElement:
         return attribute
 
     def create_translation(self, language: popenai.Language | str, content):
-        translation = LangTreeTranslation(
+        translation = Translation(
             language = language,
             content = content)
 
@@ -204,7 +204,7 @@ class LangTreeElement:
 
         if "attributes" in dictionary:
             for attribute_dict in dictionary["attributes"]:
-                attribute = LangTreeAttribute.deserialize_from_dict(attribute_dict)
+                attribute = Attribute.deserialize_from_dict(attribute_dict)
 
                 # attribute.parent_element_guid = element.guid
                 attribute.parent_element = element
@@ -213,7 +213,7 @@ class LangTreeElement:
 
         if "translations" in dictionary:
             for translation_dict in dictionary["translations"]:
-                translation = LangTreeTranslation.deserialize_from_dict(translation_dict)
+                translation = Translation.deserialize_from_dict(translation_dict)
 
                 # translation.parent_element_guid = element.guid
                 translation.parent_element = element
@@ -224,15 +224,15 @@ class LangTreeElement:
 
     @staticmethod
     def deserialize_from_dict(dictionary):
-        element = LangTreeElement(
+        element = Element(
             guid = uuid.UUID(dictionary["guid"]),
             creation_utc = pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
-        LangTreeElement._deserialize_common_fields(element, dictionary)
+        Element._deserialize_common_fields(element, dictionary)
 
         return element
 
-class LangTreeMessage(LangTreeElement):
+class Message(Element):
     def __init__(
         self,
 
@@ -259,7 +259,7 @@ class LangTreeMessage(LangTreeElement):
         self.token_count: int | None = None
 
         # Required, nullable (but not encouraged), can be empty:
-        self.child_messages: list[LangTreeMessage] = []
+        self.child_messages: list[Message] = []
         # The items are loosely expected to be ordered by "creation_utc".
 
     def create_child_message(
@@ -270,7 +270,7 @@ class LangTreeMessage(LangTreeElement):
 
         ''' Consider using "create_sibling_message" instead. '''
 
-        child_message = LangTreeMessage(
+        child_message = Message(
             user_role = user_role,
             content = content)
 
@@ -310,7 +310,7 @@ class LangTreeMessage(LangTreeElement):
 
     def generate_child_message_with_context_builder(
         self,
-        context_builder: LangTreeContextBuilder,
+        context_builder: ContextBuilder,
         client: openai.OpenAI | None = None,
         chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
@@ -333,7 +333,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Consider using "generate_sibling_message" instead. '''
 
         return self.generate_child_message_with_context_builder(
-            context_builder = get_langtree_default_context_builder(),
+            context_builder = get_default_context_builder(),
 
             client = client,
             chat_settings = chat_settings,
@@ -348,7 +348,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Creates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return typing.cast(LangTreeMessage, self.parent_element).create_child_message(user_role = user_role, content = content, user_name = user_name)
+            return typing.cast(Message, self.parent_element).create_child_message(user_role = user_role, content = content, user_name = user_name)
 
         else:
             return self.create_child_message(user_role = user_role, content = content, user_name = user_name)
@@ -363,14 +363,14 @@ class LangTreeMessage(LangTreeElement):
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return typing.cast(LangTreeMessage, self.parent_element).generate_child_message_with_messages(messages, client = client, chat_settings = chat_settings, timeout = timeout)
+            return typing.cast(Message, self.parent_element).generate_child_message_with_messages(messages, client = client, chat_settings = chat_settings, timeout = timeout)
 
         else:
             return self.generate_child_message_with_messages(messages, client = client, chat_settings = chat_settings, timeout = timeout)
 
     def generate_sibling_message_with_context_builder(
         self,
-        context_builder: LangTreeContextBuilder,
+        context_builder: ContextBuilder,
         client: openai.OpenAI | None = None,
         chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
@@ -378,7 +378,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return typing.cast(LangTreeMessage, self.parent_element).generate_child_message_with_context_builder(context_builder, client = client, chat_settings = chat_settings, timeout = timeout)
+            return typing.cast(Message, self.parent_element).generate_child_message_with_context_builder(context_builder, client = client, chat_settings = chat_settings, timeout = timeout)
 
         else:
             return self.generate_child_message_with_context_builder(context_builder, client = client, chat_settings = chat_settings, timeout = timeout)
@@ -392,7 +392,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Generates the youngest sibling message at the same level regardless of which message "self" points to. '''
 
         if self.parent_element:
-            return typing.cast(LangTreeMessage, self.parent_element).generate_child_message(client = client, chat_settings = chat_settings, timeout = timeout)
+            return typing.cast(Message, self.parent_element).generate_child_message(client = client, chat_settings = chat_settings, timeout = timeout)
 
         else:
             return self.generate_child_message(client = client, chat_settings = chat_settings, timeout = timeout)
@@ -413,7 +413,7 @@ class LangTreeMessage(LangTreeElement):
 
     def start_generating_message_with_context_builder(
         self,
-        context_builder: LangTreeContextBuilder,
+        context_builder: ContextBuilder,
         client: openai.OpenAI | None = None,
         chat_settings: popenai.ChatSettings | None = None,
         timeout = None):
@@ -432,7 +432,7 @@ class LangTreeMessage(LangTreeElement):
         timeout = None):
 
         return self.start_generating_message_with_context_builder(
-            context_builder = get_langtree_default_context_builder(),
+            context_builder = get_default_context_builder(),
 
             client = client,
             chat_settings = chat_settings,
@@ -442,7 +442,7 @@ class LangTreeMessage(LangTreeElement):
         ''' Assumes child messages at each level are ordered by "creation_utc". '''
 
         if self.parent_element:
-            parent_element = typing.cast(LangTreeMessage, self.parent_element)
+            parent_element = typing.cast(Message, self.parent_element)
 
             index = parent_element.child_messages.index(self)
 
@@ -459,7 +459,7 @@ class LangTreeMessage(LangTreeElement):
 
         def _get_sibling():
             if self.parent_element:
-                parent_element = typing.cast(LangTreeMessage, self.parent_element)
+                parent_element = typing.cast(Message, self.parent_element)
 
                 index = parent_element.child_messages.index(self)
 
@@ -501,27 +501,27 @@ class LangTreeMessage(LangTreeElement):
         if self.child_messages:
             dictionary["child_messages"] = [child_message.serialize_to_dict() for child_message in sorted(self.child_messages, key = lambda child_message: child_message.creation_utc)]
 
-        LangTreeElement._update_key_order(dictionary)
+        Element._update_key_order(dictionary)
 
         return dictionary
 
     @staticmethod
     def deserialize_from_dict(dictionary):
-        message = LangTreeMessage(
+        message = Message(
             user_role = popenai.Role(dictionary["user_role"]),
             content = dictionary["content"],
 
             guid = uuid.UUID(dictionary["guid"]),
             creation_utc = pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
-        LangTreeElement._deserialize_common_fields(message, dictionary)
+        Element._deserialize_common_fields(message, dictionary)
 
         if "user_name" in dictionary:
             message.user_name = dictionary["user_name"]
 
         if "child_messages" in dictionary:
             for child_message_dict in dictionary["child_messages"]:
-                child_message = LangTreeMessage.deserialize_from_dict(child_message_dict)
+                child_message = Message.deserialize_from_dict(child_message_dict)
 
                 # child_message.parent_element_guid = message.guid
                 child_message.parent_element = message
@@ -530,7 +530,7 @@ class LangTreeMessage(LangTreeElement):
 
         return message
 
-class LangTreeAttribute(LangTreeElement):
+class Attribute(Element):
     def __init__(
         self,
 
@@ -564,24 +564,24 @@ class LangTreeAttribute(LangTreeElement):
         dictionary["value"] = self.value
         # Can be none, but the key should be present.
 
-        LangTreeElement._update_key_order(dictionary)
+        Element._update_key_order(dictionary)
 
         return dictionary
 
     @staticmethod
     def deserialize_from_dict(dictionary):
-        attribute = LangTreeAttribute(
+        attribute = Attribute(
             name = dictionary["name"],
             value = dictionary["value"],
 
             guid = uuid.UUID(dictionary["guid"]),
             creation_utc = pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
-        LangTreeElement._deserialize_common_fields(attribute, dictionary)
+        Element._deserialize_common_fields(attribute, dictionary)
 
         return attribute
 
-class LangTreeTranslation(LangTreeElement):
+class Translation(Element):
     def __init__(
         self,
 
@@ -619,7 +619,7 @@ class LangTreeTranslation(LangTreeElement):
         dictionary["language"] = self.language_str
         dictionary["content"] = self.content
 
-        LangTreeElement._update_key_order(dictionary)
+        Element._update_key_order(dictionary)
 
         return dictionary
 
@@ -630,20 +630,20 @@ class LangTreeTranslation(LangTreeElement):
         if language is None:
             language = dictionary["language"]
 
-        translation = LangTreeTranslation(
+        translation = Translation(
             language = language,
             content = dictionary["content"],
 
             guid = uuid.UUID(dictionary["guid"]),
             creation_utc = pdatetime.roundtrip_string_to_utc(dictionary["creation_utc"]))
 
-        LangTreeElement._deserialize_common_fields(translation, dictionary)
+        Element._deserialize_common_fields(translation, dictionary)
 
         return translation
 
 # Episodic comments available: SH77 langtree-related Comments.json
 
-class LangTreeContextBuilder:
+class ContextBuilder:
     def __init__(
         self,
 
@@ -678,8 +678,8 @@ class LangTreeContextBuilder:
 
     def build(
         self,
-        message: LangTreeMessage,
-        token_counter: popenai.TokenCounter | None = None) -> LangTreeContext:
+        message: Message,
+        token_counter: popenai.TokenCounter | None = None) -> Context:
 
         # All younger siblings and the root element.
         elements = []
@@ -695,7 +695,7 @@ class LangTreeContextBuilder:
             #           the search should properly go up to the root element including only what it should
 
             if element.parent_element:
-                parent_element = typing.cast(LangTreeMessage, element.parent_element)
+                parent_element = typing.cast(Message, element.parent_element)
 
                 for sibling in parent_element.child_messages:
                     if sibling.creation_utc < element.creation_utc:
@@ -753,26 +753,26 @@ class LangTreeContextBuilder:
 
         messages = [popenai.create_message(role = element.user_role, content = element.content, name = element.user_name) for element in elements_to_include]
 
-        return LangTreeContext(
+        return Context(
             elements = elements_to_include,
             messages = messages)
 
 # Lazy loading:
-__langtree_default_context_builder: LangTreeContextBuilder | None = None # pylint: disable = invalid-name
+__default_context_builder: ContextBuilder | None = None # pylint: disable = invalid-name
 
-def get_langtree_default_context_builder():
-    global __langtree_default_context_builder # pylint: disable = global-statement
+def get_default_context_builder():
+    global __default_context_builder # pylint: disable = global-statement
 
-    if __langtree_default_context_builder is None:
-        __langtree_default_context_builder = LangTreeContextBuilder()
+    if __default_context_builder is None:
+        __default_context_builder = ContextBuilder()
 
-    return __langtree_default_context_builder
+    return __default_context_builder
 
-class LangTreeContext:
+class Context:
     def __init__(
         self,
 
-        elements: list[LangTreeMessage],
+        elements: list[Message],
         messages: list[dict]):
 
         self.elements = elements

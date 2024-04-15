@@ -23,7 +23,7 @@ pglobal.set_main_script_file_path(__file__)
 JAPANESE_TRANSLATION_PROMPT = "Translate the following text into Japanese:"
 RUSSIAN_TRANSLATION_PROMPT = "Translate the following text into Russian:"
 
-def translate(element: plangtree.LangTreeMessage, language: popenai.Language):
+def translate(element: plangtree.Message, language: popenai.Language):
     client = popenai.create_client()
 
     if language == popenai.Language.JAPANESE:
@@ -40,9 +40,9 @@ def translate(element: plangtree.LangTreeMessage, language: popenai.Language):
         prompt = f"{prompt}\n\n{element.content}",
         client = client)
 
-def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role: popenai.Role, content: str):
+def create_sibling_message(element: plangtree.Message | None, user_role: popenai.Role, content: str):
     if element is None:
-        new_current_message = plangtree.LangTreeMessage(user_role = user_role, content = content)
+        new_current_message = plangtree.Message(user_role = user_role, content = content)
 
     else:
         new_current_message = element.create_sibling_message(user_role = user_role, content = content)
@@ -58,10 +58,10 @@ def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role:
         threads.append(threading.Thread(target = translate, args = (new_current_message, popenai.Language.RUSSIAN)))
         threads[-1].start()
 
-        context_builder = plangtree.get_langtree_default_context_builder()
+        context_builder = plangtree.get_default_context_builder()
         context = context_builder.build(new_current_message)
 
-        statistics_lines = plangtree.LangTreeContext.statistics_to_lines(context.get_statistics(), all_tokens = True)
+        statistics_lines = plangtree.Context.statistics_to_lines(context.get_statistics(), all_tokens = True)
 
         plogging.log("[Statistics]") # [Content Statistics] sounds a little redundant.
         plogging.log_lines(statistics_lines, indents = pstring.LEVELED_INDENTS[1])
@@ -118,12 +118,12 @@ try:
 
     JSON_FILE_PATH = "test_langtree.json"
 
-    current_message: plangtree.LangTreeMessage | None = None # pylint: disable = invalid-name
+    current_message: plangtree.Message | None = None # pylint: disable = invalid-name
 
     if os.path.isfile(JSON_FILE_PATH):
         json_file_contents = pfs.read_all_text_from_file(JSON_FILE_PATH)
         json_dictionary = json.loads(json_file_contents)
-        current_message = plangtree.LangTreeMessage.deserialize_from_dict(json_dictionary)
+        current_message = plangtree.Message.deserialize_from_dict(json_dictionary)
 
         while True:
             if current_message and current_message.child_messages:
@@ -135,7 +135,7 @@ try:
     threads: list[threading.Thread] = []
 
     def _save():
-        root_message = typing.cast(plangtree.LangTreeMessage, current_message).get_root_element()
+        root_message = typing.cast(plangtree.Message, current_message).get_root_element()
         json_str_ = json.dumps(root_message.serialize_to_dict(), ensure_ascii = False, indent = 4)
         pfs.write_all_text_to_file(JSON_FILE_PATH, json_str_)
         return json_str_
@@ -161,7 +161,7 @@ try:
                     # If not, it automatically means it's the root element, so we set it to None.
 
                     if previous_message:
-                        typing.cast(plangtree.LangTreeMessage, current_message.parent_element).child_messages.remove(current_message)
+                        typing.cast(plangtree.Message, current_message.parent_element).child_messages.remove(current_message)
                         current_message = previous_message
                         _save() # Only when the JSON file has been affected.
 
@@ -195,7 +195,7 @@ try:
     if current_message is not None:
         json_str = _save() # Saving the translations.
 
-        new_root_message = plangtree.LangTreeMessage.deserialize_from_dict(json.loads(json_str))
+        new_root_message = plangtree.Message.deserialize_from_dict(json.loads(json_str))
         new_json_str = json.dumps(new_root_message.serialize_to_dict(), ensure_ascii = False, indent = 4)
 
         colors = pconsole.IMPORTANT_COLORS if new_json_str == json_str else pconsole.ERROR_COLORS
