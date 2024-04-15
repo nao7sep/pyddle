@@ -9,11 +9,11 @@ import math
 import os
 import random
 import re
-import sqlite3
 import traceback
 import typing
 import uuid
 
+import pyddle_backup as pbackup
 import pyddle_console as pconsole
 import pyddle_datetime as pdatetime
 import pyddle_debugging as pdebugging
@@ -102,21 +102,7 @@ class TaskList:
         pfs.write_all_text_to_file(self.file_path, json_string)
 
         if self.backups:
-            root, _ = os.path.splitext(self.file_path)
-            backup_file_path = root + ".db"
-
-            with sqlite3.connect(backup_file_path) as connection:
-                cursor = connection.cursor()
-
-                cursor.execute("CREATE TABLE IF NOT EXISTS low_priority_queue_task_list_strings ("
-                                   "utc DATETIME NOT NULL, "
-                                   "string TEXT NOT NULL)")
-
-                cursor.execute("INSERT INTO low_priority_queue_task_list_strings (utc, string) "
-                                   "VALUES (?, ?)",
-                                   (pdatetime.get_utc_now().isoformat(), json_string))
-
-                connection.commit()
+            pbackup.backup("low_priority_queue", pbackup.ValueType.JSON_STR, json_string, quiet = True)
 
     def create_task(self, task_, no_save = False):
         self.tasks.append(task_)

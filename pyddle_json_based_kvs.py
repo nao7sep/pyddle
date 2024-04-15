@@ -1,12 +1,11 @@
 ﻿# Created: 2024-03-04
 # This scripts offers a simple key-value store (KVS) using JSON files.
 
-import datetime
 import json
 import os
-import sqlite3
 import typing
 
+import pyddle_backup as pbackup
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_path as ppath
@@ -161,26 +160,7 @@ def save_kvs_data_to_file(path, data):
     # Saves the data to a SQLite database file for backup purposes.
     # This is a "lucky if we have it" kind of backup.
     # It should succeed, but if it doesnt, the program shouldnt crash.
-
-    try:
-        root, _ = os.path.splitext(path)
-        db_file_path = root + ".db"
-
-        with sqlite3.connect(db_file_path) as connection:
-            cursor = connection.cursor()
-
-            cursor.execute("CREATE TABLE IF NOT EXISTS pyddle_kvs_strings ("
-                            "utc DATETIME NOT NULL, "
-                            "string TEXT NOT NULL)")
-
-            cursor.execute("INSERT INTO pyddle_kvs_strings (utc, string) "
-                            "VALUES (?, ?)",
-                            (datetime.datetime.now(datetime.UTC).isoformat(), json_string))
-
-            connection.commit()
-
-    except Exception: # pylint: disable = broad-except
-        pass
+    pbackup.backup("pyddle_kvs", pbackup.ValueType.JSON_STR, json_string, quiet = True)
 
 def save_first_kvs_data_to_file():
     save_kvs_data_to_file(get_first_kvs_file_path(), get_first_kvs_data())

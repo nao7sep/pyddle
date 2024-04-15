@@ -16,15 +16,16 @@ cursor = connection.cursor()
 
 cursor.execute("DROP TABLE IF EXISTS table1")
 
-cursor.execute("CREATE TABLE IF NOT EXISTS table1 ("
-                   "now_in_utc DATETIME NOT NULL, "
-                   "utc_string DATETIME NOT NULL, "
-                   "utc_string_as_utc DATETIME NOT NULL, "
-                   "utc_string_as_localtime DATETIME NOT NULL, "
-                   "now_in_localtime DATETIME NOT NULL, "
-                   "localtime_string DATETIME NOT NULL, "
-                   "localtime_string_as_utc DATETIME NOT NULL, "
-                   "localtime_string_as_localtime DATETIME NOT NULL)")
+cursor.execute(
+    "CREATE TABLE IF NOT EXISTS table1 ("
+        "now_in_utc DATETIME NOT NULL, "
+        "utc_string DATETIME NOT NULL, "
+        "utc_string_as_utc DATETIME NOT NULL, "
+        "utc_string_as_localtime DATETIME NOT NULL, "
+        "now_in_localtime DATETIME NOT NULL, "
+        "localtime_string DATETIME NOT NULL, "
+        "localtime_string_as_utc DATETIME NOT NULL, "
+        "localtime_string_as_localtime DATETIME NOT NULL)")
 
 utc_string = datetime.datetime.now(datetime.UTC).isoformat()
 print(f"utc_string: {utc_string}")
@@ -32,25 +33,26 @@ print(f"utc_string: {utc_string}")
 localtime_string = datetime.datetime.now().isoformat()
 print(f"localtime_string: {localtime_string}")
 
-cursor.execute("INSERT INTO table1 ("
-                   "now_in_utc, "
-                   "utc_string, "
-                   "utc_string_as_utc, "
-                   "utc_string_as_localtime, "
-                   "now_in_localtime, "
-                   "localtime_string, "
-                   "localtime_string_as_utc, "
-                   "localtime_string_as_localtime) "
-               "VALUES ("
-                   "DATETIME('now', 'utc'), "
-                   "?, "
-                   "DATETIME(?, 'utc'), "
-                   "DATETIME(?, 'localtime'), "
-                   "DATETIME('now', 'localtime'), "
-                   "?, "
-                   "DATETIME(?, 'utc'), "
-                   "DATETIME(?, 'localtime'))",
-               (utc_string, utc_string, utc_string, localtime_string, localtime_string, localtime_string))
+cursor.execute(
+    "INSERT INTO table1 ("
+        "now_in_utc, "
+        "utc_string, "
+        "utc_string_as_utc, "
+        "utc_string_as_localtime, "
+        "now_in_localtime, "
+        "localtime_string, "
+        "localtime_string_as_utc, "
+        "localtime_string_as_localtime) "
+    "VALUES ("
+        "DATETIME('now', 'utc'), "
+        "?, "
+        "DATETIME(?, 'utc'), "
+        "DATETIME(?, 'localtime'), "
+        "DATETIME('now', 'localtime'), "
+        "?, "
+        "DATETIME(?, 'utc'), "
+        "DATETIME(?, 'localtime'))",
+    (utc_string, utc_string, utc_string, localtime_string, localtime_string, localtime_string))
 
 cursor.execute("SELECT * FROM table1")
 
