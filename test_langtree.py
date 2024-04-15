@@ -1,5 +1,5 @@
 ﻿# Created: 2024-04-10
-# Tests pyddle_openai_langtree.py.
+# Tests pyddle_langtree.py.
 
 import json
 import os
@@ -14,7 +14,7 @@ import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_logging as plogging
 import pyddle_openai as popenai
-import pyddle_openai_langtree as plangtree
+import pyddle_langtree as plangtree
 import pyddle_string as pstring
 
 pglobal.set_main_script_file_path(__file__)
@@ -116,7 +116,7 @@ def create_sibling_message(element: plangtree.LangTreeMessage | None, user_role:
 try:
     pfs.make_and_move_to_output_subdirectory()
 
-    JSON_FILE_PATH = "test_openai_langtree.json"
+    JSON_FILE_PATH = "test_langtree.json"
 
     current_message: plangtree.LangTreeMessage | None = None # pylint: disable = invalid-name
 
