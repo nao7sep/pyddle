@@ -78,6 +78,7 @@ if data[0][0]: # Assuming one row with one column is returned.
 else:
     print("There's no row in table1 with a datetime value from the current year.")
 
+cursor.close()
 connection.close()
 
 pdebugging.display_press_enter_key_to_continue_if_not_debugging()

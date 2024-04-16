@@ -73,6 +73,8 @@ def backup(
 
             connection.commit()
 
+            cursor.close()
+
     except Exception: # pylint: disable = broad-except
         if not quiet:
             raise
@@ -122,4 +124,5 @@ def restore(min_utc: datetime.datetime | None = None,
             query = "SELECT * FROM pyddle_backup"
             cursor.execute(query)
 
+        # "cursor" should be closed by the context manager of the connection.
         return cursor.fetchall()

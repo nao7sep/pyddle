@@ -50,6 +50,8 @@ def delete_relevant_rows():
 
         connection.commit()
 
+        cursor.close()
+
 delete_relevant_rows()
 
 for days_ago_item in days_ago:
