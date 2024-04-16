@@ -121,11 +121,14 @@ def restore_and_print(
     else:
         pconsole.print("No data.")
 
+# Results available in: BU44 Results of test_backup.py.json
+
 restore_and_print()
 
 # We have 3 days of data.
 restore_and_print(min_utc = days_ago[1]) # Inclusively => 0, 1 days ago.
 restore_and_print(max_utc = days_ago[0]) # Exclusively => 1, 2 days ago.
+
 restore_and_print(key_ = keys[1], key_ignore_case = False)
 restore_and_print(key_ = keys[1], key_ignore_case = True)
 restore_and_print(value_type_ = pbackup.ValueType.JSON_STR)
