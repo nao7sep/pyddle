@@ -15,6 +15,10 @@ import pyddle_utility as putility
 # The comments regarding this module werent particularly "episodic",
 #     but they were moved to BX24 in SH77 langtree-related Comments.json.
 
+# Now langtree is "technically" free from the pyddle_openai module,
+#     meaning, by adding type annotations and code that utilizes isinstance,
+#     langtree should be able to work with other AI APIs.
+
 class Element:
     def __init__(
         self,

@@ -160,6 +160,10 @@ def save_data_to_file(path, data):
     # Saves the data to a SQLite database file for backup purposes.
     # This is a "lucky if we have it" kind of backup.
     # It should succeed, but if it doesnt, the program shouldnt crash.
+
+    # Both public and private data are saved to the same table with the same key.
+    # Just-in-case backups really shouldnt be complicated.
+
     pbackup.backup("pyddle_kvs", pbackup.ValueType.JSON_STR, json_string, quiet = True)
 
 def save_public_data_to_file():
