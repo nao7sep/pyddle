@@ -1,0 +1,42 @@
+﻿[
+    {
+        "command": "positive",
+        "prompt": "Please make the text nicer and more positive and friendly."
+    },
+    {
+        "command": "positive-ja",
+        "prompt": "Please make the text nicer and more positive and friendly and respond in Japanese."
+    },
+    {
+        "command": "refine",
+        "prompt": "Please refine the text."
+    },
+    {
+        "command": "refine-ja",
+        "prompt": "Please refine the text and respond in Japanese."
+    },
+    {
+        "command": "suggest",
+        "prompt": "In response to the text, please suggest ideas, improvements, etc, analyze potential risks, difficulties, etc and provide any relevant, highly advanced and actionable knowledge."
+    },
+    {
+        "command": "suggest-ja",
+        "prompt": "In response to the text, please suggest ideas, improvements, etc, analyze potential risks, difficulties, etc, provide any relevant, highly advanced and actionable knowledge and respond in Japanese."
+    },
+    {
+        "command": "translate-en",
+        "prompt": "Please translate the text into English."
+    },
+    {
+        "command": "translate-es",
+        "prompt": "Please translate the text into Spanish."
+    },
+    {
+        "command": "translate-ja",
+        "prompt": "Please translate the text into Japanese."
+    },
+    {
+        "command": "translate-ru",
+        "prompt": "Please translate the text into Russian."
+    }
+]

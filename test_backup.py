@@ -31,7 +31,7 @@ data = {
     "grades": {"Math": 90, "Science": 80, "History": 70}
 }
 
-json_str = json.dumps(data, indent=4)
+json_str = json.dumps(data, indent = 4)
 
 str_for_bytes = "Hello, bytes!" # pylint: disable = invalid-name
 str_bytes = str_for_bytes.encode("ascii") # pylint: disable = invalid-name
@@ -95,7 +95,7 @@ def restore_and_print(
 
     if argument_lines:
         pconsole.print("Arguments:")
-        pconsole.print_lines(argument_lines, indents=pstring.LEVELED_INDENTS[1])
+        pconsole.print_lines(argument_lines, indents = pstring.LEVELED_INDENTS[1])
 
     else:
         pconsole.print("No arguments.")
@@ -116,7 +116,7 @@ def restore_and_print(
 
     if data_lines:
         pconsole.print("Data:")
-        pconsole.print_lines(data_lines, indents=pstring.LEVELED_INDENTS[1])
+        pconsole.print_lines(data_lines, indents = pstring.LEVELED_INDENTS[1])
 
     else:
         pconsole.print("No data.")
