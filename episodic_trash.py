@@ -264,7 +264,7 @@ def notes_list_command(notes, depth):
             return
 
     for note in notes:
-        partial_content = pstring.splitlines(note.content)[0] # For a start, experimentally.
+        partial_content = pstring.extract_first_part(note.content)
         pconsole.print(f"{note.code} {partial_content}", indents = pstring.LEVELED_INDENTS[depth + 1])
 
         if note.notes:
