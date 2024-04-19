@@ -5,6 +5,17 @@
 # What makes this module different is that the debugging module mainly contains features that can be used even in production code
 #     while this module will mainly contain literals and things related to them that are used only in testing.
 
+# Added: 2024-04-19
+# Now pyddle is very close to production development.
+# From now on, .py files will be like:
+#     * pyddle_*.py are components of pyddle, a Python library, and must be safe and minimal as they will be in every product
+#     * testing.py could be a part of pyddle, but considering that it might eventually contain an enormous amount of literals,
+#           let's say it's a special module shared by tools but not by pyddle modules (and they never depend on it)
+#     * test code is often but not always in test_*.py
+# We have files like play_with_sqlite.py which could be test_*.py,
+#     but if I start renaming them, I might also want to reorganize the purposes and contents of test code.
+# For optimal productivity, I'm going to have to embrace the "controlled chaos" approach.
+
 # UO27 Prompt Engineering.json
 # Also, refer to the comments in pyddle_prompts.py.
 

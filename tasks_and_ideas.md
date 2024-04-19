@@ -20,7 +20,6 @@ Explained in: YH45 Project Management.json
 ## Pending
 
 * Check all C#-related files and make yyLib's specs (somewhat) consistent with pyddle's.
-* Rename pyddle_testing.py to testing.py. All (or some of) pyddle_*.py will be in products
 * Convert (some of) test_langtree.json into an HTML page. Might be interesting to some
 * Implement langtree. Should it be a web system? Flask or Django? How long will it take?
 * Implement a simple TODO web system. There are a lot of great ones, but it wont hurt to develop a simple one for educational purposes. Now my wife and I seriously need to share our parenting-related tasks
@@ -42,3 +41,4 @@ Explained in: YH45 Project Management.json
 * Make a lazy task list
 * Check all Python-related files to ensure pyddle is ready for production development
 * Ask ChatGPT about the state I might be currently entering => YH45 Project Management.json
+* Rename pyddle_testing.py to testing.py. All (or some of) pyddle_*.py will be in products
