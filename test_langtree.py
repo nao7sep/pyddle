@@ -64,7 +64,7 @@ def create_sibling_message(element: plangtree.Message | None, user_role: popenai
         statistics_lines = plangtree.Context.statistics_to_lines(context.get_statistics(), all_tokens = True)
 
         plogging.log("[Statistics]") # [Content Statistics] sounds a little redundant.
-        plogging.log_lines(statistics_lines, indents = pstring.LEVELED_INDENTS[1])
+        plogging.log_lines(statistics_lines) # Indents not required here.
         plogging.log("", flush_ = True)
 
         messages_json_str = json.dumps(context.messages, ensure_ascii = False, indent = 4)
