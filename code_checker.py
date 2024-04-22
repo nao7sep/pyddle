@@ -95,7 +95,11 @@ try:
 
         return []
 
+    # Checked code on: 2024-04-21
     CHECK_PROMPT = "Potential issues and improvements, as many and detailed as possible, please."
+
+    # Checked code on: 2024-04-22
+    CHECK_PROMPT = "Bugs, issues, logical errors and whatever that must be fixed, please. Considering the balance between the productivity of development and the quality of code, I have little intention to implement more precise error handling, singleton-based designs, less use of hardcoded literals, more efficient algorithms, etc. They surely will make my code better, but my current priority is not efficiency; as long as the code is safe, secure and stable, performance and scalability can come later. So, please tell me only what I absolutely have to fix."
 
     if not pyddle_directory_path:
         pconsole.print("pyddle_directory_path not set.", colors = pconsole.ERROR_COLORS)
