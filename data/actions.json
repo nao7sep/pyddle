@@ -16,6 +16,14 @@
         "prompt": "Please refine the text and respond in Japanese."
     },
     {
+        "command": "rephrase",
+        "prompt": "Please rephrase the text in multiple ways for educational purposes."
+    },
+    {
+        "command": "rephrase-ja",
+        "prompt": "Please rephrase the text in multiple ways and respond in Japanese for educational purposes."
+    },
+    {
         "command": "suggest",
         "prompt": "In response to the text, please suggest ideas, improvements, etc, analyze potential risks, difficulties, etc and provide any relevant, highly advanced and actionable knowledge."
     },
