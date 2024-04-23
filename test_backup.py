@@ -46,6 +46,11 @@ def delete_relevant_rows():
     with sqlite3.connect(pbackup.get_backup_file_path()) as connection:
         cursor = connection.cursor()
 
+        cursor.execute("SELECT * FROM sqlite_master WHERE type = 'table' AND name = 'pyddle_backup'")
+
+        if not cursor.fetchone():
+            return
+
         cursor.execute("DELETE FROM pyddle_backup WHERE key IN (?, ?, ?)", keys)
 
         connection.commit()

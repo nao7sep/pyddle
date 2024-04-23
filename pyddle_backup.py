@@ -91,6 +91,11 @@ def restore(min_utc: datetime.datetime | None = None,
         connection.row_factory = sqlite3.Row # Enables column access by name: row["column_name"]
         cursor = connection.cursor()
 
+        cursor.execute("SELECT * FROM sqlite_master WHERE type = 'table' AND name = 'pyddle_backup'")
+
+        if not cursor.fetchone():
+            return []
+
         where_clause_lines = []
         parameter_values: list[str | int] = []
 
