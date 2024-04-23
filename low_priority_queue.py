@@ -1,4 +1,4 @@
-# Created: 2024-03-14
+﻿# Created: 2024-03-14
 # A simple app to manage a queue of low-priority tasks.
 
 import copy

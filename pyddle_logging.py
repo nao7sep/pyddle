@@ -1,4 +1,4 @@
-# Created: 2024-03-07
+﻿# Created: 2024-03-07
 # This script contains the possibly simplest logging mechanism that should be just enough for a small, single-threaded app.
 
 import datetime

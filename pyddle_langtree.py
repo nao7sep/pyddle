@@ -1,4 +1,4 @@
-# Created: 2024-04-10
+﻿# Created: 2024-04-10
 # A module that helps us organize knowledge in a tree structure.
 
 from __future__ import annotations

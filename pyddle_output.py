@@ -1,4 +1,4 @@
-# Created: 2024-03-07
+﻿# Created: 2024-03-07
 # This script aims to provide an unified way to output strings to the console and a log file.
 
 import pyddle_console as pconsole

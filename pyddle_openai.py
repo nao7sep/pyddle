@@ -1,4 +1,4 @@
-# Created: 2024-03-26
+﻿# Created: 2024-03-26
 # Sugar-coating classes and methods for OpenAI's API.
 
 import base64

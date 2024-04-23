@@ -1,4 +1,4 @@
-# Created: 2024-04-16
+﻿# Created: 2024-04-16
 # A simple tool that stores prompts and applies them to the input.
 
 # actions.json contains a few commands and their prompts.

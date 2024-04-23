@@ -1,4 +1,4 @@
-# Created: 2024-03-11
+﻿# Created: 2024-03-11
 # This script builds and archives all changed projects in the specified repositories directory.
 
 import glob

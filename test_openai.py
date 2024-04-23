@@ -1,4 +1,4 @@
-# Created: 2024-03-27
+﻿# Created: 2024-03-27
 # Test/sample code for pyddle_openai.py.
 
 import json

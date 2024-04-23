@@ -1,4 +1,4 @@
-# Created: 2024-03-07
+﻿# Created: 2024-03-07
 # This script contains utility functions for console output/input.
 
 from builtins import print as builtin_print
