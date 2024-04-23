@@ -4,6 +4,8 @@
 import re
 import unicodedata
 
+import pyddle_errors as perrors
+
 LEVELED_INDENTS = [
     "",
     "    ",
@@ -115,19 +117,19 @@ def equals_at(str_, index, substring):
 
     # Always an error.
     if index < 0:
-        raise RuntimeError("Index out of range.")
+        raise perrors.ArgumentError("Index out of range.")
 
     # Comparison occurs.
     if substring_length > 0:
         # Cant compare from the 8th day of a week.
         if index >= str_length:
-            raise RuntimeError("Index out of range.")
+            raise perrors.ArgumentError("Index out of range.")
 
     # It's more about technicality here.
     else:
         # Must work like "".startswith("") => True.
         if index > str_length:
-            raise RuntimeError("Index out of range.")
+            raise perrors.ArgumentError("Index out of range.")
 
         # If the substring is "" and the index is OK,
         #     the rest of the code can be skipped.
@@ -148,15 +150,15 @@ def equals_at_ignore_case(str_, index, substring):
     substring_length = len(substring)
 
     if index < 0:
-        raise RuntimeError("Index out of range.")
+        raise perrors.ArgumentError("Index out of range.")
 
     if substring_length > 0:
         if index >= str_length:
-            raise RuntimeError("Index out of range.")
+            raise perrors.ArgumentError("Index out of range.")
 
     else:
         if index > str_length:
-            raise RuntimeError("Index out of range.")
+            raise perrors.ArgumentError("Index out of range.")
 
         return True
 
@@ -170,15 +172,15 @@ def equals_at_casefold(str_, index, substring):
     substring_length = len(substring)
 
     if index < 0:
-        raise RuntimeError("Index out of range.")
+        raise perrors.ArgumentError("Index out of range.")
 
     if substring_length > 0:
         if index >= str_length:
-            raise RuntimeError("Index out of range.")
+            raise perrors.ArgumentError("Index out of range.")
 
     else:
         if index > str_length:
-            raise RuntimeError("Index out of range.")
+            raise perrors.ArgumentError("Index out of range.")
 
         return True
 
@@ -215,7 +217,7 @@ def index_of_any(str_, substrings):
 
     for substring in substrings:
         if substring is None:
-            raise RuntimeError("None is not a valid substring.")
+            raise perrors.ArgumentError("None is not a valid substring.")
 
         # Without this block, the next "for" loop will miss the case where one or more of the substrings are ""
         #     and the edge-of-cliff zero-comparison situation described in pyddle_string.py occurs.
@@ -238,7 +240,7 @@ def index_of_any_ignore_case(str_, substrings):
 
     for substring in substrings:
         if substring is None:
-            raise RuntimeError("None is not a valid substring.")
+            raise perrors.ArgumentError("None is not a valid substring.")
 
         if substring == "":
             return 0
@@ -255,7 +257,7 @@ def index_of_any_casefold(str_, substrings):
 
     for substring in substrings:
         if substring is None:
-            raise RuntimeError("None is not a valid substring.")
+            raise perrors.ArgumentError("None is not a valid substring.")
 
         if substring == "":
             return 0
@@ -284,7 +286,7 @@ def last_index_of_any(str_, substrings):
 
     for substring in substrings:
         if substring is None:
-            raise RuntimeError("None is not a valid substring.")
+            raise perrors.ArgumentError("None is not a valid substring.")
 
         if substring == "":
             # Not str_length - 1.
@@ -303,7 +305,7 @@ def last_index_of_any_ignore_case(str_, substrings):
 
     for substring in substrings:
         if substring is None:
-            raise RuntimeError("None is not a valid substring.")
+            raise perrors.ArgumentError("None is not a valid substring.")
 
         if substring == "":
             return str_length
@@ -320,7 +322,7 @@ def last_index_of_any_casefold(str_, substrings):
 
     for substring in substrings:
         if substring is None:
-            raise RuntimeError("None is not a valid substring.")
+            raise perrors.ArgumentError("None is not a valid substring.")
 
         if substring == "":
             return str_length
@@ -530,7 +532,7 @@ def split_line_into_parts(str_):
 
     else:
         # Unless the "re" module is implemented incorrectly, the number of groups should always be 3.
-        raise RuntimeError(f"Line parts could not be extracted from \"{str_}\".")
+        raise perrors.FormatError(f"Line parts could not be extracted from \"{str_}\".")
 
 # ------------------------------------------------------------------------------
 #     ChunkStrReader

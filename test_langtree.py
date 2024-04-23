@@ -10,6 +10,7 @@ import typing
 
 import pyddle_console as pconsole
 import pyddle_debugging as pdebugging
+import pyddle_errors as perrors
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_langtree as plangtree

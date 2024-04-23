@@ -16,6 +16,7 @@ import pyperclip # type: ignore
 import pyddle_console as pconsole
 import pyddle_datetime as pdatetime
 import pyddle_debugging as pdebugging
+import pyddle_errors as perrors
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_kvs as pkvs
@@ -59,7 +60,7 @@ class EntryInfo(ABC):
                 self.save()
                 return note
 
-        raise RuntimeError(f"Note not found: {note.guid}")
+        raise perrors.ArgumentError(f"Note not found: {note.guid}")
 
     def delete_note(self, note):
         ''' Raises an exception if the note is not found. '''
@@ -70,7 +71,7 @@ class EntryInfo(ABC):
                 self.save()
                 return existing_note
 
-        raise RuntimeError(f"Note not found: {note.guid}")
+        raise perrors.ArgumentError(f"Note not found: {note.guid}")
 
 # This method can also serialize notes.
 def serialize_episode(episode_):
@@ -102,7 +103,7 @@ def serialize_episode(episode_):
         return data
 
     else:
-        raise RuntimeError(f"Unsupported type: {type(episode_)}")
+        raise perrors.ArgumentError(f"Unsupported type: {type(episode_)}")
 
 def deserialize_notes(parent, notes_of_parent, note_data):
     for note_data_item in note_data:
@@ -119,7 +120,7 @@ def deserialize_notes(parent, notes_of_parent, note_data):
             note.parent_type = ParentType.NOTE
 
         else:
-            raise RuntimeError(f"Unsupported type: {type(parent)}")
+            raise perrors.ArgumentError(f"Unsupported type: {type(parent)}")
 
         note.content = "\n".join(note_data_item["content"])
 

@@ -4,6 +4,7 @@
 import os
 import zipfile
 
+import pyddle_errors as perrors
 import pyddle_global as pglobal
 import pyddle_path as ppath
 import pyddle_string as pstring

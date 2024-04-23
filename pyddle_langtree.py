@@ -8,6 +8,7 @@ import uuid
 import openai
 
 import pyddle_datetime as pdatetime
+import pyddle_errors as perrors
 import pyddle_openai as popenai
 import pyddle_type as ptype
 import pyddle_utility as putility

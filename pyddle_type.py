@@ -1,6 +1,7 @@
 ﻿# Created: 2024-03-23
 # Type-conversion-related things.
 
+import pyddle_errors as perrors
 import pyddle_string as pstring
 
 # We dont necessarily have to use these just to parse strings.

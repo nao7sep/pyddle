@@ -17,6 +17,7 @@ import pyddle_backup as pbackup
 import pyddle_console as pconsole
 import pyddle_datetime as pdatetime
 import pyddle_debugging as pdebugging
+import pyddle_errors as perrors
 import pyddle_file_system as pfs
 import pyddle_global as pglobal
 import pyddle_kvs as pkvs
@@ -68,7 +69,7 @@ def serialize_task(task_):
         return task_.name.lower()
 
     else:
-        raise RuntimeError(f"Unsupported type: {type(task_)}")
+        raise perrors.ArgumentError(f"Unsupported type: {type(task_)}")
 
 def deserialize_task(task_data):
     return TaskInfo(

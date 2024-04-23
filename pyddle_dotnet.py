@@ -8,6 +8,7 @@ import shutil
 import subprocess
 import xml.etree.ElementTree
 
+import pyddle_errors as perrors
 import pyddle_file_system as pfs
 import pyddle_path as ppath
 import pyddle_string as pstring

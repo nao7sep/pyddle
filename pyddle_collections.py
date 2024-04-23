@@ -1,6 +1,8 @@
 ﻿# Created: 2024-03-26
 # Collection-related things.
 
+import pyddle_errors as perrors
+
 # For implementing sugar-coating methods.
 # Sometimes, we should just not give certain arguments.
 

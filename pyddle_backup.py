@@ -9,6 +9,7 @@ import sqlite3
 import typing
 
 import pyddle_datetime as pdatetime
+import pyddle_errors as perrors
 
 # Lazy loading:
 __backup_file_path: str | None = None
