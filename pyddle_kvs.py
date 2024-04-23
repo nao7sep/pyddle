@@ -57,6 +57,9 @@ def get_public_data():
             content = pfs.read_all_text_from_file(public_file_path)
             __public_data = json.loads(content)
 
+        else:
+            __public_data = {}
+
     return __public_data
 
 # Lazy loading:
@@ -71,6 +74,9 @@ def get_private_data():
         if os.path.isfile(private_file_path):
             content = pfs.read_all_text_from_file(private_file_path)
             __private_data = json.loads(content)
+
+        else:
+            __private_data = {}
 
     return __private_data
 
