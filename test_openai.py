@@ -4,7 +4,7 @@
 import json
 import traceback
 
-import PIL.Image
+import PIL.Image # pip install pillow
 import PIL.ImageDraw
 
 import pyddle_console as pconsole
