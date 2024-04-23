@@ -350,8 +350,8 @@ def test_images_and_vision():
         # (0, 0) is the top-left corner.
 
         if index == 0:
-            draw.rectangle([(0, 0), (width // 2, height // 2)], fill = 0)
-            draw.rectangle([(width // 2, height // 2), (width, height)], fill = 0)
+            draw.rectangle((0, 0, width // 2, height // 2), fill = 0)
+            draw.rectangle((width // 2, height // 2, width, height), fill = 0)
 
         elif index == 1:
             draw.polygon([(0, 0), (0, height), (width, height)], fill = 0)
