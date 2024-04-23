@@ -350,8 +350,13 @@ def test_images_and_vision():
         # (0, 0) is the top-left corner.
 
         if index == 0:
-            draw.rectangle((0, 0, width // 2, height // 2), fill = 0)
-            draw.rectangle((width // 2, height // 2, width, height), fill = 0)
+            # xy – Two points to define the bounding box.
+            # Sequence of either [(x0, y0), (x1, y1)] or [x0, y0, x1, y1], where x1 >= x0 and y1 >= y0.
+            # The bounding box is inclusive of both endpoints.
+            # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html
+
+            draw.rectangle([(0, 0), (width // 2, height // 2)], fill = 0)
+            draw.rectangle([(width // 2, height // 2), (width, height)], fill = 0)
 
         elif index == 1:
             draw.polygon([(0, 0), (0, height), (width, height)], fill = 0)
