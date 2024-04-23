@@ -70,6 +70,7 @@ def backup(
                     (utc_str, key, value_type.value, base64_str))
 
             else:
+                # The message says unsupported, but it's still an argument error.
                 raise perrors.ArgumentError(f"Unsupported value type: {value_type}") # Re-raised only if not quiet.
 
             connection.commit()

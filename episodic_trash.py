@@ -103,6 +103,7 @@ def serialize_episode(episode_):
         return data
 
     else:
+        # More like an argument error than a not-supported error.
         raise perrors.ArgumentError(f"Unsupported type: {type(episode_)}")
 
 def deserialize_notes(parent, notes_of_parent, note_data):

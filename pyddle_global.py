@@ -28,6 +28,9 @@ def get_main_script_file_path():
     """ Raises an error if the main script file path is not set. """
 
     if not MAIN_SCRIPT_FILE_PATH:
+        # Invalid data or an invalid operation?
+        # If the data's origin is unclear, it could be invalid data.
+        # Here, we know how the data must be set, making it the developers' fault.
         raise perrors.InvalidOperationError("Main script file path not set.")
 
     return MAIN_SCRIPT_FILE_PATH

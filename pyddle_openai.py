@@ -216,6 +216,8 @@ def get_default_token_counter():
             __default_token_counter = get_gpt_4_vision_token_counter()
 
         else:
+            # We wouldnt always know who or what has modified the default model.
+            # We couldnt call this an invalid operation.
             raise perrors.InvalidDataError(f"Unsupported model: {DEFAULT_GPT_MODEL}")
 
     return __default_token_counter

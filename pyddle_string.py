@@ -532,6 +532,7 @@ def split_line_into_parts(str_):
 
     else:
         # Unless the "re" module is implemented incorrectly, the number of groups should always be 3.
+        # If this operation ever fails, theoretically, it'd be a failure upon parsing something in a certain format.
         raise perrors.FormatError(f"Line parts could not be extracted from \"{str_}\".")
 
 # ------------------------------------------------------------------------------

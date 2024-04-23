@@ -226,6 +226,8 @@ def zip_archive_subdirectory(zip_file, root_directory_path, subdirectory_path, n
             archived_file_count += 1
 
         else:
-            raise perrors.GeneralError(f"Unsupported file system object: {path}")
+            # Other things such as symbolic links.
+            # As long as directories and files are supported, it should be fine.
+            raise perrors.NotSupportedError(f"Unsupported file system object: {path}")
 
     return archived_file_count

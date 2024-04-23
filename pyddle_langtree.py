@@ -742,6 +742,8 @@ class ContextBuilder:
                 index = 2
 
             else:
+                # The data's origin may be unclear here.
+                # We couldnt always call this an invalid operation.
                 raise perrors.InvalidDataError(f"Unknown user role: {element.user_role}")
 
             if element.token_count is None:

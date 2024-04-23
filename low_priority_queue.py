@@ -69,6 +69,7 @@ def serialize_task(task_):
         return task_.name.lower()
 
     else:
+        # More like an argument error than a not-supported error.
         raise perrors.ArgumentError(f"Unsupported type: {type(task_)}")
 
 def deserialize_task(task_data):
