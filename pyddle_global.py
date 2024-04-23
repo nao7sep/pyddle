@@ -20,14 +20,14 @@ def set_main_script_file_path(file_path):
     # Expecting MAIN_SCRIPT_FILE_PATH to work like a field of a class.
 
     if not os.path.isfile(file_path):
-        raise RuntimeError(f"File not found: {file_path}")
+        raise perrors.ArgumentError(f"File not found: {file_path}")
 
     MAIN_SCRIPT_FILE_PATH = file_path
 
 def get_main_script_file_path():
-    """ Raises a RuntimeError if the main script file path is not set. """
+    """ Raises an error if the main script file path is not set. """
 
     if not MAIN_SCRIPT_FILE_PATH:
-        raise RuntimeError("Main script file path not set.")
+        raise perrors.InvalidOperationError("Main script file path not set.")
 
     return MAIN_SCRIPT_FILE_PATH

@@ -12,19 +12,19 @@ class PotentiallyFalsyArgs:
 
     def must_contain(self, key, value):
         if not value:
-            raise RuntimeError(f"Argument {key} must be provided.")
+            raise perrors.ArgumentError(f"Argument {key} must be provided.")
 
         self.args[key] = value
 
     def must_contain_enum_name(self, key, value):
         if not value:
-            raise RuntimeError(f"Argument {key} must be provided.")
+            raise perrors.ArgumentError(f"Argument {key} must be provided.")
 
         self.args[key] = value.name
 
     def must_contain_enum_value(self, key, value):
         if not value:
-            raise RuntimeError(f"Argument {key} must be provided.")
+            raise perrors.ArgumentError(f"Argument {key} must be provided.")
 
         self.args[key] = value.value
 

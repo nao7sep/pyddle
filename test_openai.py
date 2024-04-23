@@ -329,10 +329,10 @@ def test_images_and_vision():
         rgb_image = PIL.Image.open(image_generation_file_names[index])
 
         if not pstring.equals_ignore_case(rgb_image.format, "PNG"):
-            raise RuntimeError(f"Image {index + 1} is not in PNG format.")
+            raise perrors.GeneralError(f"Image {index + 1} is not in PNG format.")
 
         if pstring.equals_ignore_case(rgb_image.mode, "RGBA"):
-            raise RuntimeError(f"Image {index + 1} is already in RGBA mode.")
+            raise perrors.GeneralError(f"Image {index + 1} is already in RGBA mode.")
 
         rgba_image = rgb_image.convert("RGBA")
         width, height = rgba_image.size

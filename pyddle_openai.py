@@ -216,7 +216,7 @@ def get_default_token_counter():
             __default_token_counter = get_gpt_4_vision_token_counter()
 
         else:
-            raise RuntimeError(f"Unsupported model: {DEFAULT_GPT_MODEL}")
+            raise perrors.InvalidDataError(f"Unsupported model: {DEFAULT_GPT_MODEL}")
 
     return __default_token_counter
 

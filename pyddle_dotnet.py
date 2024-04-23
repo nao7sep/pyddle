@@ -41,7 +41,7 @@ class SolutionInfo:
 
             for project in self.projects[1:]:
                 if not pstring.equals(project.version_string, first_version_string):
-                    raise RuntimeError("Version strings differ.")
+                    raise perrors.GeneralError("Version strings differ.")
 
             self.__common_version_string = first_version_string
 
@@ -84,7 +84,7 @@ class ProjectInfo:
                     extracted_version_string = version_digits_to_string(parse_version_string(extracted_version_string))
 
                 except Exception as exception:
-                    raise RuntimeError(f"Invalid version string: {extracted_version_string}") from exception
+                    raise perrors.FormatError(f"Invalid version string: {extracted_version_string}") from exception
 
                 app_manifest_file_path = os.path.join(self.directory_path, "app.manifest")
 
@@ -96,10 +96,10 @@ class ProjectInfo:
                             alternatively_extracted_version_string = version_digits_to_string(parse_version_string(alternatively_extracted_version_string))
 
                         except Exception as exception:
-                            raise RuntimeError(f"Invalid version string: {alternatively_extracted_version_string}") from exception
+                            raise perrors.FormatError(f"Invalid version string: {alternatively_extracted_version_string}") from exception
 
                         if not pstring.equals(alternatively_extracted_version_string, extracted_version_string):
-                            raise RuntimeError("Version strings from 2 files differ.")
+                            raise perrors.GeneralError("Version strings from 2 files differ.")
 
                 self.__version_string = extracted_version_string
 
@@ -115,10 +115,10 @@ class ProjectInfo:
                             self.__version_string = version_digits_to_string(parse_version_string(extracted_version_string))
 
                         except Exception as exception:
-                            raise RuntimeError(f"Invalid version string: {extracted_version_string}") from exception
+                            raise perrors.FormatError(f"Invalid version string: {extracted_version_string}") from exception
 
             if self.__version_string is None:
-                raise RuntimeError("Version string not extracted.")
+                raise perrors.GeneralError("Version string not extracted.")
 
         return self.__version_string
 
@@ -134,7 +134,7 @@ class ProjectInfo:
                     referenced_project = find_referenced_project(self.solutions, referenced_project_name)
 
                     if not referenced_project:
-                        raise RuntimeError(f"Referenced project not found: {referenced_project_name}")
+                        raise perrors.GeneralError(f"Referenced project not found: {referenced_project_name}")
 
                     referenced_projects.append(referenced_project)
 

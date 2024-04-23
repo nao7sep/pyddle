@@ -93,7 +93,7 @@ def detect_utf_encoding_of_file(file):
 
 def open_file_and_write_utf_encoding_bom(path, encoding = "UTF-8", append = False):
     """
-        Raises a RuntimeError if the encoding is not supported.
+        Raises an error if the encoding is not supported.
         If 'append' is True and the file already has content without a BOM, the BOM will NOT be written.
     """
 
@@ -101,7 +101,7 @@ def open_file_and_write_utf_encoding_bom(path, encoding = "UTF-8", append = Fals
 
     if not bom:
         # Here, we cant ignore this because writing the BOM is the whole point.
-        raise RuntimeError(f"Unsupported encoding: {encoding}")
+        raise perrors.ArgumentError(f"Unsupported encoding: {encoding}")
 
     if not append:
         file = open(path, "w", encoding = encoding)
@@ -226,6 +226,6 @@ def zip_archive_subdirectory(zip_file, root_directory_path, subdirectory_path, n
             archived_file_count += 1
 
         else:
-            raise RuntimeError(f"Unsupported file system object: {path}")
+            raise perrors.GeneralError(f"Unsupported file system object: {path}")
 
     return archived_file_count

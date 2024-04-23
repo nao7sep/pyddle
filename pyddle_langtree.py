@@ -742,7 +742,7 @@ class ContextBuilder:
                 index = 2
 
             else:
-                raise RuntimeError(f"Unknown user role: {element.user_role}")
+                raise perrors.InvalidDataError(f"Unknown user role: {element.user_role}")
 
             if element.token_count is None:
                 element.token_count = token_counter_to_use.count(element.content)

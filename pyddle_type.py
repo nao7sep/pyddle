@@ -53,7 +53,7 @@ def str_to_bool(str_):
     if pstring.contains_ignore_case(FALSE_STRS, str_):
         return False
 
-    raise RuntimeError(f"Invalid boolean string: {str_}")
+    raise perrors.FormatError(f"Invalid boolean string: {str_}")
 
 def str_to_bool_or_default(str_, default):
     try:
@@ -82,7 +82,7 @@ def str_to_enum_by_name(str_, enum_type, ignore_case = True):
     if member:
         return member
 
-    raise RuntimeError(f"Invalid enum name: {str_}")
+    raise perrors.ArgumentError(f"Invalid enum name: {str_}")
 
 def try_str_to_enum_by_name(str_, enum_type, ignore_case = True):
     for member in enum_type:
@@ -102,7 +102,7 @@ def str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
     if member:
         return member
 
-    raise RuntimeError(f"Invalid enum value: {str_}")
+    raise perrors.ArgumentError(f"Invalid enum value: {str_}")
 
 def try_str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
     for member in enum_type:
@@ -126,7 +126,7 @@ def str_to_enum_by_int_value(value, enum_type):
     if member:
         return member
 
-    raise RuntimeError(f"Invalid enum value: {value}")
+    raise perrors.ArgumentError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_int_value(value, enum_type):
     for member in enum_type:
@@ -141,7 +141,7 @@ def str_to_enum_by_float_value(value, enum_type):
     if member:
         return member
 
-    raise RuntimeError(f"Invalid enum value: {value}")
+    raise perrors.ArgumentError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_float_value(value, enum_type):
     for member in enum_type:
@@ -156,7 +156,7 @@ def str_to_enum_by_complex_value(value, enum_type):
     if member:
         return member
 
-    raise RuntimeError(f"Invalid enum value: {value}")
+    raise perrors.ArgumentError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_complex_value(value, enum_type):
     for member in enum_type:
@@ -171,7 +171,7 @@ def str_to_enum_by_bool_value(value, enum_type):
     if member:
         return member
 
-    raise RuntimeError(f"Invalid enum value: {value}")
+    raise perrors.ArgumentError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_bool_value(value, enum_type):
     for member in enum_type:
