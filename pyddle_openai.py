@@ -44,6 +44,7 @@ class ConnectionSettings:
         # Optional:
         self.__api_key = None
         self.__organization = None
+        self.__project = None
         self.__base_url = None
 
     def get_value(self, key):
@@ -67,6 +68,13 @@ class ConnectionSettings:
             self.__organization = self.get_value("organization")
 
         return self.__organization
+
+    @property
+    def project(self):
+        if self.__project is None:
+            self.__project = self.get_value("project")
+
+        return self.__project
 
     @property
     def base_url(self):
@@ -217,7 +225,7 @@ def get_default_token_counter():
 
 # https://github.com/openai/openai-python/blob/main/src/openai/_client.py
 
-def create_client(api_key = None, organization = None, base_url = None, timeout = None):
+def create_client(api_key = None, organization = None, project = None, base_url = None, timeout = None):
     ''' If the arguments are falsy and cant be retrieved from "get_default_connection_settings", environment variables (where the keys are "OPENAI_API_KEY", "OPENAI_ORG_ID" and "OPENAI_BASE_URL") are used internally. '''
 
     if not api_key:
@@ -226,12 +234,16 @@ def create_client(api_key = None, organization = None, base_url = None, timeout 
     if not organization:
         organization = get_default_connection_settings().organization
 
+    if not project:
+        project = get_default_connection_settings().project
+
     if not base_url:
         base_url = get_default_connection_settings().base_url
 
     args = pcollections.PotentiallyFalsyArgs()
     args.may_contain("api_key", api_key)
     args.may_contain("organization", organization)
+    args.may_contain("project", project)
     args.may_contain("base_url", base_url)
 
     if timeout:

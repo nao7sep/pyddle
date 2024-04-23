@@ -17,6 +17,7 @@
 
     "pyddle_openai/api_key": "",
     "pyddle_openai/organization": "",
+    "pyddle_openai/project": "",
     "pyddle_openai/base_url": "https://api.openai.com/v1",
 
     "quick_action/actions_file_path": "C:\\Repositories\\pyddle\\data\\actions.json",
