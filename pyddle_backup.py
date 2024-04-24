@@ -51,7 +51,7 @@ def backup(
 
             if value_type == ValueType.STR or value_type == ValueType.JSON_STR:
                 if not isinstance(value, str):
-                    raise perrors.ArgumentError("Value must be a string.")
+                    raise perrors.FormatError("Value must be a string.")
 
                 cursor.execute(
                     "INSERT INTO pyddle_backup (utc, key, value_type, value) "
@@ -60,7 +60,7 @@ def backup(
 
             elif value_type == ValueType.BYTES:
                 if not isinstance(value, bytes):
-                    raise perrors.ArgumentError("Value must be bytes.")
+                    raise perrors.FormatError("Value must be bytes.")
 
                 base64_str = base64.b64encode(typing.cast(bytes, value)).decode("ascii")
 
@@ -70,8 +70,7 @@ def backup(
                     (utc_str, key, value_type.value, base64_str))
 
             else:
-                # The message says unsupported, but it's still an argument error.
-                raise perrors.ArgumentError(f"Unsupported value type: {value_type}") # Re-raised only if not quiet.
+                raise perrors.NotSupportedError(f"Unsupported value type: {value_type}") # Re-raised only if not quiet.
 
             connection.commit()
 

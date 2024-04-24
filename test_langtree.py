@@ -34,7 +34,7 @@ def translate(element: plangtree.Message, language: popenai.Language):
         prompt = RUSSIAN_TRANSLATION_PROMPT
 
     else:
-        raise perrors.ArgumentError(f"Invalid language: {language}")
+        raise perrors.NotSupportedError(f"Unsupported language: {language}")
 
     element.generate_translation_with_prompt(
         language = language,

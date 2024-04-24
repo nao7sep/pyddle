@@ -82,7 +82,8 @@ def str_to_enum_by_name(str_, enum_type, ignore_case = True):
     if member:
         return member
 
-    raise perrors.ArgumentError(f"Invalid enum name: {str_}")
+    # We are parsing something that must be in a certain format.
+    raise perrors.FormatError(f"Invalid enum name: {str_}")
 
 def try_str_to_enum_by_name(str_, enum_type, ignore_case = True):
     for member in enum_type:
@@ -102,7 +103,7 @@ def str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
     if member:
         return member
 
-    raise perrors.ArgumentError(f"Invalid enum value: {str_}")
+    raise perrors.FormatError(f"Invalid enum value: {str_}")
 
 def try_str_to_enum_by_str_value(str_, enum_type, ignore_case = True):
     for member in enum_type:
@@ -126,7 +127,7 @@ def str_to_enum_by_int_value(value, enum_type):
     if member:
         return member
 
-    raise perrors.ArgumentError(f"Invalid enum value: {value}")
+    raise perrors.FormatError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_int_value(value, enum_type):
     for member in enum_type:
@@ -141,7 +142,7 @@ def str_to_enum_by_float_value(value, enum_type):
     if member:
         return member
 
-    raise perrors.ArgumentError(f"Invalid enum value: {value}")
+    raise perrors.FormatError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_float_value(value, enum_type):
     for member in enum_type:
@@ -156,7 +157,7 @@ def str_to_enum_by_complex_value(value, enum_type):
     if member:
         return member
 
-    raise perrors.ArgumentError(f"Invalid enum value: {value}")
+    raise perrors.FormatError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_complex_value(value, enum_type):
     for member in enum_type:
@@ -171,7 +172,7 @@ def str_to_enum_by_bool_value(value, enum_type):
     if member:
         return member
 
-    raise perrors.ArgumentError(f"Invalid enum value: {value}")
+    raise perrors.FormatError(f"Invalid enum value: {value}")
 
 def try_str_to_enum_by_bool_value(value, enum_type):
     for member in enum_type:

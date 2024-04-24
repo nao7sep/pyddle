@@ -101,7 +101,7 @@ def open_file_and_write_utf_encoding_bom(path, encoding = "UTF-8", append = Fals
 
     if not bom:
         # Here, we cant ignore this because writing the BOM is the whole point.
-        raise perrors.ArgumentError(f"Unsupported encoding: {encoding}")
+        raise perrors.NotSupportedError(f"Unsupported encoding: {encoding}")
 
     if not append:
         file = open(path, "w", encoding = encoding)
@@ -227,7 +227,6 @@ def zip_archive_subdirectory(zip_file, root_directory_path, subdirectory_path, n
 
         else:
             # Other things such as symbolic links.
-            # As long as directories and files are supported, it should be fine.
             raise perrors.NotSupportedError(f"Unsupported file system object: {path}")
 
     return archived_file_count

@@ -103,8 +103,7 @@ def serialize_episode(episode_):
         return data
 
     else:
-        # More like an argument error than a not-supported error.
-        raise perrors.ArgumentError(f"Unsupported type: {type(episode_)}")
+        raise perrors.NotSupportedError(f"Unsupported type: {type(episode_)}")
 
 def deserialize_notes(parent, notes_of_parent, note_data):
     for note_data_item in note_data:
@@ -121,7 +120,7 @@ def deserialize_notes(parent, notes_of_parent, note_data):
             note.parent_type = ParentType.NOTE
 
         else:
-            raise perrors.ArgumentError(f"Unsupported type: {type(parent)}")
+            raise perrors.NotSupportedError(f"Unsupported type: {type(parent)}")
 
         note.content = "\n".join(note_data_item["content"])
 
