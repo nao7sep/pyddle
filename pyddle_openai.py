@@ -109,8 +109,8 @@ class Model(enum.Enum):
     WHISPER_1 = "whisper-1"
     GPT_3_5_TURBO = "gpt-3.5-turbo"
     GPT_4 = "gpt-4"
-    GPT_4_TURBO = "gpt-4-turbo-preview"
-    GPT_4_VISION = "gpt-4-vision-preview"
+    GPT_4_TURBO = "gpt-4-turbo"
+    GPT_4_VISION = "gpt-4-turbo" # With vision capabilities.
     DALL_E_2 = "dall-e-2"
     DALL_E_3 = "dall-e-3"
 
