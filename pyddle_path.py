@@ -4,6 +4,7 @@
 import enum
 import os
 
+import pyddle_environment as penvironment
 import pyddle_errors as perrors
 import pyddle_string as pstring
 
@@ -30,25 +31,41 @@ def dirname(path):
     return ""
 
 # ------------------------------------------------------------------------------
-#     to_absolute_path
+#     Joining paths
 # ------------------------------------------------------------------------------
 
 class Separator(enum.Enum):
-    WINDOWS = '\\'
-    UNIX = '/'
+    NT = '\\'
+    POSIX = '/'
 
-SEPARATORS: list[Separator] = [Separator.WINDOWS, Separator.UNIX]
+SEPARATORS: list[Separator] = [Separator.NT, Separator.POSIX]
 SEPARATORS_STR = "".join([separator.value for separator in SEPARATORS])
 
-def get_alternative_separator(separator: Separator):
-    if separator == Separator.WINDOWS:
-        return Separator.UNIX
+def _get_default_separator():
+    if penvironment.IS_NT:
+        return Separator.NT
 
-    elif separator == Separator.UNIX:
-        return Separator.WINDOWS
+    elif penvironment.IS_POSIX:
+        return Separator.POSIX
+
+    else:
+        raise perrors.NotSupportedError("Unsupported operating system.")
+
+DEFAULT_SEPARATOR: Separator = _get_default_separator()
+DEFAULT_SEPARATOR_STR = DEFAULT_SEPARATOR.value
+
+def get_alternative_separator(separator: Separator):
+    if separator == Separator.NT:
+        return Separator.POSIX
+
+    elif separator == Separator.POSIX:
+        return Separator.NT
 
     else:
         raise perrors.ArgumentError("Invalid separator.")
+
+ALTERNATIVE_SEPARATOR: Separator = get_alternative_separator(DEFAULT_SEPARATOR)
+ALTERNATIVE_SEPARATOR_STR = ALTERNATIVE_SEPARATOR.value
 
 def normalize_separators(path, separator: Separator):
     return path.replace(get_alternative_separator(separator).value, separator.value)
