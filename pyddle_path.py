@@ -1,8 +1,10 @@
 ﻿# Created: 2024-03-16
 # Contains multi-platform path-related operations.
 
+import enum
 import os
 
+import pyddle_errors as perrors
 import pyddle_string as pstring
 
 # os.path.basename(), os.path.dirname(), os.path.splitext() (and some more) are not available as static methods in pathlib.
@@ -26,6 +28,58 @@ def dirname(path):
         return path[: index]
 
     return ""
+
+# ------------------------------------------------------------------------------
+#     to_absolute_path
+# ------------------------------------------------------------------------------
+
+class Separator(enum.Enum):
+    WINDOWS = '\\'
+    UNIX = '/'
+
+SEPARATORS: list[Separator] = [Separator.WINDOWS, Separator.UNIX]
+SEPARATORS_STR = "".join([separator.value for separator in SEPARATORS])
+
+def get_alternative_separator(separator: Separator):
+    if separator == Separator.WINDOWS:
+        return Separator.UNIX
+
+    elif separator == Separator.UNIX:
+        return Separator.WINDOWS
+
+    else:
+        raise perrors.ArgumentError("Invalid separator.")
+
+def normalize_separators(path, separator: Separator):
+    return path.replace(get_alternative_separator(separator).value, separator.value)
+
+def join(separator: Separator, *paths: str):
+    paths_len = len(paths)
+
+    if paths_len < 2:
+        raise perrors.ArgumentError("At least two paths are required.")
+
+    trimmed_paths: list[str] = []
+
+    trimmed_paths.append(paths[0].rstrip(SEPARATORS_STR))
+    trimmed_paths.extend([path.strip(SEPARATORS_STR) for path in paths[1 : -1]])
+    trimmed_paths.append(paths[-1].lstrip(SEPARATORS_STR))
+
+    if any(not path for path in trimmed_paths):
+        raise perrors.ArgumentError("Empty paths are not allowed.")
+
+    joined_path = separator.value.join(trimmed_paths)
+
+    return normalize_separators(joined_path, separator)
+
+def to_absolute_path(base_path, relative_path, separator: Separator):
+    if not os.path.isabs(base_path):
+        raise perrors.ArgumentError("The base path must be an absolute path.")
+
+    if os.path.isabs(relative_path):
+        raise perrors.ArgumentError("The relative path must be relative.")
+
+    return join(separator, base_path, relative_path)
 
 # ------------------------------------------------------------------------------
 #     Minimal validation

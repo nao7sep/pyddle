@@ -19,6 +19,18 @@ LEVELED_INDENTS = [
     "                                    " # Index: 9
 ] # Length: 10
 
+def empty_to_none(str_):
+    if str_:
+        return str_
+
+    return None
+
+def whitespace_to_none(str_):
+    if str_ and not str_.isspace():
+        return str_
+
+    return None
+
 def to_visible_str(str_):
     if str_ is None:
         return "(None)"
