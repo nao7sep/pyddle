@@ -356,8 +356,8 @@ def test_images_and_vision():
             # The bounding box is inclusive of both endpoints.
             # https://pillow.readthedocs.io/en/stable/reference/ImageDraw.html
 
-            draw.rectangle([(0, 0), (width // 2, height // 2)], fill = 0)
-            draw.rectangle([(width // 2, height // 2), (width, height)], fill = 0)
+            draw.rectangle([(0, 0), (width // 2, height // 2)], fill = 0) # type: ignore
+            draw.rectangle([(width // 2, height // 2), (width, height)], fill = 0) # type: ignore
 
         elif index == 1:
             draw.polygon([(0, 0), (0, height), (width, height)], fill = 0)
