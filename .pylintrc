@@ -1,5 +1,5 @@
 ﻿[MESSAGES CONTROL]
 disable = line-too-long,
-        missing-docstring,
-        missing-function-docstring,
-        missing-module-docstring
+          missing-docstring,
+          missing-function-docstring,
+          missing-module-docstring
