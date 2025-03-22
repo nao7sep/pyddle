@@ -1,7 +1,7 @@
 ﻿{
     "build_changed_projects/repositories_directory_path": "C:\\Repositories",
     "build_changed_projects/archives_directory_path": "C:\\Repositories\\Resources\\Archives",
-    "build_changed_projects/ignored_directory_names": ".git|.vs|packages|pyddle|Resources",
+    "build_changed_projects/ignored_directory_names": ".git|.vs|_imgLab|packages|pyddle|Resources",
     "build_changed_projects/obsolete_solution_names": "",
     "build_changed_projects/supported_runtimes": "win-x64",
     "build_changed_projects/not_archived_directory_names": ".git|.vs|bin|obj",
